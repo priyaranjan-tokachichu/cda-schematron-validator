@@ -2,17 +2,36 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Mocha (Test single file)",
-      "type": "node",
-      "request": "launch",
-      "runtimeArgs": [
-        "${workspaceRoot}/node_modules/mocha/bin/mocha",
-        "--inspect-brk",
-        "${relativeFile}",
+      "args": [
+        "--timeout",
+        "999999",
+        "--colors",
+        "${workspaceFolder}/test"
       ],
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "port": 9229
+      "internalConsoleOptions": "openOnSessionStart",
+      "name": "Mocha Tests",
+      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "pwa-node"
+    },
+    {
+      "args": [
+        "--timeout",
+        "999999",
+        "--colors",
+        "${relativeFile}"
+      ],
+      "internalConsoleOptions": "openOnSessionStart",
+      "name": "Mocha Test Current File",
+      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "pwa-node"
     }
   ]
 }
