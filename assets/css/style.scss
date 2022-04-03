@@ -1,17 +1,5 @@
-@import
-    "base",
-    "layout",
-    "syntax-highlighting",
-    "bootstrap";
+@import "";
 
-* { 
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-main#content.main-content {
-    width: 100%;
-    max-width: 100rem;
-    margin: 0;
-    padding: 0;
-}
+.inner {
+    max-width: 75%;
+  }
