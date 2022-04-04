@@ -1,4 +1,12 @@
-# cda-schematron-validator
+# [cda-schematron-validator](https://github.com/priyaranjan-tokachichu/cda-schematron-validator)
+## Release History
+Starting release history with 1.0.7
+### 1.0.7
+- Added async validate function `validateAsync`
+- Added `testsAsync` to test `validateAsync`
+- Plan to use common functions between sync and async methods in the future release
+
+### 1.0.0 to 1.0.6
 A fork to the original cda-schematron. All credit to Eric Wadkins. Visit the github https://github.com/ewadkins/cda-schematron for the original repo.
 
 This is just a cosmetic change with updated node modules, a couple of minor bugs observed, and esversion 6 changes.
@@ -32,7 +40,7 @@ Mocha VS Code configuratin added to directly execute the test file in `test/test
 
 
 # Original Documentation of the cda-schematron
-# cda-schematron
+## [cda-schematron](https://github.com/ewadkins/cda-schematron)
 
 A javascript implementation of schematron testing for XML documents. This specifically resolves a need for a package that allows a quick, reliable install for validating HL7 clinical documents, such as C-CDA.
 
