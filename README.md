@@ -1,6 +1,8 @@
 # [cda-schematron-validator](https://github.com/priyaranjan-tokachichu/cda-schematron-validator)
 ## Release History
 Starting release history with 1.0.7
+### 1.0.8
+- Bug fix identifying the ignored errors
 ### 1.0.7
 - Added async validate function `validateAsync`
 - Added `testsAsync` to test `validateAsync`

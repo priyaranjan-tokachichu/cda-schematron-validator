@@ -108,7 +108,7 @@ function validate(xml, schematron, options = {}) {
             for (let j = 0; j < failedAssertions.length; j++) {
                 const assertionObject = failedAssertions[j];
                 const { type, assertionId, test, simplifiedTest, description, errorMessage, results } = assertionObject;
-                if (!results.ignored) {
+                if (!assertionObject.ignored) {
                     for (let k = 0; k < results.length; k++) {
                         const resultObject = results[k];
                         const { result, line, path, xml } = resultObject;
@@ -321,7 +321,7 @@ async function validateAsync(xml, schematron, options = {}) {
             for (let j = 0; j < failedAssertions.length; j++) {
                 const assertionObject = failedAssertions[j];
                 const { type, assertionId, test, simplifiedTest, description, errorMessage, results } = assertionObject;
-                if (!results.ignored) {
+                if (!assertionObject.ignored) {
                     for (let k = 0; k < results.length; k++) {
                         const resultObject = results[k];
                         const { result, line, path, xml } = resultObject;
