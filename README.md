@@ -1,6 +1,9 @@
 # [cda-schematron-validator](https://github.com/priyaranjan-tokachichu/cda-schematron-validator)
 ## Release History
 Starting release history with 1.0.7
+### 1.0.10
+- Fix null context issue associated with assertions within assertions
+- Skip abstract rules associated with assertions within assertions
 ### 1.0.9
 - Fixed the bug introduced in 1.0.8 trying to adjust to different data types of the return value
 - Changed variable names to improve understanding of the process

@@ -101,7 +101,7 @@ function validate(xml, schematron, options = {}) {
             const ruleObject = ruleAssertionMap[ruleId];
             if (_get(ruleObject, 'abstract')) {
                 continue;
-            }            
+            }         
             const context = _get(ruleObject, 'context');
             const assertionsAndExtensions = _get(ruleObject, 'assertionsAndExtensions') || [];
             let failedAssertions = checkRule(xmlDoc, context, assertionsAndExtensions, options);
@@ -232,8 +232,14 @@ function checkRule(xmlDoc, originalContext, assertionsAndExtensions, options) {
             if (!subAssertionsAndExtensions) {
                 continue;
             }
-            const newRuleObject = ruleAssertionMap[extensionRule];
+            const newRuleObject = ruleAssertionMap[extensionRule];            
+            if (_get(newRuleObject, 'abstract')) {
+                continue;
+            }
             const newContext = newRuleObject.context;
+            if (!newContext) {
+                continue;
+            }
             const failedSubAssertions = checkRule(xmlDoc, newContext, subAssertionsAndExtensions, options);
             failedAssertions.push(...failedSubAssertions);     
         }
@@ -455,8 +461,14 @@ function checkRulePromise(xmlDoc, originalContext, assertionsAndExtensions, opti
                     if (!subAssertionsAndExtensions) {
                         continue;
                     }
-                    const newRuleObject = ruleAssertionMap[extensionRule];
+                    const newRuleObject = ruleAssertionMap[extensionRule];            
+                    if (_get(newRuleObject, 'abstract')) {
+                        continue;
+                    }
                     const newContext = newRuleObject.context;
+                    if (!newContext) {
+                        continue;
+                    }
                     const failedSubAssertions = checkRule(xmlDoc, newContext, subAssertionsAndExtensions, options);
                     failedAssertions.push(...failedSubAssertions);     
                 }
