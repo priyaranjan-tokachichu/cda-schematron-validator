@@ -1,6 +1,9 @@
 # [cda-schematron-validator](https://github.com/priyaranjan-tokachichu/cda-schematron-validator)
 ## Release History
 Starting release history with 1.0.7
+### 1.0.9
+- Fixed the bug introduced in 1.0.8 trying to adjust to different data types of the return value
+- Changed variable names to improve understanding of the process
 ### 1.0.8
 - Bug fix identifying the ignored errors
 ### 1.0.7
