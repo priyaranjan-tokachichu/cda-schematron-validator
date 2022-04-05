@@ -191,7 +191,6 @@ function checkRule(xmlDoc, originalContext, assertionsAndExtensions, options) {
         const assertionAndExtensionObject = assertionsAndExtensions[i];
         if (assertionAndExtensionObject.type === 'assertion') {
             let { level, test, id, description } = assertionAndExtensionObject;
-
             // Extract values from external document and modify test if a document call is made
             let originalTest = test;
             let simplifiedTest = null;
@@ -232,15 +231,8 @@ function checkRule(xmlDoc, originalContext, assertionsAndExtensions, options) {
             if (!subAssertionsAndExtensions) {
                 continue;
             }
-            const newRuleObject = ruleAssertionMap[extensionRule];            
-            if (_get(newRuleObject, 'abstract')) {
-                continue;
-            }
-            const newContext = newRuleObject.context;
-            if (!newContext) {
-                continue;
-            }
-            const failedSubAssertions = checkRule(xmlDoc, newContext, subAssertionsAndExtensions, options);
+            const newRuleObject = ruleAssertionMap[extensionRule];
+            const failedSubAssertions = checkRule(xmlDoc, context, subAssertionsAndExtensions, options);
             failedAssertions.push(...failedSubAssertions);     
         }
     }
@@ -321,16 +313,10 @@ async function validateAsync(xml, schematron, options = {}) {
             const ruleObject = ruleAssertionMap[ruleId];
             if (_get(ruleObject, 'abstract')) {
                 continue;
-            }            
+            }         
             const context = _get(ruleObject, 'context');
             const assertionsAndExtensions = _get(ruleObject, 'assertionsAndExtensions') || [];
-            try {
-                failedAssertions = await checkRulePromise(xmlDoc, context, assertionsAndExtensions, options);
-            }
-            catch (errorInRuleCheck) {
-                console.log(errorInRuleCheck);
-                continue;
-            }
+            let failedAssertions = await checkRulePromise(xmlDoc, context, assertionsAndExtensions, options);
             for (let j = 0; j < failedAssertions.length; j++) {
                 const assertionObject = failedAssertions[j];
                 const { type, assertionId, test, simplifiedTest, description, errorMessage, results } = assertionObject;
@@ -420,7 +406,6 @@ function checkRulePromise(xmlDoc, originalContext, assertionsAndExtensions, opti
                 const assertionAndExtensionObject = assertionsAndExtensions[i];
                 if (assertionAndExtensionObject.type === 'assertion') {
                     let { level, test, id, description } = assertionAndExtensionObject;
-
                     // Extract values from external document and modify test if a document call is made
                     let originalTest = test;
                     let simplifiedTest = null;
@@ -461,15 +446,8 @@ function checkRulePromise(xmlDoc, originalContext, assertionsAndExtensions, opti
                     if (!subAssertionsAndExtensions) {
                         continue;
                     }
-                    const newRuleObject = ruleAssertionMap[extensionRule];            
-                    if (_get(newRuleObject, 'abstract')) {
-                        continue;
-                    }
-                    const newContext = newRuleObject.context;
-                    if (!newContext) {
-                        continue;
-                    }
-                    const failedSubAssertions = checkRule(xmlDoc, newContext, subAssertionsAndExtensions, options);
+                    const newRuleObject = ruleAssertionMap[extensionRule];
+                    const failedSubAssertions = checkRule(xmlDoc, context, subAssertionsAndExtensions, options);
                     failedAssertions.push(...failedSubAssertions);     
                 }
             }

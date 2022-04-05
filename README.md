@@ -1,6 +1,11 @@
 # [cda-schematron-validator](https://github.com/priyaranjan-tokachichu/cda-schematron-validator)
 ## Release History
 Starting release history with 1.0.7
+### 1.1.0
+- Fix the issue with the rule check which was working in the original repository, but not in the fork
+- Added HL7 C-CDA schematron file and resource file from https://github.com/HL7/CDA-ccda-2.1/releases/tag/2019JUN
+- Added a test case vitalSigns.test.js that tests the resource file and sub assertions
+- Used resources https://github.com/jddamore/ccda-samples and https://github.com/HL7/C-CDA-Examples/tree/master/Vital%20Signs to create the test file vitalSigns.xml
 ### 1.0.10
 - Fix null context issue associated with assertions within assertions
 - Skip abstract rules associated with assertions within assertions
