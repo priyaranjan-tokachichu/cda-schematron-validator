@@ -1,4 +1,11 @@
-- repo: https://github.com/pre-commit/mirrors-prettier
-  rev: "" # Use the sha or tag you want to point at
-  hooks:
-    - id: prettier
+- name: Prettier, please!
+  # You may pin to the exact commit or the version.
+  # uses: reiddraper/prettier-please@78c10c34c7c783e9ff98d49a6aaa9b015f4381f2
+  uses: reiddraper/prettier-please@v0.0.1
+  with:
+    # GitHub token
+    github-token: 
+    # Name to use for git commits
+    git-user.name: # optional, default is github-actions[bot]
+    # Email to use for git commits
+    git-user.email: # optional, default is github-actions[bot]@users.noreply.github.com
