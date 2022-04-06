@@ -4,9 +4,9 @@ const expect = require('chai').expect;
 const validator = require('../validator');
 const path = require('path');
 // Which xml file to test
-const xmlPath = path.resolve(__dirname, './test.xml');
+const xmlPath = path.resolve(__dirname, '../test/test.xml');
 // Which schematron to test against
-const schematronPath = path.resolve(__dirname, './test.sch');
+const schematronPath = path.resolve(__dirname, '../test/test.sch');
 const xml = fs.readFileSync(xmlPath, 'utf-8').toString();
 const schematron = fs.readFileSync(schematronPath, 'utf-8').toString();
 
