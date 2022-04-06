@@ -4,6 +4,10 @@
 
 Starting release history with 1.0.7
 
+### 1.1.5
+
+- Major methods have been divided into multiple small methods to avoid redundancy across sync and async methods, and reduce maintenance
+
 ### 1.1.4 (Stable Release)
 
 - Major deviations from the source repository
