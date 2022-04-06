@@ -2,17 +2,16 @@ const fs = require('fs');
 const expect = require('chai').expect;
 
 const validator = require('../validator');
-const path = require('path');
 
 // Which xml file to test
-const xmlPath = path.resolve(__dirname, '../test/vitalSigns.xml');
+const xmlPath = process.cwd() + '/test/vitalSigns.xml';
 // Which schematron to test against
-const schematronPath = path.resolve(__dirname, '../test/CDAR2_IG_CCDA_CLINNOTES_R1_DSTU2.1_2015AUG_Vol2_2019JUNwith_errata.sch');
+const schematronPath = process.cwd() + '/test/CDAR2_IG_CCDA_CLINNOTES_R1_DSTU2.1_2015AUG_Vol2_2019JUNwith_errata.sch';
 
 const xml = fs.readFileSync(xmlPath, 'utf-8').toString();
 const schematron = fs.readFileSync(schematronPath, 'utf-8').toString();
 const options = {
-    resourceDir: path.resolve(__dirname, './')
+    resourceDir: process.cwd() + '/test/'
 };
 
 describe('Validator should', function() {
