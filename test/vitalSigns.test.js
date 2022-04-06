@@ -12,7 +12,8 @@ const schematronPath = path.resolve(__dirname, './CDAR2_IG_CCDA_CLINNOTES_R1_DST
 const xml = fs.readFileSync(xmlPath, 'utf-8').toString();
 const schematron = fs.readFileSync(schematronPath, 'utf-8').toString();
 const options = {
-    resourceDir: path.resolve(__dirname, './')
+    resourceDir: path.resolve(__dirname, './'),
+    includeWarnings: true
 };
 
 describe('Validator should', function() {
@@ -59,7 +60,7 @@ describe('Validator should', function() {
     });
 
     it('return similar results without warnings', async function() {
-        results = await validator.validateAsync(xml, schematron, { includeWarnings: false, resourceDir: options.resourceDir });
+        results = await validator.validateAsync(xml, schematron, { resourceDir: options.resourceDir });
         expect(results).to.be.an('object');
         expect(results.errorCount).to.be.a('number');
         expect(results.warningCount).to.be.a('number');

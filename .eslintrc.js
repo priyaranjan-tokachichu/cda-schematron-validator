@@ -18,12 +18,13 @@ module.exports = {
         'object-curly-spacing': 0,
         'func-call-spacing': 0,
         'max-len': [2, {
-            code: 200,
-            tabWidth: 4,
-            ignoreUrls: true,
-            ignorePattern: 'goog\.(module|require)',
-            ignoreStrings: true,
-            ignoreComments: true
-        }]
+            'code': 200,
+            'tabWidth': 4,
+            'ignoreUrls': true,
+            'ignorePattern': 'goog\.(module|require)',
+            'ignoreStrings': true,
+            'ignoreComments': true
+        }],
+        'brace-style': ['error', 'stroustrup']
     }
 };

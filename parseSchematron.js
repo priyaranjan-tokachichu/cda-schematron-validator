@@ -3,20 +3,20 @@
 module.exports = parseSchematron;
 
 const xpath = require('xpath');
+const _get = require('lodash.get');
 
-function parseSchematron(doc) {
+function parseSchematron(doc, options) {
     // Extract data from schematron
-    const schematronData = extract(doc);
+    const schematronData = extract(doc, options);
 
     return schematronData;
 }
 
-function extract(doc) {
+function extract(doc, options) {
     const namespaceMap = Object.create({});
     const patternLevelMap = Object.create({});
     const patternRuleMap = Object.create({});
     const ruleAssertionMap = Object.create({});
-
     // // Namespace mapping
     const namespaces = xpath.select('//*[local-name()="ns"]', doc);
     for (let i = 0; i < namespaces.length; i++) {
@@ -41,7 +41,7 @@ function extract(doc) {
     const warningPhase = xpath.select('//*[local-name()="phase" and @id="warnings"]', doc);
 
     // Store warning patterns
-    if (warningPhase.length) {
+    if (_get(options, 'includeWarnings') && warningPhase.length) {
         for (let i = 0; i < warningPhase[0].childNodes.length; i++) {
             if (warningPhase[0].childNodes[i].localName === 'active') {
                 patternLevelMap[warningPhase[0].childNodes[i].getAttribute('pattern')] = 'warning';

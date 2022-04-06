@@ -23,7 +23,8 @@ function modifyTest(test, resourceDir) {
             }
             if (test[i] === ']') {
                 bracketDepth++;
-            } else if (test[i] === '[') {
+            }
+            else if (test[i] === '[') {
                 bracketDepth--;
             }
         }
@@ -37,7 +38,8 @@ function modifyTest(test, resourceDir) {
             }
             if (test[i] === '[') {
                 bracketDepth++;
-            } else if (test[i] === ']') {
+            }
+            else if (test[i] === ']') {
                 bracketDepth--;
             }
         }
@@ -51,12 +53,14 @@ function modifyTest(test, resourceDir) {
             let externalXml = null;
             try {
                 externalXml = fs.readFileSync(path.join(resourceDir, filepath), 'utf-8').toString();
-            } catch (err) {
+            }
+            catch (err) {
                 throw new Error('No such file \'' + filepath + '\'');
             }
             externalDoc = new Dom().parseFromString(externalXml);
             loadedExternalDocuments[filepath] = externalDoc;
-        } else {
+        }
+        else {
             externalDoc = loadedExternalDocuments[filepath];
         }
 
