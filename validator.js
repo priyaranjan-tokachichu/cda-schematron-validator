@@ -227,11 +227,11 @@ function checkRule(xmlDoc, originalContext, assertionsAndExtensions, options) {
             if (!extensionRule) {
                 continue;
             }
-            const subAssertionsAndExtensions = ruleAssertionMap[extensionRule] ? ruleAssertionMap[extensionRule].assertionsAndExtensions : null;
+            const newRuleObject = ruleAssertionMap[extensionRule];
+            const subAssertionsAndExtensions = newRuleObject ? newRuleObject.assertionsAndExtensions : null;
             if (!subAssertionsAndExtensions) {
                 continue;
             }
-            const newRuleObject = ruleAssertionMap[extensionRule];
             const failedSubAssertions = checkRule(xmlDoc, context, subAssertionsAndExtensions, options);
             failedAssertions.push(...failedSubAssertions);     
         }
@@ -442,11 +442,11 @@ function checkRulePromise(xmlDoc, originalContext, assertionsAndExtensions, opti
                     if (!extensionRule) {
                         continue;
                     }
-                    const subAssertionsAndExtensions = ruleAssertionMap[extensionRule] ? ruleAssertionMap[extensionRule].assertionsAndExtensions : null;
+                    const newRuleObject = ruleAssertionMap[extensionRule];
+                    const subAssertionsAndExtensions = newRuleObject ? newRuleObject.assertionsAndExtensions : null;
                     if (!subAssertionsAndExtensions) {
                         continue;
                     }
-                    const newRuleObject = ruleAssertionMap[extensionRule];
                     const failedSubAssertions = checkRule(xmlDoc, context, subAssertionsAndExtensions, options);
                     failedAssertions.push(...failedSubAssertions);     
                 }

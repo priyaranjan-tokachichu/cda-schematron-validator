@@ -13,19 +13,15 @@ module.exports = function (grunt) {
         },
         mochaTest: {
             api: {
+                src: ['test/*test*.js'],
                 options: {
                     reporter: 'spec'
-                },
-                src: ['test/tests.js']
+                }
             }
         }
     });
-
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-mocha-test');
-    
     grunt.registerTask('default', ['jshint', 'mochaTest']);
     grunt.registerTask('api', ['mochaTest']);
-
 };
-

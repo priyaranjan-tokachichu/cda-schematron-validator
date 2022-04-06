@@ -32,7 +32,10 @@
     "grunt": "~1.4.1",
     "grunt-contrib-jshint": "~3.2.0",
     "grunt-mocha-test": "~0.13.3",
-    "mocha": "~9.2.2"
+    "husky": "~7.0.4",
+    "lint-staged": "~12.3.7",
+    "mocha": "~9.2.2",
+    "prettier": "~2.6.2"
   },
   "dependencies": {
     "@xmldom/xmldom": "~0.7.2",
