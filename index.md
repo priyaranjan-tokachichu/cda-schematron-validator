@@ -1,6 +1,8 @@
 # [cda-schematron-validator](https://github.com/priyaranjan-tokachichu/cda-schematron-validator)
 ## Release History
 Starting release history with 1.0.7
+### 1.1.1
+- Only keeping the necessary data in the test files taken from HL7 C-CDA schematron repository to avoid bloating the module
 ### 1.1.0
 - Fix the issue with the rule check which was working in the original repository, but not in the fork
 - Added HL7 C-CDA schematron file and resource file from https://github.com/HL7/CDA-ccda-2.1/releases/tag/2019JUN
