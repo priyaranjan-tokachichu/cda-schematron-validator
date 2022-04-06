@@ -53,7 +53,7 @@ describe('Validator should', function() {
     it('return correct number of ignored', function() {
         expect(results.ignoredCount).to.be.equal(1);
     });
-    
+
     it('return similar results without warnings', async function() {
         results = await validator.validateAsync(xml, schematron, { includeWarnings: false });
         expect(results).to.be.an('object');
@@ -70,7 +70,7 @@ describe('Validator should', function() {
         expect(results.warningCount).to.be.equal(0);
         expect(results.ignoredCount).to.be.equal(1);
     });
-    
+
     it('return similar results given xml filepath', async function() {
         results = await validator.validateAsync(xmlPath, schematron);
         expect(results).to.be.an('object');
@@ -87,7 +87,7 @@ describe('Validator should', function() {
         expect(results.warningCount).to.be.equal(15);
         expect(results.ignoredCount).to.be.equal(1);
     });
-    
+
     it('return similar results given schematron filepath', async function() {
         results = await validator.validateAsync(xml, schematronPath);
         expect(results).to.be.an('object');
@@ -104,7 +104,7 @@ describe('Validator should', function() {
         expect(results.warningCount).to.be.equal(15);
         expect(results.ignoredCount).to.be.equal(1);
     });
-    
+
     it('return similar results given xml filepath and schematron filepath', async function() {
         results = await validator.validateAsync(xmlPath, schematronPath);
         expect(results).to.be.an('object');

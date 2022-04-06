@@ -10,7 +10,7 @@ module.exports = {
 
 const fs = require('fs');
 const xpath = require('xpath');
-const dom = require('@xmldom/xmldom').DOMParser;
+const Dom = require('@xmldom/xmldom').DOMParser;
 // crypto is now built-in node
 const crypto = require('crypto');
 const _get = require('lodash.get');
@@ -26,15 +26,17 @@ function clearCache() {
     parsedMap = Object.create({});
     contextMap = Object.create({});
 }
-let namespaceMap, patternRuleMap, ruleAssertionMap, xpathSelect;
+let namespaceMap;
+let patternRuleMap;
+let ruleAssertionMap;
+let xpathSelect;
 function validate(xml, schematron, options = {}) {
     // If not valid xml, it might be a filepath
     // Adding explicit check to make it clear
     if (xml.trim().indexOf('<') === -1) {
         try {
             xml = fs.readFileSync(xml, 'utf-8').toString();
-        }
-        catch (err) {
+        } catch (err) {
             // If no valid xml found, inform user, and return immediately
             console.log('No valid xml could be found');
             return;
@@ -43,25 +45,23 @@ function validate(xml, schematron, options = {}) {
 
     let schematronMap;
     // Load xml doc
-    let xmlDoc = new dom().parseFromString(xml);
+    const xmlDoc = new Dom().parseFromString(xml);
     // Allowing users to send a parsed schematron map if testing multiple xml files with the same schematron
     if (options.parsedSchematronMap) {
         schematronMap = options.parsedSchematronMap;
-    }
-    else {
+    } else {
         // If not valid schematron (xml), it might be a filepath
         // Adding explicit check to make it clear
         if (schematron.trim().indexOf('<') === -1) {
             try {
                 schematron = fs.readFileSync(schematron, 'utf-8').toString();
-            }
-            catch (err) {
+            } catch (err) {
                 // If no valid schematron found, inform user, and return immediately
                 console.log('No valid schematron could be found');
                 return;
             }
         }
-        let hash = crypto
+        const hash = crypto
             .createHash('md5')
             .update(schematron)
             .digest('hex');
@@ -69,7 +69,7 @@ function validate(xml, schematron, options = {}) {
         // If not in cache
         if (!schematronMap) {
             // Load schematron doc
-            let schematronDoc = new dom().parseFromString(schematron);
+            const schematronDoc = new Dom().parseFromString(schematron);
 
             // Parse schematron
             schematronMap = parseSchematron(schematronDoc);
@@ -88,10 +88,10 @@ function validate(xml, schematron, options = {}) {
     // Avoid using 'select' as a variable name as it is overused
     xpathSelect = xpath.useNamespaces(namespaceMap);
 
-    let errors = [];
-    let warnings = [];
-    let ignored = [];
-    for (let patternId in patternRuleMap) {
+    const errors = [];
+    const warnings = [];
+    const ignored = [];
+    for (const patternId in patternRuleMap) {
         if (!patternRuleMap.hasOwnProperty(patternId)) {
             continue;
         }
@@ -101,10 +101,10 @@ function validate(xml, schematron, options = {}) {
             const ruleObject = ruleAssertionMap[ruleId];
             if (_get(ruleObject, 'abstract')) {
                 continue;
-            }         
+            }
             const context = _get(ruleObject, 'context');
             const assertionsAndExtensions = _get(ruleObject, 'assertionsAndExtensions') || [];
-            let failedAssertions = checkRule(xmlDoc, context, assertionsAndExtensions, options);
+            const failedAssertions = checkRule(xmlDoc, context, assertionsAndExtensions, options);
             for (let j = 0; j < failedAssertions.length; j++) {
                 const assertionObject = failedAssertions[j];
                 const { type, assertionId, test, simplifiedTest, description, errorMessage, results } = assertionObject;
@@ -113,7 +113,7 @@ function validate(xml, schematron, options = {}) {
                         const resultObject = results[k];
                         const { result, line, path, xml } = resultObject;
                         if (!result) {
-                            let obj = {
+                            const obj = {
                                 type: type,
                                 test: test,
                                 simplifiedTest: simplifiedTest,
@@ -128,15 +128,13 @@ function validate(xml, schematron, options = {}) {
                             };
                             if (type === 'error') {
                                 errors.push(obj);
-                            }
-                            else {
+                            } else {
                                 warnings.push(obj);
                             }
                         }
                     }
-                }
-                else if (results.ignored) {
-                    let obj = {
+                } else if (results.ignored) {
+                    const obj = {
                         errorMessage: errorMessage,
                         type: type,
                         test: test,
@@ -169,7 +167,7 @@ function checkRule(xmlDoc, originalContext, assertionsAndExtensions, options) {
     const includeWarnings = options.includeWarnings === undefined ? true : options.includeWarnings;
     const resourceDir = options.resourceDir || './';
     const xmlSnippetMaxLength = options.xmlSnippetMaxLength === undefined ? 200 : options.xmlSnippetMaxLength;
-    let failedAssertions = [];
+    const failedAssertions = [];
     const context = options.contextOverride || originalContext;
     // Determine the sections within context, load selected section from cache if possible
     let selected = contextMap[context];
@@ -180,8 +178,7 @@ function checkRule(xmlDoc, originalContext, assertionsAndExtensions, options) {
                 contextModified = '//' + context;
             }
             selected = xpathSelect(contextModified, xmlDoc);
-        }
-        else {
+        } else {
             selected = [xmlDoc];
         }
         contextMap[context] = selected;
@@ -192,12 +189,11 @@ function checkRule(xmlDoc, originalContext, assertionsAndExtensions, options) {
         if (assertionAndExtensionObject.type === 'assertion') {
             let { level, test, id, description } = assertionAndExtensionObject;
             // Extract values from external document and modify test if a document call is made
-            let originalTest = test;
+            const originalTest = test;
             let simplifiedTest = null;
             try {
                 test = includeExternalDocument(test, resourceDir);
-            }
-            catch (err) {
+            } catch (err) {
                 failedAssertions.push({
                     type: level,
                     assertionId: id,
@@ -207,7 +203,7 @@ function checkRule(xmlDoc, originalContext, assertionsAndExtensions, options) {
                     results: { ignored: true, errorMessage: err.message }
                 });
                 continue;
-            }            
+            }
             if (originalTest !== test) {
                 simplifiedTest = test;
             }
@@ -221,8 +217,7 @@ function checkRule(xmlDoc, originalContext, assertionsAndExtensions, options) {
                     results: testAssertion(test, selected, xpathSelect, xmlDoc, resourceDir, xmlSnippetMaxLength)
                 });
             }
-        }
-        else {
+        } else {
             const extensionRule = assertionAndExtensionObject.rule;
             if (!extensionRule) {
                 continue;
@@ -233,7 +228,7 @@ function checkRule(xmlDoc, originalContext, assertionsAndExtensions, options) {
                 continue;
             }
             const failedSubAssertions = checkRule(xmlDoc, context, subAssertionsAndExtensions, options);
-            failedAssertions.push(...failedSubAssertions);     
+            failedAssertions.push(...failedSubAssertions);
         }
     }
     return failedAssertions;
@@ -245,8 +240,7 @@ async function validateAsync(xml, schematron, options = {}) {
     if (xml.trim().indexOf('<') === -1) {
         try {
             xml = fs.readFileSync(xml, 'utf-8').toString();
-        }
-        catch (err) {
+        } catch (err) {
             // If no valid xml found, inform user, and return immediately
             console.log('No valid xml could be found');
             return;
@@ -255,25 +249,23 @@ async function validateAsync(xml, schematron, options = {}) {
 
     let schematronMap;
     // Load xml doc
-    let xmlDoc = new dom().parseFromString(xml);
+    const xmlDoc = new Dom().parseFromString(xml);
     // Allowing users to send a parsed schematron map if testing multiple xml files with the same schematron
     if (options.parsedSchematronMap) {
         schematronMap = options.parsedSchematronMap;
-    }
-    else {
+    } else {
         // If not valid schematron (xml), it might be a filepath
         // Adding explicit check to make it clear
         if (schematron.trim().indexOf('<') === -1) {
             try {
                 schematron = fs.readFileSync(schematron, 'utf-8').toString();
-            }
-            catch (err) {
+            } catch (err) {
                 // If no valid schematron found, inform user, and return immediately
                 console.log('No valid schematron could be found');
                 return;
             }
         }
-        let hash = crypto
+        const hash = crypto
             .createHash('md5')
             .update(schematron)
             .digest('hex');
@@ -281,7 +273,7 @@ async function validateAsync(xml, schematron, options = {}) {
         // If not in cache
         if (!schematronMap) {
             // Load schematron doc
-            let schematronDoc = new dom().parseFromString(schematron);
+            const schematronDoc = new Dom().parseFromString(schematron);
 
             // Parse schematron
             schematronMap = parseSchematron(schematronDoc);
@@ -300,10 +292,10 @@ async function validateAsync(xml, schematron, options = {}) {
     // Avoid using 'select' as a variable name as it is overused
     xpathSelect = xpath.useNamespaces(namespaceMap);
 
-    let errors = [];
-    let warnings = [];
-    let ignored = [];
-    for (let patternId in patternRuleMap) {
+    const errors = [];
+    const warnings = [];
+    const ignored = [];
+    for (const patternId in patternRuleMap) {
         if (!patternRuleMap.hasOwnProperty(patternId)) {
             continue;
         }
@@ -313,10 +305,10 @@ async function validateAsync(xml, schematron, options = {}) {
             const ruleObject = ruleAssertionMap[ruleId];
             if (_get(ruleObject, 'abstract')) {
                 continue;
-            }         
+            }
             const context = _get(ruleObject, 'context');
             const assertionsAndExtensions = _get(ruleObject, 'assertionsAndExtensions') || [];
-            let failedAssertions = await checkRulePromise(xmlDoc, context, assertionsAndExtensions, options);
+            const failedAssertions = await checkRulePromise(xmlDoc, context, assertionsAndExtensions, options);
             for (let j = 0; j < failedAssertions.length; j++) {
                 const assertionObject = failedAssertions[j];
                 const { type, assertionId, test, simplifiedTest, description, errorMessage, results } = assertionObject;
@@ -325,7 +317,7 @@ async function validateAsync(xml, schematron, options = {}) {
                         const resultObject = results[k];
                         const { result, line, path, xml } = resultObject;
                         if (!result) {
-                            let obj = {
+                            const obj = {
                                 type: type,
                                 test: test,
                                 simplifiedTest: simplifiedTest,
@@ -340,15 +332,13 @@ async function validateAsync(xml, schematron, options = {}) {
                             };
                             if (type === 'error') {
                                 errors.push(obj);
-                            }
-                            else {
+                            } else {
                                 warnings.push(obj);
                             }
                         }
                     }
-                }
-                else if (results.ignored) {
-                    let obj = {
+                } else if (results.ignored) {
+                    const obj = {
                         errorMessage: errorMessage,
                         type: type,
                         test: test,
@@ -384,7 +374,7 @@ function checkRulePromise(xmlDoc, originalContext, assertionsAndExtensions, opti
             const includeWarnings = options.includeWarnings === undefined ? true : options.includeWarnings;
             const resourceDir = options.resourceDir || './';
             const xmlSnippetMaxLength = options.xmlSnippetMaxLength === undefined ? 200 : options.xmlSnippetMaxLength;
-            let failedAssertions = [];
+            const failedAssertions = [];
             const context = options.contextOverride || originalContext;
             // Determine the sections within context, load selected section from cache if possible
             let selected = contextMap[context];
@@ -395,8 +385,7 @@ function checkRulePromise(xmlDoc, originalContext, assertionsAndExtensions, opti
                         contextModified = '//' + context;
                     }
                     selected = xpathSelect(contextModified, xmlDoc);
-                }
-                else {
+                } else {
                     selected = [xmlDoc];
                 }
                 contextMap[context] = selected;
@@ -407,12 +396,11 @@ function checkRulePromise(xmlDoc, originalContext, assertionsAndExtensions, opti
                 if (assertionAndExtensionObject.type === 'assertion') {
                     let { level, test, id, description } = assertionAndExtensionObject;
                     // Extract values from external document and modify test if a document call is made
-                    let originalTest = test;
+                    const originalTest = test;
                     let simplifiedTest = null;
                     try {
                         test = includeExternalDocument(test, resourceDir);
-                    }
-                    catch (err) {
+                    } catch (err) {
                         failedAssertions.push({
                             type: level,
                             assertionId: id,
@@ -422,7 +410,7 @@ function checkRulePromise(xmlDoc, originalContext, assertionsAndExtensions, opti
                             results: { ignored: true, errorMessage: err.message }
                         });
                         continue;
-                    }            
+                    }
                     if (originalTest !== test) {
                         simplifiedTest = test;
                     }
@@ -436,8 +424,7 @@ function checkRulePromise(xmlDoc, originalContext, assertionsAndExtensions, opti
                             results: testAssertion(test, selected, xpathSelect, xmlDoc, resourceDir, xmlSnippetMaxLength)
                         });
                     }
-                }
-                else {
+                } else {
                     const extensionRule = assertionAndExtensionObject.rule;
                     if (!extensionRule) {
                         continue;
@@ -448,14 +435,13 @@ function checkRulePromise(xmlDoc, originalContext, assertionsAndExtensions, opti
                         continue;
                     }
                     const failedSubAssertions = checkRule(xmlDoc, context, subAssertionsAndExtensions, options);
-                    failedAssertions.push(...failedSubAssertions);     
+                    failedAssertions.push(...failedSubAssertions);
                 }
             }
             resolve (failedAssertions);
-        }
-        catch (promiseError) {
+        } catch (promiseError) {
             reject (new Error (`Promise Error: ${promiseError}`));
-        }        
+        }
     });
     return resultCapture;
 }

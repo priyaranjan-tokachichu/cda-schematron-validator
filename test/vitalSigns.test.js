@@ -13,7 +13,7 @@ const xml = fs.readFileSync(xmlPath, 'utf-8').toString();
 const schematron = fs.readFileSync(schematronPath, 'utf-8').toString();
 const options = {
     resourceDir: path.resolve(__dirname, './')
-}
+};
 
 describe('Validator should', function() {
     let results;
@@ -57,7 +57,7 @@ describe('Validator should', function() {
     it('return correct number of ignored', function() {
         expect(results.ignoredCount).to.be.equal(0);
     });
-    
+
     it('return similar results without warnings', async function() {
         results = await validator.validateAsync(xml, schematron, { includeWarnings: false, resourceDir: options.resourceDir });
         expect(results).to.be.an('object');
@@ -74,7 +74,7 @@ describe('Validator should', function() {
         expect(results.warningCount).to.be.equal(0);
         expect(results.ignoredCount).to.be.equal(0);
     });
-    
+
     it('return similar results given xml filepath', async function() {
         results = await validator.validateAsync(xmlPath, schematron, options);
         expect(results).to.be.an('object');
@@ -91,7 +91,7 @@ describe('Validator should', function() {
         expect(results.warningCount).to.be.equal(6);
         expect(results.ignoredCount).to.be.equal(0);
     });
-    
+
     it('return similar results given schematron filepath', async function() {
         results = await validator.validateAsync(xml, schematronPath, options);
         expect(results).to.be.an('object');
@@ -108,7 +108,7 @@ describe('Validator should', function() {
         expect(results.warningCount).to.be.equal(6);
         expect(results.ignoredCount).to.be.equal(0);
     });
-    
+
     it('return similar results given xml filepath and schematron filepath', async function() {
         results = await validator.validateAsync(xmlPath, schematronPath, options);
         expect(results).to.be.an('object');
