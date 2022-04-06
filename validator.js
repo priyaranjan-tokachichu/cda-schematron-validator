@@ -36,7 +36,8 @@ function validate(xml, schematron, options = {}) {
     if (xml.trim().indexOf('<') === -1) {
         try {
             xml = fs.readFileSync(xml, 'utf-8').toString();
-        } catch (err) {
+        }
+        catch (err) {
             // If no valid xml found, inform user, and return immediately
             console.log('No valid xml could be found');
             return;
@@ -49,13 +50,15 @@ function validate(xml, schematron, options = {}) {
     // Allowing users to send a parsed schematron map if testing multiple xml files with the same schematron
     if (options.parsedSchematronMap) {
         schematronMap = options.parsedSchematronMap;
-    } else {
+    }
+    else {
         // If not valid schematron (xml), it might be a filepath
         // Adding explicit check to make it clear
         if (schematron.trim().indexOf('<') === -1) {
             try {
                 schematron = fs.readFileSync(schematron, 'utf-8').toString();
-            } catch (err) {
+            }
+            catch (err) {
                 // If no valid schematron found, inform user, and return immediately
                 console.log('No valid schematron could be found');
                 return;
@@ -72,13 +75,12 @@ function validate(xml, schematron, options = {}) {
             const schematronDoc = new Dom().parseFromString(schematron);
 
             // Parse schematron
-            schematronMap = parseSchematron(schematronDoc);
+            schematronMap = parseSchematron(schematronDoc, options);
 
             // Cache parsed schematron
             parsedMap[hash] = schematronMap;
         }
     }
-
     // Extract data from parsed schematron object
     namespaceMap = schematronMap.namespaceMap;
     patternRuleMap = schematronMap.patternRuleMap;
@@ -128,12 +130,14 @@ function validate(xml, schematron, options = {}) {
                             };
                             if (type === 'error') {
                                 errors.push(obj);
-                            } else {
+                            }
+                            else {
                                 warnings.push(obj);
                             }
                         }
                     }
-                } else if (results.ignored) {
+                }
+                else if (results.ignored) {
                     const obj = {
                         errorMessage: errorMessage,
                         type: type,
@@ -164,7 +168,6 @@ function validate(xml, schematron, options = {}) {
 // Take the checkRule function out of validate function, and pass on the variable needed as parameters and options
 function checkRule(xmlDoc, originalContext, assertionsAndExtensions, options) {
     // Context cache
-    const includeWarnings = options.includeWarnings === undefined ? true : options.includeWarnings;
     const resourceDir = options.resourceDir || './';
     const xmlSnippetMaxLength = options.xmlSnippetMaxLength === undefined ? 200 : options.xmlSnippetMaxLength;
     const failedAssertions = [];
@@ -178,7 +181,8 @@ function checkRule(xmlDoc, originalContext, assertionsAndExtensions, options) {
                 contextModified = '//' + context;
             }
             selected = xpathSelect(contextModified, xmlDoc);
-        } else {
+        }
+        else {
             selected = [xmlDoc];
         }
         contextMap[context] = selected;
@@ -193,7 +197,8 @@ function checkRule(xmlDoc, originalContext, assertionsAndExtensions, options) {
             let simplifiedTest = null;
             try {
                 test = includeExternalDocument(test, resourceDir);
-            } catch (err) {
+            }
+            catch (err) {
                 failedAssertions.push({
                     type: level,
                     assertionId: id,
@@ -207,7 +212,7 @@ function checkRule(xmlDoc, originalContext, assertionsAndExtensions, options) {
             if (originalTest !== test) {
                 simplifiedTest = test;
             }
-            if (level === 'error' || includeWarnings) {
+            if (level === 'error' || _get(options, 'includeWarnings')) {
                 failedAssertions.push({
                     type: level,
                     assertionId: id,
@@ -217,7 +222,8 @@ function checkRule(xmlDoc, originalContext, assertionsAndExtensions, options) {
                     results: testAssertion(test, selected, xpathSelect, xmlDoc, resourceDir, xmlSnippetMaxLength)
                 });
             }
-        } else {
+        }
+        else {
             const extensionRule = assertionAndExtensionObject.rule;
             if (!extensionRule) {
                 continue;
@@ -240,7 +246,8 @@ async function validateAsync(xml, schematron, options = {}) {
     if (xml.trim().indexOf('<') === -1) {
         try {
             xml = fs.readFileSync(xml, 'utf-8').toString();
-        } catch (err) {
+        }
+        catch (err) {
             // If no valid xml found, inform user, and return immediately
             console.log('No valid xml could be found');
             return;
@@ -253,13 +260,15 @@ async function validateAsync(xml, schematron, options = {}) {
     // Allowing users to send a parsed schematron map if testing multiple xml files with the same schematron
     if (options.parsedSchematronMap) {
         schematronMap = options.parsedSchematronMap;
-    } else {
+    }
+    else {
         // If not valid schematron (xml), it might be a filepath
         // Adding explicit check to make it clear
         if (schematron.trim().indexOf('<') === -1) {
             try {
                 schematron = fs.readFileSync(schematron, 'utf-8').toString();
-            } catch (err) {
+            }
+            catch (err) {
                 // If no valid schematron found, inform user, and return immediately
                 console.log('No valid schematron could be found');
                 return;
@@ -276,7 +285,7 @@ async function validateAsync(xml, schematron, options = {}) {
             const schematronDoc = new Dom().parseFromString(schematron);
 
             // Parse schematron
-            schematronMap = parseSchematron(schematronDoc);
+            schematronMap = parseSchematron(schematronDoc, options);
 
             // Cache parsed schematron
             parsedMap[hash] = schematronMap;
@@ -332,12 +341,14 @@ async function validateAsync(xml, schematron, options = {}) {
                             };
                             if (type === 'error') {
                                 errors.push(obj);
-                            } else {
+                            }
+                            else {
                                 warnings.push(obj);
                             }
                         }
                     }
-                } else if (results.ignored) {
+                }
+                else if (results.ignored) {
                     const obj = {
                         errorMessage: errorMessage,
                         type: type,
@@ -371,7 +382,6 @@ function checkRulePromise(xmlDoc, originalContext, assertionsAndExtensions, opti
     const resultCapture = new Promise((resolve, reject) => {
         try {
             // Context cache
-            const includeWarnings = options.includeWarnings === undefined ? true : options.includeWarnings;
             const resourceDir = options.resourceDir || './';
             const xmlSnippetMaxLength = options.xmlSnippetMaxLength === undefined ? 200 : options.xmlSnippetMaxLength;
             const failedAssertions = [];
@@ -385,7 +395,8 @@ function checkRulePromise(xmlDoc, originalContext, assertionsAndExtensions, opti
                         contextModified = '//' + context;
                     }
                     selected = xpathSelect(contextModified, xmlDoc);
-                } else {
+                }
+                else {
                     selected = [xmlDoc];
                 }
                 contextMap[context] = selected;
@@ -400,7 +411,8 @@ function checkRulePromise(xmlDoc, originalContext, assertionsAndExtensions, opti
                     let simplifiedTest = null;
                     try {
                         test = includeExternalDocument(test, resourceDir);
-                    } catch (err) {
+                    }
+                    catch (err) {
                         failedAssertions.push({
                             type: level,
                             assertionId: id,
@@ -414,7 +426,7 @@ function checkRulePromise(xmlDoc, originalContext, assertionsAndExtensions, opti
                     if (originalTest !== test) {
                         simplifiedTest = test;
                     }
-                    if (level === 'error' || includeWarnings) {
+                    if (level === 'error' || _get(options, 'includeWarnings')) {
                         failedAssertions.push({
                             type: level,
                             assertionId: id,
@@ -424,7 +436,8 @@ function checkRulePromise(xmlDoc, originalContext, assertionsAndExtensions, opti
                             results: testAssertion(test, selected, xpathSelect, xmlDoc, resourceDir, xmlSnippetMaxLength)
                         });
                     }
-                } else {
+                }
+                else {
                     const extensionRule = assertionAndExtensionObject.rule;
                     if (!extensionRule) {
                         continue;
@@ -439,7 +452,8 @@ function checkRulePromise(xmlDoc, originalContext, assertionsAndExtensions, opti
                 }
             }
             resolve (failedAssertions);
-        } catch (promiseError) {
+        }
+        catch (promiseError) {
             reject (new Error (`Promise Error: ${promiseError}`));
         }
     });

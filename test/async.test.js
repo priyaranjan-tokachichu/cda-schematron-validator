@@ -14,7 +14,7 @@ const schematron = fs.readFileSync(schematronPath, 'utf-8').toString();
 describe('Validator should', function() {
     let results;
     it('return results', async function() {
-        results = await validator.validateAsync(xml, schematron);
+        results = await validator.validateAsync(xml, schematron, { includeWarnings: true });
         expect(results).to.be.an('object');
     });
     it('return errorCount', function() {
@@ -55,7 +55,7 @@ describe('Validator should', function() {
     });
 
     it('return similar results without warnings', async function() {
-        results = await validator.validateAsync(xml, schematron, { includeWarnings: false });
+        results = await validator.validateAsync(xml, schematron);
         expect(results).to.be.an('object');
         expect(results.errorCount).to.be.a('number');
         expect(results.warningCount).to.be.a('number');
@@ -72,7 +72,7 @@ describe('Validator should', function() {
     });
 
     it('return similar results given xml filepath', async function() {
-        results = await validator.validateAsync(xmlPath, schematron);
+        results = await validator.validateAsync(xmlPath, schematron, { includeWarnings: true });
         expect(results).to.be.an('object');
         expect(results.errorCount).to.be.a('number');
         expect(results.warningCount).to.be.a('number');
@@ -89,7 +89,7 @@ describe('Validator should', function() {
     });
 
     it('return similar results given schematron filepath', async function() {
-        results = await validator.validateAsync(xml, schematronPath);
+        results = await validator.validateAsync(xml, schematronPath, { includeWarnings: true });
         expect(results).to.be.an('object');
         expect(results.errorCount).to.be.a('number');
         expect(results.warningCount).to.be.a('number');
@@ -106,7 +106,7 @@ describe('Validator should', function() {
     });
 
     it('return similar results given xml filepath and schematron filepath', async function() {
-        results = await validator.validateAsync(xmlPath, schematronPath);
+        results = await validator.validateAsync(xmlPath, schematronPath, { includeWarnings: true });
         expect(results).to.be.an('object');
         expect(results.errorCount).to.be.a('number');
         expect(results.warningCount).to.be.a('number');

@@ -13,7 +13,7 @@ const schematron = fs.readFileSync(schematronPath, 'utf-8').toString();
 describe('Validator should', function() {
     let results;
     it('return results', function(done) {
-        results = validator.validate(xml, schematron);
+        results = validator.validate(xml, schematron, { includeWarnings: true });
         expect(results).to.be.an('object');
         done();
     });
@@ -67,7 +67,7 @@ describe('Validator should', function() {
     });
 
     it('return similar results without warnings', function(done) {
-        results = validator.validate(xml, schematron, { includeWarnings: false });
+        results = validator.validate(xml, schematron);
         expect(results).to.be.an('object');
         expect(results.errorCount).to.be.a('number');
         expect(results.warningCount).to.be.a('number');
@@ -85,7 +85,7 @@ describe('Validator should', function() {
     });
 
     it('return similar results given xml filepath', function(done) {
-        results = validator.validate(xmlPath, schematron);
+        results = validator.validate(xmlPath, schematron, { includeWarnings: true });
         expect(results).to.be.an('object');
         expect(results.errorCount).to.be.a('number');
         expect(results.warningCount).to.be.a('number');
@@ -103,7 +103,7 @@ describe('Validator should', function() {
     });
 
     it('return similar results given schematron filepath', function(done) {
-        results = validator.validate(xml, schematronPath);
+        results = validator.validate(xml, schematronPath, { includeWarnings: true });
         expect(results).to.be.an('object');
         expect(results.errorCount).to.be.a('number');
         expect(results.warningCount).to.be.a('number');
@@ -121,7 +121,7 @@ describe('Validator should', function() {
     });
 
     it('return similar results given xml filepath and schematron filepath', function(done) {
-        results = validator.validate(xmlPath, schematronPath);
+        results = validator.validate(xmlPath, schematronPath, { includeWarnings: true });
         expect(results).to.be.an('object');
         expect(results.errorCount).to.be.a('number');
         expect(results.warningCount).to.be.a('number');

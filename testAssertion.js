@@ -19,7 +19,8 @@ function testAssertion(test, selected, select, xmlDoc, resourceDir, xmlSnippetMa
                 xmlSnippet = xmlSnippet.slice(0, maxLength) + '...';
             }
             results.push({ result: result, line: lineNumber, path: getXPath(selected[i]), xml: xmlSnippet });
-        } catch (err) {
+        }
+        catch (err) {
             return { ignored: true, errorMessage: err.message };
         }
     }
@@ -51,13 +52,15 @@ function getXPath(node, path) {
         if (count === 1) {
             count = null;
         }
-    } else if (node.nextSibling) {
+    }
+    else if (node.nextSibling) {
         let sibling = node.nextSibling;
         do {
             if (sibling.nodeType === 1 && sibling.nodeName === node.nodeName) {
                 count = 1;
                 sibling = null;
-            } else {
+            }
+            else {
                 count = null;
                 sibling = sibling.previousSibling;
             }
