@@ -52,7 +52,7 @@ describe('Validator should', function() {
         expect(results.errorCount).to.be.equal(1);
     });
     it('return correct number of warnings', function() {
-        expect(results.warningCount).to.be.equal(37);
+        expect(results.warningCount).to.be.equal(6);
     });
     it('return correct number of ignored', function() {
         expect(results.ignoredCount).to.be.equal(0);
@@ -88,7 +88,7 @@ describe('Validator should', function() {
         expect(results.warningCount).to.be.equal(results.warnings.length);
         expect(results.ignoredCount).to.be.equal(results.ignored.length);
         expect(results.errorCount).to.be.equal(1);
-        expect(results.warningCount).to.be.equal(37);
+        expect(results.warningCount).to.be.equal(6);
         expect(results.ignoredCount).to.be.equal(0);
     });
     
@@ -105,7 +105,7 @@ describe('Validator should', function() {
         expect(results.warningCount).to.be.equal(results.warnings.length);
         expect(results.ignoredCount).to.be.equal(results.ignored.length);
         expect(results.errorCount).to.be.equal(1);
-        expect(results.warningCount).to.be.equal(37);
+        expect(results.warningCount).to.be.equal(6);
         expect(results.ignoredCount).to.be.equal(0);
     });
     
@@ -122,7 +122,7 @@ describe('Validator should', function() {
         expect(results.warningCount).to.be.equal(results.warnings.length);
         expect(results.ignoredCount).to.be.equal(results.ignored.length);
         expect(results.errorCount).to.be.equal(1);
-        expect(results.warningCount).to.be.equal(37);
+        expect(results.warningCount).to.be.equal(6);
         expect(results.ignoredCount).to.be.equal(0);
     });
 });
