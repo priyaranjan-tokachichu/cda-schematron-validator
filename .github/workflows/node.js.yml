@@ -13,6 +13,9 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}/test
 
     strategy:
       matrix:
@@ -22,8 +25,6 @@ jobs:
     steps:
     - name: Checkout cda-schematron-validator repo
       uses: actions/checkout@v3
-      with:
-        path: ./
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
