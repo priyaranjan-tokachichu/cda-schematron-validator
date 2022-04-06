@@ -1,9 +1,9 @@
 // jshint node:true
-module.exports = function (grunt) {
+module.exports = function(grunt) {
     grunt.initConfig({
-		jshint: {
+        jshint: {
             options: {
-                jshintrc: '.jshintrc',
+                jshintrc: '.jshintrc'
             },
             files: {
                 src: ['*.js']},
@@ -13,19 +13,15 @@ module.exports = function (grunt) {
         },
         mochaTest: {
             api: {
+                src: ['test/*test*.js'],
                 options: {
                     reporter: 'spec'
-                },
-                src: ['test/tests.js']
+                }
             }
         }
     });
-
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-mocha-test');
-    
     grunt.registerTask('default', ['jshint', 'mochaTest']);
     grunt.registerTask('api', ['mochaTest']);
-
 };
-

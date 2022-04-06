@@ -3,28 +3,27 @@
 module.exports = testAssertion;
 
 function testAssertion(test, selected, select, xmlDoc, resourceDir, xmlSnippetMaxLength) {
-    let results = [];
-    
+    const results = [];
+
     for (let i = 0; i < selected.length; i++) {
         try {
-            let result = select('boolean(' + test + ')', selected[i]);
+            const result = select('boolean(' + test + ')', selected[i]);
             let lineNumber = null;
             let xmlSnippet = null;
             if (selected[i].lineNumber) {
                 lineNumber = selected[i].lineNumber;
                 xmlSnippet = selected[i].toString();
             }
-            let maxLength = (xmlSnippetMaxLength || 1e308);
+            const maxLength = (xmlSnippetMaxLength || 1e308);
             if (xmlSnippet && xmlSnippet.length > maxLength) {
                 xmlSnippet = xmlSnippet.slice(0, maxLength) + '...';
             }
             results.push({ result: result, line: lineNumber, path: getXPath(selected[i]), xml: xmlSnippet });
-        }
-        catch (err) {
+        } catch (err) {
             return { ignored: true, errorMessage: err.message };
         }
     }
-    
+
     for (let i = 0; i < results.length; i++) {
         if (results[i].result !== true && results[i].result !== false) {
             return { ignored: true, errorMessage: 'Test returned non-boolean result' };
@@ -33,8 +32,8 @@ function testAssertion(test, selected, select, xmlDoc, resourceDir, xmlSnippetMa
     return results;
 }
 
-function getXPath(node, path) {    
-    let top = !path ? true : false;
+function getXPath(node, path) {
+    const top = !path ? true : false;
     path = path || [];
     if (node.parentNode) {
         path = getXPath(node.parentNode, path);
@@ -52,8 +51,7 @@ function getXPath(node, path) {
         if (count === 1) {
             count = null;
         }
-    }
-    else if (node.nextSibling) {
+    } else if (node.nextSibling) {
         let sibling = node.nextSibling;
         do {
             if (sibling.nodeType === 1 && sibling.nodeName === node.nodeName) {
