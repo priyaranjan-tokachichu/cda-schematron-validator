@@ -26,24 +26,130 @@ function clearCache() {
     parsedMap = Object.create({});
     contextMap = Object.create({});
 }
-function checkIfFileOrPath(givenString) {
-    // If not valid xml, it might be a filepath
-    // Adding explicit check to make it clear
-    if (!givenString) {
-        return new Error('No data found in the xml or schematron');
-    }
-    if (givenString.trim().indexOf('<') === -1) {
-        try {
-            givenString = fs.readFileSync(givenString, 'utf-8').toString();
+
+let namespaceMap;
+let patternRuleMap;
+let ruleAssertionMap;
+let xpathSelect;
+let resourceDir;
+let xmlSnippetMaxLength;
+let xmlDoc;
+let schematronMap;
+let errors;
+let warnings;
+let ignored;
+let assertionInfo;
+
+/**
+ * @method validate The entry method called to validate an xml with schematron. Calls `initializeProcess` and `processRules` methods, and gets the results
+ * @param {string} xml string content of an xml file or path to an xml file
+ * @param {string} schematron string content of a schematron file or path to a schematron file
+ * @param {object} options object that takes parameters
+ * `resourceDir`: Where additional documents with added rules such as value set restrictions are present. Default value is the same directory of the code being executed './'.,
+ * `xmlSnippetMaxLength`: Restrict the length of the xpath mapped xml snippet when returning the error/warning data to the user. Default value is 200 characters.,
+ * `includeWarnings`: User can choose to look for warnings and include them in the report. The default value is false.,
+ * `parsedSchematronMap`: User can choose to supply the schematron map instead of a schematron file avoiding the parsing of the schematron file for multiple xml files or check for cache.
+ * @returns Calls `getReturnObject` and gets the results (errors, warning, and ignored) as javascript objects
+ */
+
+function validate(xml, schematron, options = {}) {
+    initializeProcess(xml, schematron, options);
+    for (const patternId in patternRuleMap) {
+        if (!patternRuleMap.hasOwnProperty(patternId)) {
+            continue;
         }
-        catch (err) {
-            // If no valid xml found, inform user, and return immediately
-            console.log('No valid xml or schematron could be found');
-            return err;
-        }
+        assertionInfo.patternId = patternId;
+        const rules = patternRuleMap[patternId];
+        processRules(rules, assertionInfo, options);
     }
-    return givenString;
+    return getReturnObject(assertionInfo);
 }
+
+/**
+ * @method validateAsync The entry method called to validate an xml with schematron. Calls `initializeProcess` and `processRulesAsync` methods, and gets the results.
+ * This is similar to `validate` method except that it uses asynchronous `processRulesAsync` method.
+ * @param {string} xml string content of an xml file or path to an xml file
+ * @param {string} schematron string content of a schematron file or path to a schematron file
+ * @param {object} options object that takes parameters
+ * `resourceDir`: Where additional documents with added rules such as value set restrictions are present. Default value is the same directory of the code being executed './'.,
+ * `xmlSnippetMaxLength`: Restrict the length of the xpath mapped xml snippet when returning the error/warning data to the user. Default value is 200 characters.,
+ * `includeWarnings`: User can choose to look for warnings and include them in the report. The default value is false.,
+ * `parsedSchematronMap`: User can choose to supply the schematron map instead of a schematron file avoiding the parsing of the schematron file for multiple xml files or check for cache.
+ * @returns Calls `getReturnObject` and gets the results (errors, warning, and ignored) as javascript objects
+ */
+
+async function validateAsync(xml, schematron, options = {}) {
+    initializeProcess(xml, schematron, options);
+    for (const patternId in patternRuleMap) {
+        if (!patternRuleMap.hasOwnProperty(patternId)) {
+            continue;
+        }
+        assertionInfo.patternId = patternId;
+        const rules = patternRuleMap[patternId];
+        await processRulesAsync(rules, assertionInfo, options);
+    }
+    return getReturnObject(assertionInfo);
+}
+
+/**
+ * @method initializeProcess Checks the validity of the supplied xml and schematron, and sets some global variables used across functions in this script.
+ * This calls the `getSchematronMap` and assigns the value to schematronMap variable.
+ * @param {string} xml string content of an xml file or path to an xml file
+ * @param {string} schematron string content of a schematron file or path to a schematron file
+ * @param {object} options object that takes parameters as seen in the `validate` method
+ * @returns Sets the following variables with file scope
+ * xml, schematron, xmlDoc,
+ * schematronMap, namespaceMap,
+ * patternRuleMap, ruleAssertionMap,
+ * resourceDir, xmlSnippetMaxLength,
+ * xpathSelect, errors, warnings,
+ * ignored, and assertionInfo
+ */
+
+function initializeProcess(xml, schematron, options) {
+    try {
+        xml = checkIfFileOrPath(xml);
+        schematron = checkIfFileOrPath(schematron);
+    }
+    catch (err) {
+        return err;
+    }
+    // Load xml doc
+    xmlDoc = new Dom().parseFromString(xml);
+    // Allowing users to send a parsed schematron map if testing multiple xml files with the same schematron
+    schematronMap = getSchematronMap(schematron, options);
+    // Extract data from parsed schematron object
+    namespaceMap = schematronMap.namespaceMap;
+    patternRuleMap = schematronMap.patternRuleMap;
+    ruleAssertionMap = schematronMap.ruleAssertionMap;
+    resourceDir = './';
+    xmlSnippetMaxLength = 200;
+    if (_get(options, 'resourceDir')) {
+        resourceDir = _get(options, 'resourceDir');
+    }
+    if (_get(options, 'xmlSnippetMaxLength')) {
+        xmlSnippetMaxLength = _get(options, 'xmlSnippetMaxLength');
+    }
+    // Create selector object, initialized with namespaces
+    // Avoid using 'select' as a variable name as it is overused
+    xpathSelect = xpath.useNamespaces(namespaceMap);
+    errors = [];
+    warnings = [];
+    ignored = [];
+    assertionInfo = {
+        errors,
+        warnings,
+        ignored
+    };
+}
+
+/**
+ * @method getSchematronMap A method to get the schematron map from the provided schematron or utilize the data from cache or options object
+ * @param {string} schematron String data of schematron
+ * @param {object} options options object passed to `validate` or `validateAsync` method
+ * @returns {object} parsed schemtaron map object
+ */
+
 function getSchematronMap(schematron, options = {}) {
     if (_get(options, 'parsedSchematronMap')) {
         return _get(options, 'parsedSchematronMap');
@@ -62,6 +168,96 @@ function getSchematronMap(schematron, options = {}) {
     parsedMap[hash] = parseSchematron(schematronDoc, options);
     return parsedMap[hash];
 }
+
+/**
+ * @method checkIfFileOrPath Checks if a given xml string is xml content or file path to the xml, and extracts the content and
+ * assigns it back to the variable. If no data could be found or there is an issue to access the file, an error will be returned.
+ * @param {string} givenString xml string or a path to the xml file (the xml can be an xml file or schematron file which is basically an xml)
+ * @returns If it is a valid xml, returns it. If it is a file path, extracts the content and returns it. Otherwise throws appropriate error.
+ */
+
+function checkIfFileOrPath(givenString) {
+    // If not valid xml, it might be a filepath
+    // Adding explicit check to make it clear
+    if (!givenString) {
+        return new Error('No data found in the xml or schematron');
+    }
+    if (givenString.trim().indexOf('<') === -1) {
+        try {
+            givenString = fs.readFileSync(givenString, 'utf-8').toString();
+        }
+        catch (err) {
+            // If no valid xml found, inform user, and return immediately
+            console.log('No valid xml or schematron could be found');
+            return err;
+        }
+    }
+    return givenString;
+}
+
+/**
+ * @method processRules Entry method to start processing schematron rules. Calls methods `getFailedAssertions` and `processFailedAssertions`
+ * @param {Array} rules Array of ruleIds
+ * @param {object} assertionInfo Capturing the information of the rule to pass it on to reporting object
+ * @param {object} options Passing on the options object passed to the `validate` or `validateAsync` methods
+ */
+
+function processRules(rules, assertionInfo, options) {
+    for (let index = 0; index < rules.length; index++) {
+        const ruleId = rules[index];
+        const failedAssertions = getFailedAssertions(ruleId, options);
+        if (failedAssertions) {
+            processFailedAssertions(failedAssertions, assertionInfo);
+        }
+    }
+}
+
+/**
+ * @method processRulesAsync Entry method to start processing schematron rules. Calls methods `getFailedAssertions` and `processFailedAssertions`
+ * This method is same as `processRules` except that this is an Async method wrapping a promise, and returning the promise
+ * @param {Array} rules Array of ruleIds
+ * @param {object} assertionInfo Capturing the information of the rule to pass it on to reporting object
+ * @param {object} options Passing on the options object passed to the `validate` or `validateAsync` methods
+ */
+
+async function processRulesAsync(rules, assertionInfo, options) {
+    const rulesProcessed = new Promise((resolve, reject) => {
+        try {
+            for (let index = 0; index < rules.length; index++) {
+                const ruleId = rules[index];
+                const failedAssertions = getFailedAssertions(ruleId, options);
+                resolve (failedAssertions);
+                if (failedAssertions) {
+                    processFailedAssertions(failedAssertions, assertionInfo);
+                }
+            }
+        }
+        catch (promiseError) {
+            reject (new Error (`Promise Error: ${promiseError}`));
+        }
+    });
+    return rulesProcessed;
+}
+
+/**
+ * @method getReturnObject Simple method to avoid redundancy of result object representation
+ * @param {object} assertionInfo carrying the arrays errors, warnings and ignored
+ * @returns result object with information about overall errors, warnings and ignored
+ */
+
+function getReturnObject(assertionInfo) {
+    const { errors, warnings, ignored } = assertionInfo;
+    const result = {
+        errorCount: errors.length,
+        warningCount: warnings.length,
+        ignoredCount: ignored.length,
+        errors: errors,
+        warnings: warnings,
+        ignored: ignored
+    };
+    return result;
+}
+
 function getErrorsAndWarnings(assertionObject, assertionInfo) {
     const { type, assertionId, test, simplifiedTest, description, results } = assertionObject;
     const { patternId, ruleId, context, errors, warnings } = assertionInfo;
@@ -136,118 +332,26 @@ function getFailedAssertions(ruleId, options) {
     }
     return failedAssertions;
 }
-function processRules(rules, assertionInfo, options) {
-    for (let index = 0; index < rules.length; index++) {
-        const ruleId = rules[index];
-        const failedAssertions = getFailedAssertions(ruleId, options);
-        if (failedAssertions) {
-            processFailedAssertions(failedAssertions, assertionInfo);
+
+// Take the checkRule function out of validate function, and pass on the variable needed as parameters and options
+function checkRule(context, assertionsAndExtensions, options) {
+    // Context cache
+    const failedAssertions = [];
+    // Determine the sections within context, load selected section from cache if possible
+    const selectedXml = getSelectXmlChunk(context);
+    for (let i = 0; i < assertionsAndExtensions.length; i++) {
+        const assertionAndExtensionObject = assertionsAndExtensions[i];
+        if (assertionAndExtensionObject.type === 'assertion') {
+            processAssertions(assertionAndExtensionObject, selectedXml, failedAssertions, options);
+        }
+        else {
+            const failedSubAssertions = processExtension(assertionAndExtensionObject, context, options);
+            failedAssertions.push(...failedSubAssertions);
         }
     }
-}
-async function processRulesAsync(rules, assertionInfo, options) {
-    const rulesProcessed = new Promise((resolve, reject) => {
-        try {
-            for (let index = 0; index < rules.length; index++) {
-                const ruleId = rules[index];
-                const failedAssertions = getFailedAssertions(ruleId, options);
-                resolve (failedAssertions);
-                if (failedAssertions) {
-                    processFailedAssertions(failedAssertions, assertionInfo);
-                }
-            }
-        }
-        catch (promiseError) {
-            reject (new Error (`Promise Error: ${promiseError}`));
-        }
-    });
-    return rulesProcessed;
-}
-function getReturnObject(assertionInfo) {
-    const { errors, warnings, ignored } = assertionInfo;
-    const result = {
-        errorCount: errors.length,
-        warningCount: warnings.length,
-        ignoredCount: ignored.length,
-        errors: errors,
-        warnings: warnings,
-        ignored: ignored
-    };
-    return result;
-}
-let namespaceMap;
-let patternRuleMap;
-let ruleAssertionMap;
-let xpathSelect;
-let resourceDir;
-let xmlSnippetMaxLength;
-let xmlDoc;
-let schematronMap;
-let errors;
-let warnings;
-let ignored;
-let assertionInfo;
-function initializeProcess(xml, schematron, options) {
-    try {
-        xml = checkIfFileOrPath(xml);
-        schematron = checkIfFileOrPath(schematron);
-    }
-    catch (err) {
-        return err;
-    }
-    // Load xml doc
-    xmlDoc = new Dom().parseFromString(xml);
-    // Allowing users to send a parsed schematron map if testing multiple xml files with the same schematron
-    schematronMap = getSchematronMap(schematron, options);
-    // Extract data from parsed schematron object
-    namespaceMap = schematronMap.namespaceMap;
-    patternRuleMap = schematronMap.patternRuleMap;
-    ruleAssertionMap = schematronMap.ruleAssertionMap;
-    resourceDir = './';
-    xmlSnippetMaxLength = 200;
-    if (_get(options, 'resourceDir')) {
-        resourceDir = _get(options, 'resourceDir');
-    }
-    if (_get(options, 'xmlSnippetMaxLength')) {
-        xmlSnippetMaxLength = _get(options, 'xmlSnippetMaxLength');
-    }
-    // Create selector object, initialized with namespaces
-    // Avoid using 'select' as a variable name as it is overused
-    xpathSelect = xpath.useNamespaces(namespaceMap);
-    errors = [];
-    warnings = [];
-    ignored = [];
-    assertionInfo = {
-        errors,
-        warnings,
-        ignored
-    };
-}
-function validate(xml, schematron, options = {}) {
-    initializeProcess(xml, schematron, options);
-    for (const patternId in patternRuleMap) {
-        if (!patternRuleMap.hasOwnProperty(patternId)) {
-            continue;
-        }
-        assertionInfo.patternId = patternId;
-        const rules = patternRuleMap[patternId];
-        processRules(rules, assertionInfo, options);
-    }
-    return getReturnObject(assertionInfo);
+    return failedAssertions;
 }
 
-async function validateAsync(xml, schematron, options = {}) {
-    initializeProcess(xml, schematron, options);
-    for (const patternId in patternRuleMap) {
-        if (!patternRuleMap.hasOwnProperty(patternId)) {
-            continue;
-        }
-        assertionInfo.patternId = patternId;
-        const rules = patternRuleMap[patternId];
-        await processRulesAsync(rules, assertionInfo, options);
-    }
-    return getReturnObject(assertionInfo);
-}
 function getSelectXmlChunk(context) {
     // Determine the sections within context, load selected section from cache if possible
     let selectedXml = contextMap[context];
@@ -312,24 +416,6 @@ function processAssertions(assertionAndExtensionObject, selectedXml, failedAsser
         const assertionObject = getAssertionObject(level, id, originalTest, simplifiedTest, description);
         assertionObject.results = { ignored: true, errorMessage: err.message };
         failedAssertions.push(assertionObject);
-    }
-    return failedAssertions;
-}
-// Take the checkRule function out of validate function, and pass on the variable needed as parameters and options
-function checkRule(context, assertionsAndExtensions, options) {
-    // Context cache
-    const failedAssertions = [];
-    // Determine the sections within context, load selected section from cache if possible
-    const selectedXml = getSelectXmlChunk(context);
-    for (let i = 0; i < assertionsAndExtensions.length; i++) {
-        const assertionAndExtensionObject = assertionsAndExtensions[i];
-        if (assertionAndExtensionObject.type === 'assertion') {
-            processAssertions(assertionAndExtensionObject, selectedXml, failedAssertions, options);
-        }
-        else {
-            const failedSubAssertions = processExtension(assertionAndExtensionObject, context, options);
-            failedAssertions.push(...failedSubAssertions);
-        }
     }
     return failedAssertions;
 }
