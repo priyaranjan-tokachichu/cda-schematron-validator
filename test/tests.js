@@ -2,12 +2,11 @@ const fs = require('fs');
 const expect = require('chai').expect;
 
 const validator = require('../validator');
-
+const path = require('path');
 // Which xml file to test
-const xmlPath = './test/test.xml';
+const xmlPath = path.resolve(__dirname, './test.xml');
 // Which schematron to test against
-const schematronPath = './test/test.sch';
-
+const schematronPath = path.resolve(__dirname, './test.sch');
 const xml = fs.readFileSync(xmlPath, 'utf-8').toString();
 const schematron = fs.readFileSync(schematronPath, 'utf-8').toString();
 
