@@ -1,19 +1,20 @@
 // jshint node:true
+const path = require('path');
 module.exports = function(grunt) {
     grunt.initConfig({
         jshint: {
             options: {
-                jshintrc: '.jshintrc'
+                jshintrc: path.resolve(__dirname, '.jshintrc')
             },
             files: {
-                src: ['*.js']},
+                src: [path.resolve(__dirname, '*.js')]},
             gruntfile: {
-                src: 'Gruntfile.js'
+                src: path.resolve(__dirname, 'Gruntfile.js')
             }
         },
         mochaTest: {
             api: {
-                src: ['test/*test*.js'],
+                src: [path.resolve(__dirname, 'test/*test*.js')],
                 options: {
                     reporter: 'spec'
                 }
