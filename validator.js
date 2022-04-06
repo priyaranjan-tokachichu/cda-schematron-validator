@@ -26,436 +26,310 @@ function clearCache() {
     parsedMap = Object.create({});
     contextMap = Object.create({});
 }
-let namespaceMap;
-let patternRuleMap;
-let ruleAssertionMap;
-let xpathSelect;
-function validate(xml, schematron, options = {}) {
+function checkIfFileOrPath(givenString) {
     // If not valid xml, it might be a filepath
     // Adding explicit check to make it clear
-    if (xml.trim().indexOf('<') === -1) {
+    if (!givenString) {
+        return new Error('No data found in the xml or schematron');
+    }
+    if (givenString.trim().indexOf('<') === -1) {
         try {
-            xml = fs.readFileSync(xml, 'utf-8').toString();
+            givenString = fs.readFileSync(givenString, 'utf-8').toString();
         }
         catch (err) {
             // If no valid xml found, inform user, and return immediately
-            console.log('No valid xml could be found');
-            return;
+            console.log('No valid xml or schematron could be found');
+            return err;
         }
     }
-
-    let schematronMap;
-    // Load xml doc
-    const xmlDoc = new Dom().parseFromString(xml);
-    // Allowing users to send a parsed schematron map if testing multiple xml files with the same schematron
-    if (options.parsedSchematronMap) {
-        schematronMap = options.parsedSchematronMap;
-    }
-    else {
-        // If not valid schematron (xml), it might be a filepath
-        // Adding explicit check to make it clear
-        if (schematron.trim().indexOf('<') === -1) {
-            try {
-                schematron = fs.readFileSync(schematron, 'utf-8').toString();
-            }
-            catch (err) {
-                // If no valid schematron found, inform user, and return immediately
-                console.log('No valid schematron could be found');
-                return;
-            }
-        }
-        const hash = crypto
-            .createHash('md5')
-            .update(schematron)
-            .digest('hex');
-        schematronMap = parsedMap[hash];
-        // If not in cache
-        if (!schematronMap) {
-            // Load schematron doc
-            const schematronDoc = new Dom().parseFromString(schematron);
-
-            // Parse schematron
-            schematronMap = parseSchematron(schematronDoc, options);
-
-            // Cache parsed schematron
-            parsedMap[hash] = schematronMap;
-        }
-    }
-    // Extract data from parsed schematron object
-    namespaceMap = schematronMap.namespaceMap;
-    patternRuleMap = schematronMap.patternRuleMap;
-    ruleAssertionMap = schematronMap.ruleAssertionMap;
-
-    // Create selector object, initialized with namespaces
-    // Avoid using 'select' as a variable name as it is overused
-    xpathSelect = xpath.useNamespaces(namespaceMap);
-
-    const errors = [];
-    const warnings = [];
-    const ignored = [];
-    for (const patternId in patternRuleMap) {
-        if (!patternRuleMap.hasOwnProperty(patternId)) {
-            continue;
-        }
-        const rules = patternRuleMap[patternId];
-        for (let i = 0; i < rules.length; i++) {
-            const ruleId = rules[i];
-            const ruleObject = ruleAssertionMap[ruleId];
-            if (_get(ruleObject, 'abstract')) {
-                continue;
-            }
-            const context = _get(ruleObject, 'context');
-            const assertionsAndExtensions = _get(ruleObject, 'assertionsAndExtensions') || [];
-            const failedAssertions = checkRule(xmlDoc, context, assertionsAndExtensions, options);
-            for (let j = 0; j < failedAssertions.length; j++) {
-                const assertionObject = failedAssertions[j];
-                const { type, assertionId, test, simplifiedTest, description, errorMessage, results } = assertionObject;
-                if (Array.isArray(results)) {
-                    for (let k = 0; k < results.length; k++) {
-                        const resultObject = results[k];
-                        const { result, line, path, xml } = resultObject;
-                        if (!result) {
-                            const obj = {
-                                type: type,
-                                test: test,
-                                simplifiedTest: simplifiedTest,
-                                description: description,
-                                line: line,
-                                path: path,
-                                patternId: patternId,
-                                ruleId: ruleId,
-                                assertionId: assertionId,
-                                context: context,
-                                xml: xml
-                            };
-                            if (type === 'error') {
-                                errors.push(obj);
-                            }
-                            else {
-                                warnings.push(obj);
-                            }
-                        }
-                    }
-                }
-                else if (results.ignored) {
-                    const obj = {
-                        errorMessage: errorMessage,
-                        type: type,
-                        test: test,
-                        simplifiedTest: simplifiedTest,
-                        description: description,
-                        patternId: patternId,
-                        ruleId: ruleId,
-                        assertionId: assertionId,
-                        context: context
-                    };
-                    ignored.push(obj);
-                }
-            }
-        }
-    }
-
-    return {
-        errorCount: errors.length,
-        warningCount: warnings.length,
-        ignoredCount: ignored.length,
-        errors: errors,
-        warnings: warnings,
-        ignored: ignored
-    };
+    return givenString;
 }
-
-// Take the checkRule function out of validate function, and pass on the variable needed as parameters and options
-function checkRule(xmlDoc, originalContext, assertionsAndExtensions, options) {
-    // Context cache
-    const resourceDir = options.resourceDir || './';
-    const xmlSnippetMaxLength = options.xmlSnippetMaxLength === undefined ? 200 : options.xmlSnippetMaxLength;
-    const failedAssertions = [];
-    const context = options.contextOverride || originalContext;
-    // Determine the sections within context, load selected section from cache if possible
-    let selected = contextMap[context];
-    let contextModified = context;
-    if (!selected) {
-        if (context) {
-            if (context.indexOf('/')) {
-                contextModified = '//' + context;
-            }
-            selected = xpathSelect(contextModified, xmlDoc);
-        }
-        else {
-            selected = [xmlDoc];
-        }
-        contextMap[context] = selected;
+function getSchematronMap(schematron, options = {}) {
+    if (_get(options, 'parsedSchematronMap')) {
+        return _get(options, 'parsedSchematronMap');
     }
-
-    for (let i = 0; i < assertionsAndExtensions.length; i++) {
-        const assertionAndExtensionObject = assertionsAndExtensions[i];
-        if (assertionAndExtensionObject.type === 'assertion') {
-            let { level, test, id, description } = assertionAndExtensionObject;
-            // Extract values from external document and modify test if a document call is made
-            const originalTest = test;
-            let simplifiedTest = null;
-            try {
-                test = includeExternalDocument(test, resourceDir);
+    const hash = crypto
+        .createHash('md5')
+        .update(schematron)
+        .digest('hex');
+    if (parsedMap[hash]) {
+        return parsedMap[hash];
+    }
+    // If not in cache
+    // Load schematron doc
+    const schematronDoc = new Dom().parseFromString(schematron);
+    // Parse schematron
+    parsedMap[hash] = parseSchematron(schematronDoc, options);
+    return parsedMap[hash];
+}
+function getErrorsAndWarnings(assertionObject, assertionInfo) {
+    const { type, assertionId, test, simplifiedTest, description, results } = assertionObject;
+    const { patternId, ruleId, context, errors, warnings } = assertionInfo;
+    for (let index = 0; index < results.length; index++) {
+        const resultObject = results[index];
+        const { result, line, path, xml } = resultObject;
+        // If the xpath did not return a result (result=false), then there should be
+        // and error or warning
+        if (!result) {
+            const obj = {
+                type,
+                test,
+                simplifiedTest,
+                description,
+                line,
+                path,
+                patternId,
+                ruleId,
+                assertionId,
+                context,
+                xml
+            };
+            if (type === 'error') {
+                errors.push(obj);
             }
-            catch (err) {
-                failedAssertions.push({
-                    type: level,
-                    assertionId: id,
-                    test: originalTest,
-                    simplifiedTest: simplifiedTest,
-                    description: description,
-                    results: { ignored: true, errorMessage: err.message }
-                });
-                continue;
-            }
-            if (originalTest !== test) {
-                simplifiedTest = test;
-            }
-            if (level === 'error' || _get(options, 'includeWarnings')) {
-                failedAssertions.push({
-                    type: level,
-                    assertionId: id,
-                    test: originalTest,
-                    simplifiedTest: simplifiedTest,
-                    description: description,
-                    results: testAssertion(test, selected, xpathSelect, xmlDoc, resourceDir, xmlSnippetMaxLength)
-                });
+            else {
+                warnings.push(obj);
             }
         }
-        else {
-            const extensionRule = assertionAndExtensionObject.rule;
-            if (!extensionRule) {
-                continue;
-            }
-            const newRuleObject = ruleAssertionMap[extensionRule];
-            const subAssertionsAndExtensions = newRuleObject ? newRuleObject.assertionsAndExtensions : null;
-            if (!subAssertionsAndExtensions) {
-                continue;
-            }
-            const failedSubAssertions = checkRule(xmlDoc, context, subAssertionsAndExtensions, options);
-            failedAssertions.push(...failedSubAssertions);
-        }
+    }
+}
+function getIgnored(assertionObject, assertionInfo) {
+    const { type, assertionId, test, simplifiedTest, description, errorMessage } = assertionObject;
+    const { patternId, ruleId, context, ignored } = assertionInfo;
+    const obj = {
+        errorMessage,
+        type,
+        test,
+        simplifiedTest,
+        description,
+        patternId,
+        ruleId,
+        assertionId,
+        context
+    };
+    ignored.push(obj);
+}
+function getResults(assertionObject, assertionInfo) {
+    const { results } = assertionObject;
+    if (Array.isArray(results)) {
+        getErrorsAndWarnings(assertionObject, assertionInfo);
+    }
+    else if (results.ignored) {
+        getIgnored(assertionObject, assertionInfo);
+    }
+}
+function processFailedAssertions(failedAssertions, assertionInfo) {
+    for (let index = 0; index < failedAssertions.length; index++) {
+        const assertionObject = failedAssertions[index];
+        getResults(assertionObject, assertionInfo);
+    }
+}
+function getFailedAssertions(ruleId, options) {
+    let failedAssertions;
+    assertionInfo.ruleId = ruleId;
+    const ruleObject = ruleAssertionMap[ruleId];
+    if (!_get(ruleObject, 'abstract')) {
+        const context = _get(ruleObject, 'context');
+        assertionInfo.context = context;
+        const assertionsAndExtensions = _get(ruleObject, 'assertionsAndExtensions') || [];
+        failedAssertions = checkRule(context, assertionsAndExtensions, options);
     }
     return failedAssertions;
 }
-
-async function validateAsync(xml, schematron, options = {}) {
-    // If not valid xml, it might be a filepath
-    // Adding explicit check to make it clear
-    if (xml.trim().indexOf('<') === -1) {
-        try {
-            xml = fs.readFileSync(xml, 'utf-8').toString();
-        }
-        catch (err) {
-            // If no valid xml found, inform user, and return immediately
-            console.log('No valid xml could be found');
-            return;
+function processRules(rules, assertionInfo, options) {
+    for (let index = 0; index < rules.length; index++) {
+        const ruleId = rules[index];
+        const failedAssertions = getFailedAssertions(ruleId, options);
+        if (failedAssertions) {
+            processFailedAssertions(failedAssertions, assertionInfo);
         }
     }
-
-    let schematronMap;
-    // Load xml doc
-    const xmlDoc = new Dom().parseFromString(xml);
-    // Allowing users to send a parsed schematron map if testing multiple xml files with the same schematron
-    if (options.parsedSchematronMap) {
-        schematronMap = options.parsedSchematronMap;
-    }
-    else {
-        // If not valid schematron (xml), it might be a filepath
-        // Adding explicit check to make it clear
-        if (schematron.trim().indexOf('<') === -1) {
-            try {
-                schematron = fs.readFileSync(schematron, 'utf-8').toString();
-            }
-            catch (err) {
-                // If no valid schematron found, inform user, and return immediately
-                console.log('No valid schematron could be found');
-                return;
-            }
-        }
-        const hash = crypto
-            .createHash('md5')
-            .update(schematron)
-            .digest('hex');
-        schematronMap = parsedMap[hash];
-        // If not in cache
-        if (!schematronMap) {
-            // Load schematron doc
-            const schematronDoc = new Dom().parseFromString(schematron);
-
-            // Parse schematron
-            schematronMap = parseSchematron(schematronDoc, options);
-
-            // Cache parsed schematron
-            parsedMap[hash] = schematronMap;
-        }
-    }
-
-    // Extract data from parsed schematron object
-    namespaceMap = schematronMap.namespaceMap;
-    patternRuleMap = schematronMap.patternRuleMap;
-    ruleAssertionMap = schematronMap.ruleAssertionMap;
-
-    // Create selector object, initialized with namespaces
-    // Avoid using 'select' as a variable name as it is overused
-    xpathSelect = xpath.useNamespaces(namespaceMap);
-
-    const errors = [];
-    const warnings = [];
-    const ignored = [];
-    for (const patternId in patternRuleMap) {
-        if (!patternRuleMap.hasOwnProperty(patternId)) {
-            continue;
-        }
-        const rules = patternRuleMap[patternId];
-        for (let i = 0; i < rules.length; i++) {
-            const ruleId = rules[i];
-            const ruleObject = ruleAssertionMap[ruleId];
-            if (_get(ruleObject, 'abstract')) {
-                continue;
-            }
-            const context = _get(ruleObject, 'context');
-            const assertionsAndExtensions = _get(ruleObject, 'assertionsAndExtensions') || [];
-            const failedAssertions = await checkRulePromise(xmlDoc, context, assertionsAndExtensions, options);
-            for (let j = 0; j < failedAssertions.length; j++) {
-                const assertionObject = failedAssertions[j];
-                const { type, assertionId, test, simplifiedTest, description, errorMessage, results } = assertionObject;
-                if (Array.isArray(results)) {
-                    for (let k = 0; k < results.length; k++) {
-                        const resultObject = results[k];
-                        const { result, line, path, xml } = resultObject;
-                        if (!result) {
-                            const obj = {
-                                type: type,
-                                test: test,
-                                simplifiedTest: simplifiedTest,
-                                description: description,
-                                line: line,
-                                path: path,
-                                patternId: patternId,
-                                ruleId: ruleId,
-                                assertionId: assertionId,
-                                context: context,
-                                xml: xml
-                            };
-                            if (type === 'error') {
-                                errors.push(obj);
-                            }
-                            else {
-                                warnings.push(obj);
-                            }
-                        }
-                    }
-                }
-                else if (results.ignored) {
-                    const obj = {
-                        errorMessage: errorMessage,
-                        type: type,
-                        test: test,
-                        simplifiedTest: simplifiedTest,
-                        description: description,
-                        patternId: patternId,
-                        ruleId: ruleId,
-                        assertionId: assertionId,
-                        context: context
-                    };
-                    ignored.push(obj);
-                }
-            }
-        }
-    }
-
-    return {
-        errorCount: errors.length,
-        warningCount: warnings.length,
-        ignoredCount: ignored.length,
-        errors: errors,
-        warnings: warnings,
-        ignored: ignored
-    };
 }
-
-// Take the checkRule function out of validate function, and pass on the variable needed as parameters and options
-function checkRulePromise(xmlDoc, originalContext, assertionsAndExtensions, options) {
-    // Context cache
-    const resultCapture = new Promise((resolve, reject) => {
+async function processRulesAsync(rules, assertionInfo, options) {
+    const rulesProcessed = new Promise((resolve, reject) => {
         try {
-            // Context cache
-            const resourceDir = options.resourceDir || './';
-            const xmlSnippetMaxLength = options.xmlSnippetMaxLength === undefined ? 200 : options.xmlSnippetMaxLength;
-            const failedAssertions = [];
-            const context = options.contextOverride || originalContext;
-            // Determine the sections within context, load selected section from cache if possible
-            let selected = contextMap[context];
-            let contextModified = context;
-            if (!selected) {
-                if (context) {
-                    if (context.indexOf('/')) {
-                        contextModified = '//' + context;
-                    }
-                    selected = xpathSelect(contextModified, xmlDoc);
-                }
-                else {
-                    selected = [xmlDoc];
-                }
-                contextMap[context] = selected;
-            }
-
-            for (let i = 0; i < assertionsAndExtensions.length; i++) {
-                const assertionAndExtensionObject = assertionsAndExtensions[i];
-                if (assertionAndExtensionObject.type === 'assertion') {
-                    let { level, test, id, description } = assertionAndExtensionObject;
-                    // Extract values from external document and modify test if a document call is made
-                    const originalTest = test;
-                    let simplifiedTest = null;
-                    try {
-                        test = includeExternalDocument(test, resourceDir);
-                    }
-                    catch (err) {
-                        failedAssertions.push({
-                            type: level,
-                            assertionId: id,
-                            test: originalTest,
-                            simplifiedTest: simplifiedTest,
-                            description: description,
-                            results: { ignored: true, errorMessage: err.message }
-                        });
-                        continue;
-                    }
-                    if (originalTest !== test) {
-                        simplifiedTest = test;
-                    }
-                    if (level === 'error' || _get(options, 'includeWarnings')) {
-                        failedAssertions.push({
-                            type: level,
-                            assertionId: id,
-                            test: originalTest,
-                            simplifiedTest: simplifiedTest,
-                            description: description,
-                            results: testAssertion(test, selected, xpathSelect, xmlDoc, resourceDir, xmlSnippetMaxLength)
-                        });
-                    }
-                }
-                else {
-                    const extensionRule = assertionAndExtensionObject.rule;
-                    if (!extensionRule) {
-                        continue;
-                    }
-                    const newRuleObject = ruleAssertionMap[extensionRule];
-                    const subAssertionsAndExtensions = newRuleObject ? newRuleObject.assertionsAndExtensions : null;
-                    if (!subAssertionsAndExtensions) {
-                        continue;
-                    }
-                    const failedSubAssertions = checkRule(xmlDoc, context, subAssertionsAndExtensions, options);
-                    failedAssertions.push(...failedSubAssertions);
+            for (let index = 0; index < rules.length; index++) {
+                const ruleId = rules[index];
+                const failedAssertions = getFailedAssertions(ruleId, options);
+                resolve (failedAssertions);
+                if (failedAssertions) {
+                    processFailedAssertions(failedAssertions, assertionInfo);
                 }
             }
-            resolve (failedAssertions);
         }
         catch (promiseError) {
             reject (new Error (`Promise Error: ${promiseError}`));
         }
     });
-    return resultCapture;
+    return rulesProcessed;
+}
+function getReturnObject(assertionInfo) {
+    const { errors, warnings, ignored } = assertionInfo;
+    const result = {
+        errorCount: errors.length,
+        warningCount: warnings.length,
+        ignoredCount: ignored.length,
+        errors: errors,
+        warnings: warnings,
+        ignored: ignored
+    };
+    return result;
+}
+let namespaceMap;
+let patternRuleMap;
+let ruleAssertionMap;
+let xpathSelect;
+let resourceDir;
+let xmlSnippetMaxLength;
+let xmlDoc;
+let schematronMap;
+let errors;
+let warnings;
+let ignored;
+let assertionInfo;
+function initializeProcess(xml, schematron, options) {
+    try {
+        xml = checkIfFileOrPath(xml);
+        schematron = checkIfFileOrPath(schematron);
+    }
+    catch (err) {
+        return err;
+    }
+    // Load xml doc
+    xmlDoc = new Dom().parseFromString(xml);
+    // Allowing users to send a parsed schematron map if testing multiple xml files with the same schematron
+    schematronMap = getSchematronMap(schematron, options);
+    // Extract data from parsed schematron object
+    namespaceMap = schematronMap.namespaceMap;
+    patternRuleMap = schematronMap.patternRuleMap;
+    ruleAssertionMap = schematronMap.ruleAssertionMap;
+    resourceDir = './';
+    xmlSnippetMaxLength = 200;
+    if (_get(options, 'resourceDir')) {
+        resourceDir = _get(options, 'resourceDir');
+    }
+    if (_get(options, 'xmlSnippetMaxLength')) {
+        xmlSnippetMaxLength = _get(options, 'xmlSnippetMaxLength');
+    }
+    // Create selector object, initialized with namespaces
+    // Avoid using 'select' as a variable name as it is overused
+    xpathSelect = xpath.useNamespaces(namespaceMap);
+    errors = [];
+    warnings = [];
+    ignored = [];
+    assertionInfo = {
+        errors,
+        warnings,
+        ignored
+    };
+}
+function validate(xml, schematron, options = {}) {
+    initializeProcess(xml, schematron, options);
+    for (const patternId in patternRuleMap) {
+        if (!patternRuleMap.hasOwnProperty(patternId)) {
+            continue;
+        }
+        assertionInfo.patternId = patternId;
+        const rules = patternRuleMap[patternId];
+        processRules(rules, assertionInfo, options);
+    }
+    return getReturnObject(assertionInfo);
+}
+
+async function validateAsync(xml, schematron, options = {}) {
+    initializeProcess(xml, schematron, options);
+    for (const patternId in patternRuleMap) {
+        if (!patternRuleMap.hasOwnProperty(patternId)) {
+            continue;
+        }
+        assertionInfo.patternId = patternId;
+        const rules = patternRuleMap[patternId];
+        await processRulesAsync(rules, assertionInfo, options);
+    }
+    return getReturnObject(assertionInfo);
+}
+function getSelectXmlChunk(context) {
+    // Determine the sections within context, load selected section from cache if possible
+    let selectedXml = contextMap[context];
+    let contextModified = context;
+    if (!selectedXml) {
+        if (context) {
+            if (context.indexOf('/')) {
+                contextModified = '//' + context;
+            }
+            selectedXml = xpathSelect(contextModified, xmlDoc);
+        }
+        else {
+            selectedXml = [xmlDoc];
+        }
+        contextMap[context] = selectedXml;
+    }
+    return selectedXml;
+}
+function getAssertionObject(level, id, originalTest, simplifiedTest, description) {
+    const assertionObject = {
+        type: level,
+        assertionId: id,
+        test: originalTest,
+        simplifiedTest: simplifiedTest,
+        description: description
+    };
+    return assertionObject;
+}
+function processExtension(assertionAndExtensionObject, context, options) {
+    const extensionRule = assertionAndExtensionObject.rule;
+    let failedSubAssertions = [];
+    if (extensionRule) {
+        const newRuleObject = ruleAssertionMap[extensionRule];
+        const subAssertionsAndExtensions = newRuleObject ? newRuleObject.assertionsAndExtensions : null;
+        if (subAssertionsAndExtensions) {
+            failedSubAssertions = checkRule(context, subAssertionsAndExtensions, options);
+        }
+    }
+    return failedSubAssertions;
+}
+function processAssertions(assertionAndExtensionObject, selectedXml, failedAssertions, options) {
+    // const failedAssertions = [];
+    let { level, test, id, description } = assertionAndExtensionObject;
+    // Extract values from external document and modify test if a document call is made
+    const originalTest = test;
+    let simplifiedTest = null;
+    try {
+        test = includeExternalDocument(test, resourceDir);
+        if (originalTest !== test) {
+            simplifiedTest = test;
+        }
+        if (level === 'error' || _get(options, 'includeWarnings')) {
+            const testAssertionResponse = testAssertion(test, selectedXml, xpathSelect, xmlDoc, resourceDir, xmlSnippetMaxLength);
+            if ((Array.isArray(testAssertionResponse) && testAssertionResponse.length) || _get(testAssertionResponse, 'ignored')) {
+                const assertionObject = getAssertionObject(level, id, originalTest, simplifiedTest, description);
+                assertionObject.results = testAssertionResponse;
+                failedAssertions.push(assertionObject);
+            }
+        }
+    }
+    catch (err) {
+        const assertionObject = getAssertionObject(level, id, originalTest, simplifiedTest, description);
+        assertionObject.results = { ignored: true, errorMessage: err.message };
+        failedAssertions.push(assertionObject);
+    }
+    return failedAssertions;
+}
+// Take the checkRule function out of validate function, and pass on the variable needed as parameters and options
+function checkRule(context, assertionsAndExtensions, options) {
+    // Context cache
+    const failedAssertions = [];
+    // Determine the sections within context, load selected section from cache if possible
+    const selectedXml = getSelectXmlChunk(context);
+    for (let i = 0; i < assertionsAndExtensions.length; i++) {
+        const assertionAndExtensionObject = assertionsAndExtensions[i];
+        if (assertionAndExtensionObject.type === 'assertion') {
+            processAssertions(assertionAndExtensionObject, selectedXml, failedAssertions, options);
+        }
+        else {
+            const failedSubAssertions = processExtension(assertionAndExtensionObject, context, options);
+            failedAssertions.push(...failedSubAssertions);
+        }
+    }
+    return failedAssertions;
 }
