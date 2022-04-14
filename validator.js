@@ -4,6 +4,7 @@
 module.exports = {
     validate: validate,
     validateAsync: validateAsync,
+    validateFileListAsync: validateFileListAsync,
     clearCache: clearCache,
     parseSchematron: require('./parseSchematron')
 };
@@ -92,6 +93,16 @@ async function validateAsync(xml, schematron, options = {}) {
         })
     ).then(() => {
         return getReturnObject(resultInfo);
+    });
+}
+
+async function validateFileListAsync(xmlArray, schematron, options = {}) {
+    return Promise.all(
+        xmlArray.map(async (xml) => {
+            await validateAsync(xml, schematron, options = {});
+        })
+    ).then(() => {
+        console.log(`All xml files validated`);
     });
 }
 
