@@ -97,12 +97,13 @@ async function validateAsync(xml, schematron, options = {}) {
 }
 
 async function validateFileListAsync(xmlArray, schematron, options = {}) {
+    const resultInfo = [];
     return Promise.all(
         xmlArray.map(async (xml) => {
-            await validateAsync(xml, schematron, options = {});
+            resultInfo.push(await validateAsync(xml, schematron, options));
         })
     ).then(() => {
-        console.log(`All xml files validated`);
+        return resultInfo;
     });
 }
 

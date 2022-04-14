@@ -19,16 +19,19 @@ const options = {
 describe('Vital Sign schematron validation should', function() {
     let results;
     it('return results', async function() {
-        results = await validator.validateAsync(xml, schematron, options);
-        expect(results).to.be.an('object');
+        results = await validator.validateFileListAsync([xml, xml], schematron, options);
+        expect(results.length).to.be.equal(2);
     });
     it('return correct number of errors', function() {
-        expect(results.errorCount).to.be.equal(1);
+        expect(results[0].errorCount).to.be.equal(1);
+        expect(results[1].errorCount).to.be.equal(1);
     });
     it('return correct number of warnings', function() {
-        expect(results.warningCount).to.be.equal(6);
+        expect(results[0].warningCount).to.be.equal(6);
+        expect(results[1].warningCount).to.be.equal(6);
     });
     it('return correct number of ignored', function() {
-        expect(results.ignoredCount).to.be.equal(0);
+        expect(results[0].ignoredCount).to.be.equal(0);
+        expect(results[1].ignoredCount).to.be.equal(0);
     });
 });
