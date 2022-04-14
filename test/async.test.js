@@ -11,7 +11,7 @@ const schematronPath = './test/test.sch';
 const xml = fs.readFileSync(xmlPath, 'utf-8').toString();
 const schematron = fs.readFileSync(schematronPath, 'utf-8').toString();
 
-describe('Validator should', function() {
+describe('Async validator should', function() {
     let results;
     it('return results', async function() {
         results = await validator.validateAsync(xml, schematron, { includeWarnings: true });

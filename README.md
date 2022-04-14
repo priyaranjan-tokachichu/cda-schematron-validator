@@ -2,7 +2,14 @@
 
 ## Release History
 
-Starting release history with 1.0.7
+### 1.1.6
+
+- Methods have been moved to js files and relocated to lib directory
+- Introduced a new method called validateFileListAsync which allows to supply an array of xml file content or paths to validate
+- An array of results will be returned from the validateFileListAsync method
+- Test file `test/asyncFileList.test.js` has the example usage
+- Started to make use of Promise.all for async methods
+- Documentation of the methods completed by 40%
 
 ### 1.1.5
 
