@@ -56,6 +56,7 @@ async function validateFileListAsync(xmlArray, schematron, options = {}) {
     return Promise.all(
         xmlArray.map(async (xml) => {
             resultInfo.push(await validateAsync(xml, schematron, options));
+            console.log(`Number of files processed: ${resultInfo.length}`);
         })
     ).then(() => {
         return resultInfo;
