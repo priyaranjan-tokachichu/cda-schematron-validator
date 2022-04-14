@@ -10,7 +10,7 @@ const schematronPath = path.resolve(__dirname, './test.sch');
 const xml = fs.readFileSync(xmlPath, 'utf-8').toString();
 const schematron = fs.readFileSync(schematronPath, 'utf-8').toString();
 
-describe('Validator should', function() {
+describe('Classic validator should', function() {
     let results;
     it('return results', function(done) {
         results = validator.validate(xml, schematron, { includeWarnings: true });

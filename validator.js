@@ -21,24 +21,14 @@ const includeExternalDocument = require('./includeExternalDocument');
 // Parsed object cache
 let parsedMap = Object.create({});
 let contextMap = Object.create({});
+let schematronMap = Object.create({});
 
 function clearCache() {
     parsedMap = Object.create({});
     contextMap = Object.create({});
+    schematronMap = Object.create({});
 }
 
-let namespaceMap;
-let patternRuleMap;
-let ruleAssertionMap;
-let xpathSelect;
-let resourceDir;
-let xmlSnippetMaxLength;
-let xmlDoc;
-let schematronMap;
-let errors;
-let warnings;
-let ignored;
-let assertionInfo;
 
 /**
  * @method validate The entry method called to validate an xml with schematron. Calls `initializeProcess` and `processRules` methods, and gets the results
@@ -53,16 +43,22 @@ let assertionInfo;
  */
 
 function validate(xml, schematron, options = {}) {
+    const resultInfo = {
+        errors: [],
+        warnings: [],
+        ignored: []
+    };
     initializeProcess(xml, schematron, options);
-    for (const patternId in patternRuleMap) {
-        if (!patternRuleMap.hasOwnProperty(patternId)) {
+    for (const patternId in schematronMap.patternRuleMap) {
+        if (!schematronMap.patternRuleMap.hasOwnProperty(patternId)) {
             continue;
         }
+        const assertionInfo = Object.create({});
         assertionInfo.patternId = patternId;
-        const rules = patternRuleMap[patternId];
-        processRules(rules, assertionInfo, options);
+        const rules = schematronMap.patternRuleMap[patternId];
+        processRules(rules, assertionInfo, resultInfo, options);
     }
-    return getReturnObject(assertionInfo);
+    return getReturnObject(resultInfo);
 }
 
 /**
@@ -79,16 +75,24 @@ function validate(xml, schematron, options = {}) {
  */
 
 async function validateAsync(xml, schematron, options = {}) {
+    const resultInfo = {
+        errors: [],
+        warnings: [],
+        ignored: []
+    };
     initializeProcess(xml, schematron, options);
-    for (const patternId in patternRuleMap) {
-        if (!patternRuleMap.hasOwnProperty(patternId)) {
-            continue;
-        }
-        assertionInfo.patternId = patternId;
-        const rules = patternRuleMap[patternId];
-        await processRulesAsync(rules, assertionInfo, options);
-    }
-    return getReturnObject(assertionInfo);
+    return Promise.all(
+        Object.keys(schematronMap.patternRuleMap).map(async (patternId) => {
+            if (schematronMap.patternRuleMap.hasOwnProperty(patternId)) {
+                const assertionInfo = Object.create({});
+                assertionInfo.patternId = patternId;
+                const rules = schematronMap.patternRuleMap[patternId];
+                await processRulesAsync(rules, assertionInfo, resultInfo, options);
+            }
+        })
+    ).then(() => {
+        return getReturnObject(resultInfo);
+    });
 }
 
 /**
@@ -103,7 +107,7 @@ async function validateAsync(xml, schematron, options = {}) {
  * patternRuleMap, ruleAssertionMap,
  * resourceDir, xmlSnippetMaxLength,
  * xpathSelect, errors, warnings,
- * ignored, and assertionInfo
+ * ignored, and resultInfo
  */
 
 function initializeProcess(xml, schematron, options) {
@@ -115,32 +119,19 @@ function initializeProcess(xml, schematron, options) {
         return err;
     }
     // Load xml doc
-    xmlDoc = new Dom().parseFromString(xml);
+    options.xmlDoc = new Dom().parseFromString(xml);
     // Allowing users to send a parsed schematron map if testing multiple xml files with the same schematron
     schematronMap = getSchematronMap(schematron, options);
     // Extract data from parsed schematron object
-    namespaceMap = schematronMap.namespaceMap;
-    patternRuleMap = schematronMap.patternRuleMap;
-    ruleAssertionMap = schematronMap.ruleAssertionMap;
-    resourceDir = './';
-    xmlSnippetMaxLength = 200;
-    if (_get(options, 'resourceDir')) {
-        resourceDir = _get(options, 'resourceDir');
+    if (!_get(options, 'resourceDir')) {
+        options.resourceDir = './';
     }
-    if (_get(options, 'xmlSnippetMaxLength')) {
-        xmlSnippetMaxLength = _get(options, 'xmlSnippetMaxLength');
+    if (!_get(options, 'xmlSnippetMaxLength')) {
+        options.xmlSnippetMaxLength = 200;
     }
     // Create selector object, initialized with namespaces
     // Avoid using 'select' as a variable name as it is overused
-    xpathSelect = xpath.useNamespaces(namespaceMap);
-    errors = [];
-    warnings = [];
-    ignored = [];
-    assertionInfo = {
-        errors,
-        warnings,
-        ignored
-    };
+    options.xpathSelect = xpath.useNamespaces(schematronMap.namespaceMap);
 }
 
 /**
@@ -198,16 +189,16 @@ function checkIfFileOrPath(givenString) {
 /**
  * @method processRules Entry method to start processing schematron rules. Calls methods `getFailedAssertions` and `processFailedAssertions`
  * @param {Array} rules Array of ruleIds
- * @param {object} assertionInfo Capturing the information of the rule to pass it on to reporting object
+ * @param {object} resultInfo Capturing the information of the rule to pass it on to reporting object
  * @param {object} options Passing on the options object passed to the `validate` or `validateAsync` methods
  */
 
-function processRules(rules, assertionInfo, options) {
+function processRules(rules, assertionInfo, resultInfo, options) {
     for (let index = 0; index < rules.length; index++) {
         const ruleId = rules[index];
-        const failedAssertions = getFailedAssertions(ruleId, options);
+        const failedAssertions = getFailedAssertions(ruleId, assertionInfo, options);
         if (failedAssertions) {
-            processFailedAssertions(failedAssertions, assertionInfo);
+            processFailedAssertions(failedAssertions, assertionInfo, resultInfo);
         }
     }
 }
@@ -216,19 +207,19 @@ function processRules(rules, assertionInfo, options) {
  * @method processRulesAsync Entry method to start processing schematron rules. Calls methods `getFailedAssertions` and `processFailedAssertions`
  * This method is same as `processRules` except that this is an Async method wrapping a promise, and returning the promise
  * @param {Array} rules Array of ruleIds
- * @param {object} assertionInfo Capturing the information of the rule to pass it on to reporting object
+ * @param {object} resultInfo Capturing the information of the rule to pass it on to reporting object
  * @param {object} options Passing on the options object passed to the `validate` or `validateAsync` methods
  */
 
-async function processRulesAsync(rules, assertionInfo, options) {
+async function processRulesAsync(rules, assertionInfo, resultInfo, options) {
     const rulesProcessed = new Promise((resolve, reject) => {
         try {
             for (let index = 0; index < rules.length; index++) {
                 const ruleId = rules[index];
-                const failedAssertions = getFailedAssertions(ruleId, options);
+                const failedAssertions = getFailedAssertions(ruleId, assertionInfo, options);
                 resolve (failedAssertions);
                 if (failedAssertions) {
-                    processFailedAssertions(failedAssertions, assertionInfo);
+                    processFailedAssertions(failedAssertions, assertionInfo, resultInfo);
                 }
             }
         }
@@ -241,12 +232,12 @@ async function processRulesAsync(rules, assertionInfo, options) {
 
 /**
  * @method getReturnObject Simple method to avoid redundancy of result object representation
- * @param {object} assertionInfo carrying the arrays errors, warnings and ignored
+ * @param {object} resultInfo carrying the arrays errors, warnings and ignored
  * @returns result object with information about overall errors, warnings and ignored
  */
 
-function getReturnObject(assertionInfo) {
-    const { errors, warnings, ignored } = assertionInfo;
+function getReturnObject(resultInfo) {
+    const { errors, warnings, ignored } = resultInfo;
     const result = {
         errorCount: errors.length,
         warningCount: warnings.length,
@@ -258,9 +249,10 @@ function getReturnObject(assertionInfo) {
     return result;
 }
 
-function getErrorsAndWarnings(assertionObject, assertionInfo) {
+function getErrorsAndWarnings(assertionObject, assertionInfo, resultInfo) {
     const { type, assertionId, test, simplifiedTest, description, results } = assertionObject;
-    const { patternId, ruleId, context, errors, warnings } = assertionInfo;
+    const { patternId, ruleId, context } = assertionInfo;
+    const { errors, warnings } = resultInfo;
     for (let index = 0; index < results.length; index++) {
         const resultObject = results[index];
         const { result, line, path, xml } = resultObject;
@@ -289,9 +281,10 @@ function getErrorsAndWarnings(assertionObject, assertionInfo) {
         }
     }
 }
-function getIgnored(assertionObject, assertionInfo) {
+function getIgnored(assertionObject, assertionInfo, resultInfo) {
     const { type, assertionId, test, simplifiedTest, description, errorMessage } = assertionObject;
-    const { patternId, ruleId, context, ignored } = assertionInfo;
+    const { patternId, ruleId, context } = assertionInfo;
+    const { ignored } = resultInfo;
     const obj = {
         errorMessage,
         type,
@@ -305,25 +298,25 @@ function getIgnored(assertionObject, assertionInfo) {
     };
     ignored.push(obj);
 }
-function getResults(assertionObject, assertionInfo) {
+function getResults(assertionObject, assertionInfo, resultInfo) {
     const { results } = assertionObject;
     if (Array.isArray(results)) {
-        getErrorsAndWarnings(assertionObject, assertionInfo);
+        getErrorsAndWarnings(assertionObject, assertionInfo, resultInfo);
     }
     else if (results.ignored) {
-        getIgnored(assertionObject, assertionInfo);
+        getIgnored(assertionObject, assertionInfo, resultInfo);
     }
 }
-function processFailedAssertions(failedAssertions, assertionInfo) {
+function processFailedAssertions(failedAssertions, assertionInfo, resultInfo) {
     for (let index = 0; index < failedAssertions.length; index++) {
         const assertionObject = failedAssertions[index];
-        getResults(assertionObject, assertionInfo);
+        getResults(assertionObject, assertionInfo, resultInfo);
     }
 }
-function getFailedAssertions(ruleId, options) {
+function getFailedAssertions(ruleId, assertionInfo, options) {
     let failedAssertions;
     assertionInfo.ruleId = ruleId;
-    const ruleObject = ruleAssertionMap[ruleId];
+    const ruleObject = schematronMap.ruleAssertionMap[ruleId];
     if (!_get(ruleObject, 'abstract')) {
         const context = _get(ruleObject, 'context');
         assertionInfo.context = context;
@@ -338,7 +331,7 @@ function checkRule(context, assertionsAndExtensions, options) {
     // Context cache
     const failedAssertions = [];
     // Determine the sections within context, load selected section from cache if possible
-    const selectedXml = getSelectXmlChunk(context);
+    const selectedXml = getSelectXmlChunk(context, options);
     for (let i = 0; i < assertionsAndExtensions.length; i++) {
         const assertionAndExtensionObject = assertionsAndExtensions[i];
         if (assertionAndExtensionObject.type === 'assertion') {
@@ -352,7 +345,7 @@ function checkRule(context, assertionsAndExtensions, options) {
     return failedAssertions;
 }
 
-function getSelectXmlChunk(context) {
+function getSelectXmlChunk(context, options) {
     // Determine the sections within context, load selected section from cache if possible
     let selectedXml = contextMap[context];
     let contextModified = context;
@@ -361,10 +354,10 @@ function getSelectXmlChunk(context) {
             if (context.indexOf('/')) {
                 contextModified = '//' + context;
             }
-            selectedXml = xpathSelect(contextModified, xmlDoc);
+            selectedXml = options.xpathSelect(contextModified, options.xmlDoc);
         }
         else {
-            selectedXml = [xmlDoc];
+            selectedXml = [options.xmlDoc];
         }
         contextMap[context] = selectedXml;
     }
@@ -384,7 +377,7 @@ function processExtension(assertionAndExtensionObject, context, options) {
     const extensionRule = assertionAndExtensionObject.rule;
     let failedSubAssertions = [];
     if (extensionRule) {
-        const newRuleObject = ruleAssertionMap[extensionRule];
+        const newRuleObject = schematronMap.ruleAssertionMap[extensionRule];
         const subAssertionsAndExtensions = newRuleObject ? newRuleObject.assertionsAndExtensions : null;
         if (subAssertionsAndExtensions) {
             failedSubAssertions = checkRule(context, subAssertionsAndExtensions, options);
@@ -399,12 +392,12 @@ function processAssertions(assertionAndExtensionObject, selectedXml, failedAsser
     const originalTest = test;
     let simplifiedTest = null;
     try {
-        test = includeExternalDocument(test, resourceDir);
+        test = includeExternalDocument(test, options.resourceDir);
         if (originalTest !== test) {
             simplifiedTest = test;
         }
         if (level === 'error' || _get(options, 'includeWarnings')) {
-            const testAssertionResponse = testAssertion(test, selectedXml, xpathSelect, xmlDoc, resourceDir, xmlSnippetMaxLength);
+            const testAssertionResponse = testAssertion(test, selectedXml, options.xpathSelect, options.xmlDoc, options.resourceDir, options.xmlSnippetMaxLength);
             if ((Array.isArray(testAssertionResponse) && testAssertionResponse.length) || _get(testAssertionResponse, 'ignored')) {
                 const assertionObject = getAssertionObject(level, id, originalTest, simplifiedTest, description);
                 assertionObject.results = testAssertionResponse;
