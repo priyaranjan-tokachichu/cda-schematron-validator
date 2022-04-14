@@ -49,14 +49,17 @@ function validate(xml, schematron, options = {}) {
         warnings: [],
         ignored: []
     };
+    options.parsedMap = parsedMap;
+    options.contextMap = contextMap;
+    options.schematronMap = schematronMap;
     initializeProcess(xml, schematron, options);
-    for (const patternId in schematronMap.patternRuleMap) {
-        if (!schematronMap.patternRuleMap.hasOwnProperty(patternId)) {
+    for (const patternId in options.schematronMap.patternRuleMap) {
+        if (!options.schematronMap.patternRuleMap.hasOwnProperty(patternId)) {
             continue;
         }
         const assertionInfo = Object.create({});
         assertionInfo.patternId = patternId;
-        const rules = schematronMap.patternRuleMap[patternId];
+        const rules = options.schematronMap.patternRuleMap[patternId];
         processRules(rules, assertionInfo, resultInfo, options);
     }
     return getReturnObject(resultInfo);
@@ -81,13 +84,16 @@ async function validateAsync(xml, schematron, options = {}) {
         warnings: [],
         ignored: []
     };
+    options.parsedMap = parsedMap;
+    options.contextMap = contextMap;
+    options.schematronMap = schematronMap;
     initializeProcess(xml, schematron, options);
     return Promise.all(
-        Object.keys(schematronMap.patternRuleMap).map(async (patternId) => {
-            if (schematronMap.patternRuleMap.hasOwnProperty(patternId)) {
+        Object.keys(options.schematronMap.patternRuleMap).map(async (patternId) => {
+            if (options.schematronMap.patternRuleMap.hasOwnProperty(patternId)) {
                 const assertionInfo = Object.create({});
                 assertionInfo.patternId = patternId;
-                const rules = schematronMap.patternRuleMap[patternId];
+                const rules = options.schematronMap.patternRuleMap[patternId];
                 await processRulesAsync(rules, assertionInfo, resultInfo, options);
             }
         })
@@ -133,7 +139,7 @@ function initializeProcess(xml, schematron, options) {
     // Load xml doc
     options.xmlDoc = new Dom().parseFromString(xml);
     // Allowing users to send a parsed schematron map if testing multiple xml files with the same schematron
-    schematronMap = getSchematronMap(schematron, options);
+    options.schematronMap = getSchematronMap(schematron, options);
     // Extract data from parsed schematron object
     if (!_get(options, 'resourceDir')) {
         options.resourceDir = './';
@@ -143,7 +149,7 @@ function initializeProcess(xml, schematron, options) {
     }
     // Create selector object, initialized with namespaces
     // Avoid using 'select' as a variable name as it is overused
-    options.xpathSelect = xpath.useNamespaces(schematronMap.namespaceMap);
+    options.xpathSelect = xpath.useNamespaces(options.schematronMap.namespaceMap);
 }
 
 /**
@@ -161,15 +167,15 @@ function getSchematronMap(schematron, options = {}) {
         .createHash('md5')
         .update(schematron)
         .digest('hex');
-    if (parsedMap[hash]) {
-        return parsedMap[hash];
+    if (options.parsedMap[hash]) {
+        return options.parsedMap[hash];
     }
     // If not in cache
     // Load schematron doc
     const schematronDoc = new Dom().parseFromString(schematron);
     // Parse schematron
-    parsedMap[hash] = parseSchematron(schematronDoc, options);
-    return parsedMap[hash];
+    options.parsedMap[hash] = parseSchematron(schematronDoc, options);
+    return options.parsedMap[hash];
 }
 
 /**
@@ -328,7 +334,7 @@ function processFailedAssertions(failedAssertions, assertionInfo, resultInfo) {
 function getFailedAssertions(ruleId, assertionInfo, options) {
     let failedAssertions;
     assertionInfo.ruleId = ruleId;
-    const ruleObject = schematronMap.ruleAssertionMap[ruleId];
+    const ruleObject = options.schematronMap.ruleAssertionMap[ruleId];
     if (!_get(ruleObject, 'abstract')) {
         const context = _get(ruleObject, 'context');
         assertionInfo.context = context;
@@ -359,7 +365,7 @@ function checkRule(context, assertionsAndExtensions, options) {
 
 function getSelectXmlChunk(context, options) {
     // Determine the sections within context, load selected section from cache if possible
-    let selectedXml = contextMap[context];
+    let selectedXml = options.contextMap[context];
     let contextModified = context;
     if (!selectedXml) {
         if (context) {
@@ -371,7 +377,7 @@ function getSelectXmlChunk(context, options) {
         else {
             selectedXml = [options.xmlDoc];
         }
-        contextMap[context] = selectedXml;
+        options.contextMap[context] = selectedXml;
     }
     return selectedXml;
 }
@@ -389,7 +395,7 @@ function processExtension(assertionAndExtensionObject, context, options) {
     const extensionRule = assertionAndExtensionObject.rule;
     let failedSubAssertions = [];
     if (extensionRule) {
-        const newRuleObject = schematronMap.ruleAssertionMap[extensionRule];
+        const newRuleObject = options.schematronMap.ruleAssertionMap[extensionRule];
         const subAssertionsAndExtensions = newRuleObject ? newRuleObject.assertionsAndExtensions : null;
         if (subAssertionsAndExtensions) {
             failedSubAssertions = checkRule(context, subAssertionsAndExtensions, options);

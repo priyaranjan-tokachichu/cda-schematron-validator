@@ -16,7 +16,7 @@ const options = {
     includeWarnings: true
 };
 
-describe('Vital Sign schematron validation should', function() {
+describe('Vital Sign async schematron validation should', function() {
     let results;
     it('return results', async function() {
         results = await validator.validateAsync(xml, schematron, options);
