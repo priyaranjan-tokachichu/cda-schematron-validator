@@ -12,5 +12,5 @@ module.exports = {
     validateFileObjectAsync: require('./validateAsync').validateFileObjectAsync,
     clearCache: require('./validateSync').clearCache,
     clearCacheAsync: require('./validateAsync').clearCache,
-    parseSchematron: require('./parseSchematron')
+    parseSchematron: require('./lib/parseSchematron')
 };

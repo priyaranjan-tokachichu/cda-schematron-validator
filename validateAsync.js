@@ -54,7 +54,7 @@ async function validateAsync(xml, schematron, options = {}) {
 /**
  * @method validateFileListAsync Run the validateAsync method on each xml file of the array provided, and combine the results into an array and return it.
  * It is important to know that the results could be in a different order than the submitted files. We can't reliably identify which error belongs to which file.
- * You should use this if all that you care about is the type of error, but not about in which file this error occurred.
+ * The property `fileIndex` of each result object will provide the index of the xml data to which the error belongs to.
  * @param {array} xmlArray array of string content of an xml file or path to an xml file
   * @param {string} schematron string content of a schematron file or path to a schematron file
  * @param {object} options object that takes parameters
@@ -83,7 +83,7 @@ async function validateFileListAsync(xmlArray, schematron, options = {}) {
 /**
  * @method validateFileObjectAsync Run the validateAsync method on each xml file of the xml data object provided, and combine the results into an array and return it.
  * It is important to know that the results could be in a different order than the submitted files. We can't reliably identify which error belongs to which file.
- * You should use this if all that you care about is the type of error, but not about in which file this error occurred.
+ * The property `fileInfo` of each result object will provide the information (probably an identifier or the name of the xml) the xml data to which the error belongs to.
  * @param {object} xmlDataObject object with key identifying the xml and value to be the xml file data or xml file path
   * @param {string} schematron string content of a schematron file or path to a schematron file
  * @param {object} options object that takes parameters
