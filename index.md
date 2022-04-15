@@ -2,11 +2,19 @@
 
 ## Release History
 
+### 1.1.7
+
+- Introduced a new method called `validateFileObjectAsync` which allows to supply an object with key, value pairs where key represents the identifier of the xml, and the value represents xml file content or path to validate
+- An array of results will be returned from the `validateFileObjectAsync` method
+- Test file `test/asyncFileList.test.js` has the example usage
+- The result object has the property `fileInfo` that would return the `key` the identifier of the xml to identify and debug issues
+- The result object of the array result from the method `validateFileListAsync` now has the property `fileIndex` that will give an indication of which xml file the result belongs to for debugging purposes
+
 ### 1.1.6
 
 - Methods have been moved to js files and relocated to lib directory
-- Introduced a new method called validateFileListAsync which allows to supply an array of xml file content or paths to validate
-- An array of results will be returned from the validateFileListAsync method
+- Introduced a new method called `validateFileListAsync` which allows to supply an array of xml file content or paths to validate
+- An array of results will be returned from the `validateFileListAsync` method
 - Test file `test/asyncFileList.test.js` has the example usage
 - Started to make use of Promise.all for async methods
 - Documentation of the methods completed by 40%
