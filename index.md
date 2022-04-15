@@ -2,6 +2,11 @@
 
 ## Release History
 
+### 1.1.8
+
+- jsdoc module added
+- parseSchematron.js moved to lib
+
 ### 1.1.7
 
 - Introduced a new method called `validateFileObjectAsync` which allows to supply an object with key, value pairs where key represents the identifier of the xml, and the value represents xml file content or path to validate
