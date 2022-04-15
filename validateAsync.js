@@ -51,6 +51,20 @@ async function validateAsync(xml, schematron, options = {}) {
     });
 }
 
+/**
+ * @method validateFileListAsync Run the validateAsync method on each xml file of the array provided, and combine the results into an array and return it.
+ * It is important to know that the results could be in a different order than the submitted files. We can't reliably identify which error belongs to which file.
+ * You should use this if all that you care about is the type of error, but not about in which file this error occurred.
+ * @param {array} xmlArray array of string content of an xml file or path to an xml file
+  * @param {string} schematron string content of a schematron file or path to a schematron file
+ * @param {object} options object that takes parameters
+ * `resourceDir`: Where additional documents with added rules such as value set restrictions are present. Default value is the same directory of the code being executed './'.,
+ * `xmlSnippetMaxLength`: Restrict the length of the xpath mapped xml snippet when returning the error/warning data to the user. Default value is 200 characters.,
+ * `includeWarnings`: User can choose to look for warnings and include them in the report. The default value is false.,
+ * `parsedSchematronMap`: User can choose to supply the schematron map instead of a schematron file avoiding the parsing of the schematron file for multiple xml files or check for cache.
+ * @returns {array} gets array of return objects with results
+ */
+
 async function validateFileListAsync(xmlArray, schematron, options = {}) {
     const resultInfo = [];
     return Promise.all(
