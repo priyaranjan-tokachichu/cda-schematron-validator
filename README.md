@@ -2,6 +2,10 @@
 
 ## Release History
 
+### 1.1.9
+
+- Fix grunt vulnerability
+
 ### 1.1.8
 
 - jsdoc module added
