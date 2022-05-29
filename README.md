@@ -2,6 +2,12 @@
 
 ## Release History
 
+### 1.1.10
+
+- Fix grunt race condition reported by github
+
+    "file.copy operations in GruntJS are vulnerable to a TOCTOU race condition leading to arbitrary file write in GitHub repository gruntjs/grunt prior to 1.5.3. This vulnerability is capable of arbitrary file writes which can lead to local privilege escalation to the GruntJS user if a lower-privileged user has write access to both source and destination directories as the lower-privileged user can create a symlink to the GruntJS user's .bashrc file or replace /etc/shadow file if the GruntJS user is root."
+
 ### 1.1.9
 
 - Fix grunt vulnerability
