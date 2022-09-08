@@ -2,6 +2,10 @@
 
 ## Release History
 
+### 1.1.11
+
+- License file added
+
 ### 1.1.10
 
 - Fix grunt race condition reported by github
