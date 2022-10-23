@@ -2,6 +2,10 @@
 
 ## Release History
 
+### 1.1.12
+
+- Update xmldom to the latest version
+
 ### 1.1.11
 
 - License file added
