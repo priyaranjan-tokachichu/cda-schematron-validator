@@ -1,5 +1,5 @@
 {
-  "verifiedAt": "2026-11-16T15:01:30.039184+00:00",
+  "verifiedAt": "2026-11-16T15:26:45.350934+00:00",
   "checks": [
     {
       "name": "JavaScript API, isolation, and HTTP client tests",
@@ -43,7 +43,7 @@
     }
   ],
   "javascriptTests": 62,
-  "javaTests": 16,
+  "javaTests": 20,
   "browserChecks": [
     "XML file chooser upload",
     "Example document submission",
@@ -74,17 +74,17 @@
     "memoryBytes": 1610612736,
     "nanoCpus": 2000000000,
     "health": "healthy",
-    "startupLog": "CDA Validator ready at http://0.0.0.0:17643 (profiles compiled in 3.4s)"
+    "startupLog": "CDA Validator ready at http://0.0.0.0:17643 (profiles compiled in 3.7s)"
   },
   "exampleResult": {
     "status": "invalid",
     "validationComplete": false,
     "executionComplete": true,
     "summary": {
-      "firedRules": 17,
-      "warnings": 7,
       "errors": 14,
-      "findings": 21
+      "findings": 21,
+      "firedRules": 17,
+      "warnings": 7
     },
     "profile": {
       "id": "ccda-5.0",
@@ -113,10 +113,10 @@
       }
     },
     "engine": {
+      "name": "Saxon-HE / SchXslt",
       "saxon": "12.9",
       "schemaRelease": "20260205_SDTC",
-      "schxslt": "1.10.1",
-      "name": "Saxon-HE / SchXslt"
+      "schxslt": "1.10.1"
     }
   }
 }

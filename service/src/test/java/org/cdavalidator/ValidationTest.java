@@ -124,4 +124,32 @@ class ValidationTest {
             assertThrows(IllegalArgumentException.class, () -> ValidationEngine.xmlLimit(invalid));
     }
 
+    @Test void uploadBudgetRejectsExcessReadersAndRecoversAfterDisconnects() throws Exception {
+        try (var app = new Server(new InetSocketAddress("127.0.0.1",0), assets, Path.of("web"),2,null, 2 * (8L * ValidationEngine.MAX_BYTES + 128 * 1024))) {
+            app.start(); var client = HttpClient.newHttpClient(); String base="http://127.0.0.1:"+app.port();
+            int slots = Math.min(6, app.uploadBudgetKiB / app.uploadReservationKiB);
+            assertTrue(slots > 0 && slots < 6, "Use the explicitly constrained upload budget");
+            var sockets = new ArrayList<Socket>();
+            try {
+                for (int i=0; i<slots; i++) {
+                    var socket = new Socket("127.0.0.1",app.port()); sockets.add(socket);
+                    socket.getOutputStream().write(("POST /v1/validate HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: "+Server.MAX_REQUEST_BYTES+"\r\n\r\n{\"xml\":\"").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                    socket.getOutputStream().flush();
+                }
+                long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(5);
+                while (app.uploadMemory.availablePermits() >= app.uploadReservationKiB && System.nanoTime()<deadline) Thread.sleep(10);
+                assertTrue(app.uploadMemory.availablePermits() < app.uploadReservationKiB);
+                var request=HttpRequest.newBuilder(URI.create(base+"/v1/validate")).timeout(java.time.Duration.ofSeconds(5)).header("Content-Type","application/json");
+                var response=client.send(request.POST(HttpRequest.BodyPublishers.ofString(ValidationEngine.JSON.toJson(Map.of("xml",GOOD,"profile","test")))).build(),HttpResponse.BodyHandlers.ofString());
+                assertEquals(429,response.statusCode()); assertEquals("2",response.headers().firstValue("Retry-After").orElseThrow());
+                assertEquals(200,client.send(HttpRequest.newBuilder(URI.create(base+"/health/ready")).GET().build(),HttpResponse.BodyHandlers.ofString()).statusCode());
+            } finally { for (var socket : sockets) socket.close(); }
+            long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(5);
+            while (app.admission.availablePermits()!=6 && System.nanoTime()<deadline) Thread.sleep(10);
+            assertEquals(app.uploadBudgetKiB,app.uploadMemory.availablePermits());
+            var request=HttpRequest.newBuilder(URI.create(base+"/v1/validate")).header("Content-Type","application/json");
+            assertEquals(200,client.send(request.POST(HttpRequest.BodyPublishers.ofString(ValidationEngine.JSON.toJson(Map.of("xml",GOOD,"profile","test")))).build(),HttpResponse.BodyHandlers.ofString()).statusCode());
+        }
+    }
+
 }

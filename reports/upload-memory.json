@@ -1,0 +1,45 @@
+{
+  "verifiedAt": "2026-11-16T15:27:22.111821+00:00",
+  "javaMaxHeapBytes": 1073741824,
+  "containerMemoryBytes": 1610612736,
+  "limits": {
+    "uploadMemoryBudgetBytes": 259489792,
+    "maxRequestBytes": 125894656,
+    "maxXmlBytes": 20971520,
+    "maxConcurrentUploads": 1
+  },
+  "rounds": [
+    {
+      "framing": "known-length",
+      "uploads": 6,
+      "decodedXmlBytesEach": 20971520,
+      "serializedJsonBytesEach": 125824640,
+      "httpStatuses": [
+        429,
+        429,
+        429,
+        429,
+        429,
+        200
+      ]
+    },
+    {
+      "framing": "chunked",
+      "uploads": 6,
+      "decodedXmlBytesEach": 20971520,
+      "serializedJsonBytesEach": 125824640,
+      "httpStatuses": [
+        429,
+        429,
+        429,
+        429,
+        429,
+        200
+      ]
+    }
+  ],
+  "healthSamples": 18,
+  "allHealthChecksPassed": true,
+  "postLoadValidationPassed": true,
+  "outOfMemory": false
+}

@@ -1,6 +1,5 @@
 package org.cdavalidator;
 
-import com.google.gson.*;
 import com.sun.net.httpserver.*;
 import java.io.*;
 import java.net.*;
@@ -19,10 +18,21 @@ public final class Server implements AutoCloseable {
     final ThreadPoolExecutor workers;
     final ExecutorService requests = Executors.newVirtualThreadPerTaskExecutor();
     final Semaphore admission;
+    // Cover string-builder growth, UTF-16 inflation, final decoded strings and parser buffers.
+    // Reserve before reading; only a quarter of the heap may be used for upload decoding.
+    final int uploadReservationKiB = Math.toIntExact((8L * ValidationEngine.MAX_BYTES + 128 * 1024) / 1024);
+    final int uploadBudgetKiB;
+    final Semaphore uploadMemory;
     final Path web;
     final String apiToken;
 
     public Server(InetSocketAddress address, Path assets, Path web, int concurrency, String token) throws Exception {
+        this(address, assets, web, concurrency, token, Runtime.getRuntime().maxMemory() / 4);
+    }
+    Server(InetSocketAddress address, Path assets, Path web, int concurrency, String token, long uploadBudgetBytes) throws Exception {
+        uploadBudgetKiB = (int)Math.min(Integer.MAX_VALUE, uploadBudgetBytes / 1024);
+        uploadMemory = new Semaphore(uploadBudgetKiB);
+        if (uploadReservationKiB > uploadBudgetKiB) throw new IllegalArgumentException("Configured XML size requires a larger Java heap for upload decoding");
         this.engine = new ValidationEngine(assets);
         this.web = web.toAbsolutePath().normalize();
         apiToken = token;
@@ -31,6 +41,18 @@ public final class Server implements AutoCloseable {
         server = HttpServer.create(address, 32);
         server.setExecutor(requests);
         server.createContext("/", this::handle);
+    }
+    int uploadReservation(HttpExchange exchange) throws ValidationRequest.InputError {
+        long encoded = MAX_REQUEST_BYTES;
+        String length = exchange.getRequestHeaders().getFirst("Content-Length");
+        if (length != null && exchange.getRequestHeaders().getFirst("Transfer-Encoding") == null) {
+            try { encoded = Long.parseLong(length); }
+            catch (NumberFormatException e) { throw new ValidationRequest.InputError(400, "Invalid Content-Length"); }
+            if (encoded < 0) throw new ValidationRequest.InputError(400, "Invalid Content-Length");
+            if (encoded > MAX_REQUEST_BYTES) throw new ValidationRequest.InputError(413, "Request exceeds size limit");
+        }
+        // HTTP framing bounds known-length bodies; chunked uploads reserve the full allowance.
+        return Math.toIntExact((8L * Math.min(ValidationEngine.MAX_BYTES, encoded) + 128 * 1024 + 1023) / 1024);
     }
     public void start() { server.start(); }
     public int port() { return server.getAddress().getPort(); }
@@ -53,7 +75,7 @@ public final class Server implements AutoCloseable {
                 switch (path) {
                     case "/health/live" -> json(exchange, 200, Map.of("status", "live"));
                     case "/health/ready" -> json(exchange, 200, Map.of("status", "ready", "profiles", engine.profiles.size()));
-                    case "/v1/profiles" -> json(exchange, 200, Map.of("profiles", engine.profileInfo(), "sources", engine.manifest.get("sources"), "limits", Map.of("maxXmlBytes", ValidationEngine.MAX_BYTES, "maxRequestBytes", MAX_REQUEST_BYTES)));
+                    case "/v1/profiles" -> json(exchange, 200, Map.of("profiles", engine.profileInfo(), "sources", engine.manifest.get("sources"), "limits", Map.of("maxXmlBytes", ValidationEngine.MAX_BYTES, "maxRequestBytes", MAX_REQUEST_BYTES, "uploadMemoryBudgetBytes", 1024L * uploadBudgetKiB, "maxConcurrentUploads", Math.min(workers.getMaximumPoolSize() * 3, uploadBudgetKiB / uploadReservationKiB))));
                     case "/v1/version" -> json(exchange, 200, Map.of("version", "2.0.0-preview.1", "engine", "Saxon-HE 12.9 / SchXslt 1.10.1"));
                     case "/", "/index.html" -> file(exchange, "index.html", "text/html; charset=utf-8");
                     case "/app.js" -> file(exchange, "app.js", "text/javascript; charset=utf-8");
@@ -86,31 +108,30 @@ public final class Server implements AutoCloseable {
         }
         Future<Map<String, Object>> task = null;
         try {
-            var bytes = exchange.getRequestBody().readNBytes(MAX_REQUEST_BYTES + 1);
-            if (bytes.length > MAX_REQUEST_BYTES) { json(exchange, 413, Map.of("error", "Request exceeds size limit")); return; }
-            String content;
-            try { content = StandardCharsets.UTF_8.newDecoder().decode(java.nio.ByteBuffer.wrap(bytes)).toString(); }
-            catch (CharacterCodingException e) { json(exchange, 400, Map.of("error", "Request must be UTF-8")); return; }
             String contentType = Optional.ofNullable(exchange.getRequestHeaders().getFirst("Content-Type")).orElse("").split(";")[0].strip();
             if (!contentType.equals("application/json")) { json(exchange, 415, Map.of("error", "Send application/json with xml and profile fields")); return; }
-            JsonObject body;
-            try {
-                body = JsonParser.parseString(content).getAsJsonObject();
-                if (!body.has("xml") || !body.get("xml").isJsonPrimitive() || !body.getAsJsonPrimitive("xml").isString()) throw new IllegalArgumentException();
-                if (body.has("profile") && (!body.get("profile").isJsonPrimitive() || !body.getAsJsonPrimitive("profile").isString())) throw new IllegalArgumentException();
-                if (body.has("includeWarnings") && (!body.get("includeWarnings").isJsonPrimitive() || !body.getAsJsonPrimitive("includeWarnings").isBoolean())) throw new IllegalArgumentException();
-            } catch (Exception e) { json(exchange, 400, Map.of("error", "Expected a JSON object with XML text, optional profile, and optional boolean includeWarnings")); return; }
-            String xml = body.get("xml").getAsString();
-            String profile = body.has("profile") ? body.get("profile").getAsString() : "ccda-5.0";
-            boolean warnings = !body.has("includeWarnings") || body.get("includeWarnings").getAsBoolean();
+            int reservation = uploadReservation(exchange);
+            if (!uploadMemory.tryAcquire(reservation)) {
+                exchange.getResponseHeaders().set("Retry-After", "2");
+                json(exchange, 429, Map.of("error", "Upload memory capacity reached; retry shortly")); return;
+            }
+            ValidationRequest body;
+            try { body = ValidationRequest.read(exchange.getRequestBody()); }
+            finally { uploadMemory.release(reservation); }
+            String xml = body.xml();
+            String profile = body.profile();
+            boolean warnings = body.warnings();
             if (xml.isBlank()) { json(exchange, 400, Map.of("error", "XML document is required")); return; }
-            if (xml.getBytes(StandardCharsets.UTF_8).length > ValidationEngine.MAX_BYTES) { json(exchange, 413, Map.of("error", "XML exceeds configured limit of " + ValidationEngine.MAX_BYTES + " bytes")); return; }
             if (!engine.profiles.containsKey(profile)) { json(exchange, 422, Map.of("error", "Unknown profile", "available", engine.profiles.keySet())); return; }
             task = workers.submit(() -> engine.validate(xml, profile, warnings));
             var report = task.get(30, TimeUnit.SECONDS);
             @SuppressWarnings("unchecked") var stages = (List<Map<String, Object>>) report.get("stages");
             boolean engineFailure = stages.stream().anyMatch(stage -> "failed".equals(stage.get("status")) && "schematron".equals(stage.get("name")));
             json(exchange, engineFailure ? 500 : 200, report);
+        } catch (ValidationRequest.InputError e) {
+            json(exchange, e.status, Map.of("error", e.getMessage()));
+        } catch (CharacterCodingException e) {
+            json(exchange, 400, Map.of("error", "Request must be UTF-8"));
         } catch (TimeoutException e) {
             if (task != null) task.cancel(true);
             json(exchange, 504, Map.of("error", "Validation deadline exceeded", "status", "execution-error", "validationComplete", false));

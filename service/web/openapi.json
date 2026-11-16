@@ -5,9 +5,9 @@
   "paths": {
     "/v1/validate": {"post": {
       "operationId": "validateDocument", "summary": "Validate one UTF-8 CDA XML document",
-      "description": "Runs strict XML parsing, the pinned CDA XSD, and the selected full HL7 Schematron. Default maximum decoded UTF-8 XML size 20 MiB, configurable with MAX_XML_MIB. GET /v1/profiles advertises active limits. Serialized JSON allowance is six times the XML limit plus 64 KiB to allow escaping; maximum 2,000 findings. Supply Authorization: Bearer TOKEN when API_TOKEN is configured. Request deadlines are 30 seconds; cancellation is cooperative. Unknown profiles are rejected rather than guessed.",
+      "description": "Runs strict XML parsing, the pinned CDA XSD, and the selected full HL7 Schematron. Default maximum decoded UTF-8 XML size 20 MiB, configurable with MAX_XML_MIB. GET /v1/profiles advertises active limits. Serialized JSON allowance is six times the XML limit plus 64 KiB to allow escaping; maximum 2,000 findings. Supply Authorization: Bearer TOKEN when API_TOKEN is configured. Request deadlines are 30 seconds; cancellation is cooperative. Unknown profiles are rejected rather than guessed. JSON decoding is streamed; duplicate or unknown fields are rejected. Profile IDs are limited to 128 UTF-8 bytes. Shared upload-memory admission may return HTTP 429 before reading a body.",
       "security": [{"bearerAuth": []}, {}],
-      "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "required": ["xml"], "properties": {
+      "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "required": ["xml"], "additionalProperties": false, "properties": {
         "xml": {"type": "string", "minLength": 1, "description": "XML text, never a file path or URL"},
         "profile": {"type": "string", "enum": ["ccda-2.1", "ccda-5.0"], "default": "ccda-5.0"},
         "includeWarnings": {"type": "boolean", "default": true}
@@ -20,7 +20,7 @@
         "413": {"description": "Request or document exceeds size limit"},
         "415": {"description": "Content type must be application/json"},
         "422": {"description": "Unknown profile"},
-        "429": {"description": "Worker and queue capacity exhausted; retry later"},
+        "429": {"description": "Worker/queue or shared upload-memory capacity exhausted; retry later (Retry-After: 2)"},
         "500": {"description": "Engine failure; may include a partial report with validationComplete false"},
         "504": {"description": "Deadline exceeded; validationComplete false"}
       }
