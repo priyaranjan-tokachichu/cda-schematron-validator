@@ -1,5 +1,5 @@
 {
-  "verifiedAt": "2026-11-16T14:42:43.053512+00:00",
+  "verifiedAt": "2026-11-16T15:01:30.039184+00:00",
   "checks": [
     {
       "name": "JavaScript API, isolation, and HTTP client tests",
@@ -42,8 +42,8 @@
       "status": "passed"
     }
   ],
-  "javascriptTests": 55,
-  "javaTests": 13,
+  "javascriptTests": 62,
+  "javaTests": 16,
   "browserChecks": [
     "XML file chooser upload",
     "Example document submission",
@@ -53,7 +53,10 @@
     "JSON report download parses correctly",
     "Mobile 390px layout has no horizontal overflow",
     "Editing XML clears stale results before another validation",
-    "Malformed XML displays the precise parser error"
+    "Malformed XML displays the precise parser error",
+    "20 MiB active upload allowance displayed",
+    "Example validation succeeds after review fixes",
+    "Editing XML hides the previously rendered report after review fixes"
   ],
   "npmVulnerabilities": {
     "info": 0,
@@ -78,10 +81,10 @@
     "validationComplete": false,
     "executionComplete": true,
     "summary": {
+      "firedRules": 17,
       "warnings": 7,
       "errors": 14,
-      "findings": 21,
-      "firedRules": 17
+      "findings": 21
     },
     "profile": {
       "id": "ccda-5.0",
@@ -110,10 +113,10 @@
       }
     },
     "engine": {
+      "saxon": "12.9",
       "schemaRelease": "20260205_SDTC",
       "schxslt": "1.10.1",
-      "name": "Saxon-HE / SchXslt",
-      "saxon": "12.9"
+      "name": "Saxon-HE / SchXslt"
     }
   }
 }

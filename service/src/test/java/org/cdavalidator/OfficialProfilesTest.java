@@ -19,4 +19,22 @@ class OfficialProfilesTest {
             if(profile.equals("ccda-5.0")) assertEquals(false,report.get("validationComplete"),"Upstream conversion gaps must be visible");
         }
     }
+    @Test void nestedTemplatesCannotEstablishDocumentCoverage() throws Exception {
+        var engine = new ValidationEngine(Path.of("assets"));
+        String original = Files.readString(Path.of("../test/VitalSigns.xml"));
+        // Only strip immediate document template IDs; preserve all nested section/entry rules.
+        int boundary = original.indexOf("<id ");
+        assertTrue(boundary > 0);
+        String stripped = original.substring(0, boundary).replaceAll("<templateId[^>]*/>", "") + original.substring(boundary);
+        for (String xml : List.of(stripped, stripped.replaceFirst("<id ", "<templateId root='9.9.9' extension='2099-01-01'/><id "))) {
+            var report = engine.validate(xml, "ccda-2.1", false);
+            assertTrue(((Number)((Map<?,?>)report.get("summary")).get("firedRules")).intValue() > 0);
+            assertEquals(true, report.get("executionComplete"));
+            assertEquals(false, report.get("validationComplete"));
+            assertNotEquals("valid", report.get("status"));
+            assertTrue(((List<Map<String,Object>>)report.get("findings")).stream().anyMatch(f -> "coverage".equals(f.get("stage"))));
+        }
+        assertEquals(true, engine.validate(original,"ccda-2.1",false).get("validationComplete"));
+    }
+
 }

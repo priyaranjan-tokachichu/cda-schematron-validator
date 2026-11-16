@@ -23,7 +23,6 @@ async function main() {
     }
     if (!file) throw new Error('An XML file or - for stdin is required. Use --help for usage.');
     const data = fs.readFileSync(file === '-' ? 0 : file);
-    if (data.length > 5 * 1024 * 1024) throw new Error('XML exceeds the 5 MiB limit');
     const xml = new TextDecoder('utf-8', { fatal: true }).decode(data);
     const report = await createClient({ baseUrl, token: process.env.CDA_VALIDATOR_TOKEN }).validate(xml, { profile, includeWarnings });
     if (json) console.log(JSON.stringify(report, null, 2));

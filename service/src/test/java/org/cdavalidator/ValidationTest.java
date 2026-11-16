@@ -98,4 +98,30 @@ class ValidationTest {
             assertEquals(403,client.send(request.header("Origin","https://untrusted.example").POST(HttpRequest.BodyPublishers.ofString("{}")).build(),HttpResponse.BodyHandlers.ofString()).statusCode());
         }
     }
+    @Test void jsonEscapingDoesNotReduceDecodedXmlAllowance() throws Exception {
+        try (var app = new Server(new InetSocketAddress("127.0.0.1",0), assets, Path.of("web"),1,null)) {
+            app.start(); var client=HttpClient.newHttpClient();
+            var request=HttpRequest.newBuilder(URI.create("http://127.0.0.1:"+app.port()+"/v1/validate")).header("Content-Type","application/json");
+            String xml = GOOD.replace("</root>", "\n".repeat(ValidationEngine.MAX_BYTES - GOOD.length()) + "</root>");
+            assertEquals(ValidationEngine.MAX_BYTES, xml.getBytes(java.nio.charset.StandardCharsets.UTF_8).length);
+            String json = ValidationEngine.JSON.toJson(Map.of("xml",xml,"profile","test"));
+            for (String body : List.of(json, json.replace("\\n", "\\u000a"))) {
+                assertTrue(body.length() > ValidationEngine.MAX_BYTES + 1024 * 1024);
+                var response=client.send(request.POST(HttpRequest.BodyPublishers.ofString(body)).build(),HttpResponse.BodyHandlers.ofString());
+                assertEquals(200,response.statusCode(),response.body());
+                assertEquals("valid",JsonParser.parseString(response.body()).getAsJsonObject().get("status").getAsString());
+            }
+            var oversized=ValidationEngine.JSON.toJson(Map.of("xml",xml+" ","profile","test"));
+            assertEquals(413,client.send(request.POST(HttpRequest.BodyPublishers.ofString(oversized)).build(),HttpResponse.BodyHandlers.ofString()).statusCode());
+            assertEquals(413,client.send(request.POST(HttpRequest.BodyPublishers.ofString(" ".repeat(Server.MAX_REQUEST_BYTES+1))).build(),HttpResponse.BodyHandlers.ofString()).statusCode());
+        }
+    }
+
+    @Test void xmlSizeConfigurationRejectsInvalidOrOverflowingLimits() {
+        assertEquals(20 * 1024 * 1024, ValidationEngine.xmlLimit("20"));
+        assertEquals(40 * 1024 * 1024, ValidationEngine.xmlLimit("40"));
+        for (String invalid : List.of("0", "-1", "1.5", "no", "2048", "9999999999"))
+            assertThrows(IllegalArgumentException.class, () -> ValidationEngine.xmlLimit(invalid));
+    }
+
 }

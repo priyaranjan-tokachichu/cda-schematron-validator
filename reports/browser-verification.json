@@ -8,7 +8,10 @@
     "JSON report download parses correctly",
     "Mobile 390px layout has no horizontal overflow",
     "Editing XML clears stale results before another validation",
-    "Malformed XML displays the precise parser error"
+    "Malformed XML displays the precise parser error",
+    "20 MiB active upload allowance displayed",
+    "Example validation succeeds after review fixes",
+    "Editing XML hides the previously rendered report after review fixes"
   ],
   "method": "Interactive browser checks with the synthetic example; screenshots saved in this directory."
 }

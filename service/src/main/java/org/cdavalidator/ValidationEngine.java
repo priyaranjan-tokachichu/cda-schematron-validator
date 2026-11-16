@@ -21,7 +21,17 @@ import java.util.*;
 
 /** Immutable compiled profiles are shared; every document owns its parse, transformer and results. */
 public final class ValidationEngine {
-    public static final int MAX_BYTES = 5 * 1024 * 1024;
+    public static final int MAX_BYTES = xmlLimit(System.getenv().getOrDefault("MAX_XML_MIB", "20"));
+    static int xmlLimit(String value) {
+        try {
+            int bytes = Math.multiplyExact(Integer.parseInt(value), 1024 * 1024);
+            if (bytes <= 0) throw new IllegalArgumentException();
+            Math.addExact(Math.multiplyExact(bytes, 6), 64 * 1024 + 1);
+            return bytes;
+        } catch (RuntimeException e) {
+            throw new IllegalArgumentException("MAX_XML_MIB must be a positive whole MiB value whose JSON envelope fits the supported integer byte range", e);
+        }
+    }
     public static final int MAX_FINDINGS = 2000;
     static final String SCH = "http://purl.oclc.org/dsdl/schematron";
     static final String SVRL = "http://purl.oclc.org/dsdl/svrl";
@@ -31,7 +41,7 @@ public final class ValidationEngine {
     final Map<String, Profile> profiles = new LinkedHashMap<>();
     final Path assets;
     final JsonObject manifest;
-    record Profile(JsonObject info, Schema schema, XsltExecutable stylesheet) {}
+    record Profile(JsonObject info, Schema schema, XsltExecutable stylesheet, XPathExecutable documentTemplate) {}
 
     public ValidationEngine(Path directory) throws Exception {
         assets = directory.toRealPath();
@@ -106,7 +116,22 @@ public final class ValidationEngine {
             var generated = new DOMSource(generatedDoc);
             generated.setSystemId(sch.toUri().toString());
             var executable = compiler.compile(generated);
-            profiles.put(info.get("id").getAsString(), new Profile(info, schema, executable));
+            // Derive supported document roots and versions from this exact pinned profile.
+            var contexts = new TreeSet<String>();
+            var rules = doc.getElementsByTagNameNS(SCH, "rule");
+            for (int i = 0; i < rules.getLength(); i++) {
+                String context = ((Element) rules.item(i)).getAttribute("context");
+                if (context.startsWith("cda:ClinicalDocument[") && context.contains("cda:templateId[") && !context.contains("/")) contexts.add(context);
+            }
+            XPathExecutable documentTemplate = null;
+            if (!contexts.isEmpty()) {
+                var xpath = processor.newXPathCompiler();
+                xpath.declareNamespace("cda", "urn:hl7-org:v3");
+                documentTemplate = xpath.compile("exists(/* intersect (" + String.join(" | ", contexts) + "))");
+            } else if (info.get("id").getAsString().startsWith("ccda-")) {
+                throw new IOException("Profile has no supported document-level template rules");
+            }
+            profiles.put(info.get("id").getAsString(), new Profile(info, schema, executable, documentTemplate));
         }
     }
 
@@ -182,7 +207,7 @@ public final class ValidationEngine {
         var profile = profiles.get(profileId);
         if (profile == null) throw new IllegalArgumentException("Unknown validation profile");
         if (xml == null || xml.isBlank()) throw new IllegalArgumentException("XML document is required");
-        if (xml.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > MAX_BYTES) throw new IllegalArgumentException("XML exceeds 5 MiB limit");
+        if (xml.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > MAX_BYTES) throw new IllegalArgumentException("XML exceeds configured limit of " + MAX_BYTES + " bytes");
         long start = System.nanoTime();
         List<Map<String, Object>> findings = new ArrayList<>();
         List<Map<String, Object>> stages = new ArrayList<>();
@@ -205,6 +230,13 @@ public final class ValidationEngine {
             return report(profile, findings, stages, false, false, start, 0, includeWarnings);
         }
         boolean completed = true;
+        if (profile.documentTemplate != null) {
+            var selector = profile.documentTemplate.load();
+            selector.setContextItem(document);
+            if (!selector.effectiveBooleanValue()) {
+                findings.add(finding("warning", "coverage", "No supported document-level template matched the ClinicalDocument root for this profile. Nested templates do not establish document-level coverage.", null, null, null));
+            }
+        }
         var validator = profile.schema.newValidator();
         validator.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
         validator.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
@@ -308,7 +340,7 @@ public final class ValidationEngine {
         long errors = findings.stream().filter(f -> f.get("severity").equals("error")).count();
         long warnings = findings.stream().filter(f -> f.get("severity").equals("warning")).count();
         boolean coverageComplete = !profile.info.has("generationCoverage") || profile.info.getAsJsonObject("generationCoverage").entrySet().stream().allMatch(e -> e.getValue().getAsInt() == 0);
-        boolean complete = executed && coverageComplete && !truncated;
+        boolean complete = executed && coverageComplete && !truncated && findings.stream().noneMatch(f -> "coverage".equals(f.get("stage")));
         var result = new LinkedHashMap<String, Object>();
         result.put("requestId", UUID.randomUUID().toString());
         result.put("applicationVersion", "2.0.0-preview.1");

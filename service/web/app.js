@@ -1,9 +1,10 @@
 'use strict';
 const $ = (id) => document.getElementById(id);
-let profiles = [], latestReport = null, selectedFilter = 'all', busy = false;
+let profiles = [], latestReport = null, selectedFilter = 'all', busy = false, inputRevision = 0, loadRevision = 0, maxXmlBytes = 20 * 1024 * 1024;
 const token = () => $('api-token').value.trim();
 const headers = () => token() ? { Authorization: `Bearer ${token()}` } : {};
 function invalidateReport() {
+  inputRevision++; loadRevision++;
   latestReport = null; $('report').hidden = true; $('empty-results').hidden = false;
 }
 const size = (value) => new TextEncoder().encode(value).length;
@@ -24,7 +25,11 @@ async function connect() {
   try {
     const response = await fetch('/v1/profiles', { headers: headers() });
     if (!response.ok) throw new Error(response.status === 401 ? 'This service requires an API token. Enter it under Service authentication.' : 'Unable to load validation profiles.');
-    profiles = (await response.json()).profiles;
+    const configuration = await response.json();
+    profiles = configuration.profiles;
+    maxXmlBytes = configuration.limits?.maxXmlBytes || 20 * 1024 * 1024;
+    $('upload-limit').textContent = `UTF-8 XML · up to ${maxXmlBytes / 1024 / 1024} MiB`;
+    invalidateReport();
     $('profile').replaceChildren(...profiles.map((p) => { const option = document.createElement('option'); option.value = p.id; option.textContent = p.name; option.selected = p.id === 'ccda-5.0'; return option; }));
     $('profile').disabled = false;
     $('connection').replaceChildren();
@@ -75,9 +80,10 @@ function renderReport(report) {
 async function loadFile(file) {
   if (busy) return;
   if (!file) return;
-  if (file.size > 5 * 1024 * 1024) { notice('Choose an XML document smaller than 5 MiB.'); return; }
-  try { $('xml').value = new TextDecoder('utf-8', { fatal: true }).decode(await file.arrayBuffer()); $('file-name').textContent = file.name; invalidateReport(); notice(); updateEditor(); }
-  catch { notice('The file must be UTF-8 encoded XML.'); }
+  const revision = ++loadRevision;
+  if (file.size > maxXmlBytes) { notice(`Choose an XML document at most ${maxXmlBytes.toLocaleString()} bytes (${maxXmlBytes / 1024 / 1024} MiB).`); return; }
+  try { const xml = new TextDecoder('utf-8', { fatal: true }).decode(await file.arrayBuffer()); if (busy || revision !== loadRevision) return; $('xml').value = xml; $('file-name').textContent = file.name; invalidateReport(); notice(); updateEditor(); }
+  catch { if (!busy && revision === loadRevision) notice('The file must be UTF-8 encoded XML.'); }
 }
 $('xml').addEventListener('input', () => { $('file-name').textContent = 'Pasted document'; invalidateReport(); updateEditor(); });
 $('xml').addEventListener('scroll', () => { $('line-numbers').scrollTop = $('xml').scrollTop; });
@@ -88,18 +94,33 @@ $('connect').addEventListener('click', connect);
 $('dropzone').addEventListener('dragover', (event) => { event.preventDefault(); $('dropzone').classList.add('dragover'); });
 $('dropzone').addEventListener('dragleave', () => $('dropzone').classList.remove('dragover'));
 $('dropzone').addEventListener('drop', (event) => { event.preventDefault(); $('dropzone').classList.remove('dragover'); loadFile(event.dataTransfer.files[0]); });
-$('clear').onclick = () => { $('xml').value = ''; $('file-name').textContent = 'Untitled document'; latestReport = null; $('report').hidden = true; $('empty-results').hidden = false; notice(); updateEditor(); };
-$('load-example').onclick = async () => { try { const response = await fetch('/sample.xml'); if (!response.ok) throw new Error(); $('xml').value = await response.text(); $('file-name').textContent = 'example-with-errors.xml'; invalidateReport(); notice('This synthetic example intentionally contains errors to demonstrate the report.'); updateEditor(); } catch { notice('Could not load the example document.'); } };
+$('clear').onclick = () => { invalidateReport(); $('xml').value = ''; $('file-name').textContent = 'Untitled document'; latestReport = null; $('report').hidden = true; $('empty-results').hidden = false; notice(); updateEditor(); };
+$('load-example').onclick = async () => {
+  if (busy) return;
+  const revision = ++loadRevision;
+  try {
+    const response = await fetch('/sample.xml'); if (!response.ok) throw new Error();
+    const xml = await response.text();
+    if (busy || revision !== loadRevision) return;
+    $('xml').value = xml; $('file-name').textContent = 'example-with-errors.xml'; invalidateReport();
+    notice('This synthetic example intentionally contains errors to demonstrate the report.'); updateEditor();
+  } catch { if (!busy && revision === loadRevision) notice('Could not load the example document.'); }
+};
 $('validate').onclick = async () => {
+  if (busy) return;
   invalidateReport();
+  const revision = inputRevision;
+  const input = { xml: $('xml').value, profile: $('profile').value, includeWarnings: $('warnings').checked };
+  const isCurrent = () => revision === inputRevision && input.xml === $('xml').value && input.profile === $('profile').value && input.includeWarnings === $('warnings').checked;
   busy = true; document.body.classList.add('busy'); $('results').setAttribute('aria-busy', 'true'); $('validate').firstElementChild.textContent = 'Checking your document…'; updateEditor(); notice();
   for (const id of ['xml', 'file', 'profile', 'warnings', 'clear', 'load-example']) $(id).disabled = true;
   try {
-    const response = await fetch('/v1/validate', { method: 'POST', headers: { ...headers(), 'Content-Type': 'application/json' }, body: JSON.stringify({ xml: $('xml').value, profile: $('profile').value, includeWarnings: $('warnings').checked }) });
+    const response = await fetch('/v1/validate', { method: 'POST', headers: { ...headers(), 'Content-Type': 'application/json' }, body: JSON.stringify(input) });
     const report = await response.json();
+    if (!isCurrent()) return;
     if (report.findings && report.profile) { renderReport(report); if (!response.ok) notice(report.error || 'The engine could not finish every validation stage.'); }
     else throw new Error(report.error || 'Validation could not complete.');
-  } catch (error) { notice(error.message || 'The service could not be reached.'); }
+  } catch (error) { if (isCurrent()) notice(error.message || 'The service could not be reached.'); }
   finally { busy = false; for (const id of ['xml', 'file', 'profile', 'warnings', 'clear', 'load-example']) $(id).disabled = false; document.body.classList.remove('busy'); $('results').setAttribute('aria-busy', 'false'); $('validate').firstElementChild.textContent = 'Validate document'; updateEditor(); }
 };
 $('api-link').onclick = () => $('api-dialog').showModal(); $('close-api').onclick = () => $('api-dialog').close();

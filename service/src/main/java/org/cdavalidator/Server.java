@@ -12,6 +12,8 @@ import java.util.concurrent.*;
 
 /** Small stateless HTTP adapter. Submitted documents and findings are never logged or stored. */
 public final class Server implements AutoCloseable {
+    // JSON can encode each ASCII XML byte as six bytes (JSON Unicode escapes), plus metadata.
+    static final int MAX_REQUEST_BYTES = 6 * ValidationEngine.MAX_BYTES + 64 * 1024;
     final HttpServer server;
     final ValidationEngine engine;
     final ThreadPoolExecutor workers;
@@ -51,7 +53,7 @@ public final class Server implements AutoCloseable {
                 switch (path) {
                     case "/health/live" -> json(exchange, 200, Map.of("status", "live"));
                     case "/health/ready" -> json(exchange, 200, Map.of("status", "ready", "profiles", engine.profiles.size()));
-                    case "/v1/profiles" -> json(exchange, 200, Map.of("profiles", engine.profileInfo(), "sources", engine.manifest.get("sources")));
+                    case "/v1/profiles" -> json(exchange, 200, Map.of("profiles", engine.profileInfo(), "sources", engine.manifest.get("sources"), "limits", Map.of("maxXmlBytes", ValidationEngine.MAX_BYTES, "maxRequestBytes", MAX_REQUEST_BYTES)));
                     case "/v1/version" -> json(exchange, 200, Map.of("version", "2.0.0-preview.1", "engine", "Saxon-HE 12.9 / SchXslt 1.10.1"));
                     case "/", "/index.html" -> file(exchange, "index.html", "text/html; charset=utf-8");
                     case "/app.js" -> file(exchange, "app.js", "text/javascript; charset=utf-8");
@@ -84,8 +86,8 @@ public final class Server implements AutoCloseable {
         }
         Future<Map<String, Object>> task = null;
         try {
-            var bytes = exchange.getRequestBody().readNBytes(ValidationEngine.MAX_BYTES + 1024 * 1024 + 1);
-            if (bytes.length > ValidationEngine.MAX_BYTES + 1024 * 1024) { json(exchange, 413, Map.of("error", "Request exceeds size limit")); return; }
+            var bytes = exchange.getRequestBody().readNBytes(MAX_REQUEST_BYTES + 1);
+            if (bytes.length > MAX_REQUEST_BYTES) { json(exchange, 413, Map.of("error", "Request exceeds size limit")); return; }
             String content;
             try { content = StandardCharsets.UTF_8.newDecoder().decode(java.nio.ByteBuffer.wrap(bytes)).toString(); }
             catch (CharacterCodingException e) { json(exchange, 400, Map.of("error", "Request must be UTF-8")); return; }
@@ -102,7 +104,7 @@ public final class Server implements AutoCloseable {
             String profile = body.has("profile") ? body.get("profile").getAsString() : "ccda-5.0";
             boolean warnings = !body.has("includeWarnings") || body.get("includeWarnings").getAsBoolean();
             if (xml.isBlank()) { json(exchange, 400, Map.of("error", "XML document is required")); return; }
-            if (xml.getBytes(StandardCharsets.UTF_8).length > ValidationEngine.MAX_BYTES) { json(exchange, 413, Map.of("error", "XML exceeds 5 MiB limit")); return; }
+            if (xml.getBytes(StandardCharsets.UTF_8).length > ValidationEngine.MAX_BYTES) { json(exchange, 413, Map.of("error", "XML exceeds configured limit of " + ValidationEngine.MAX_BYTES + " bytes")); return; }
             if (!engine.profiles.containsKey(profile)) { json(exchange, 422, Map.of("error", "Unknown profile", "available", engine.profiles.keySet())); return; }
             task = workers.submit(() -> engine.validate(xml, profile, warnings));
             var report = task.get(30, TimeUnit.SECONDS);

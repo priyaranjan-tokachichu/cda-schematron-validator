@@ -5,7 +5,7 @@
   "paths": {
     "/v1/validate": {"post": {
       "operationId": "validateDocument", "summary": "Validate one UTF-8 CDA XML document",
-      "description": "Runs strict XML parsing, the pinned CDA XSD, and the selected full HL7 Schematron. Maximum XML size 5 MiB; maximum 2,000 findings. Supply Authorization: Bearer TOKEN when API_TOKEN is configured. Request deadlines are 30 seconds; cancellation is cooperative. Unknown profiles are rejected rather than guessed.",
+      "description": "Runs strict XML parsing, the pinned CDA XSD, and the selected full HL7 Schematron. Default maximum decoded UTF-8 XML size 20 MiB, configurable with MAX_XML_MIB. GET /v1/profiles advertises active limits. Serialized JSON allowance is six times the XML limit plus 64 KiB to allow escaping; maximum 2,000 findings. Supply Authorization: Bearer TOKEN when API_TOKEN is configured. Request deadlines are 30 seconds; cancellation is cooperative. Unknown profiles are rejected rather than guessed.",
       "security": [{"bearerAuth": []}, {}],
       "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "required": ["xml"], "properties": {
         "xml": {"type": "string", "minLength": 1, "description": "XML text, never a file path or URL"},

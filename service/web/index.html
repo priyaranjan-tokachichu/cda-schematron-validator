@@ -8,7 +8,7 @@
     <section class="workspace" aria-label="Validation workspace">
       <div class="document-panel">
         <div class="panel-header"><div><span class="step">01</span><h2>Your document</h2></div><button class="text-button" id="load-example">Try an example ↗</button></div>
-        <label class="dropzone" id="dropzone" for="file"><span class="upload-icon">↥</span><strong>Choose an XML file</strong><span>or drag and drop it here</span><small>UTF-8 XML · up to 5 MiB</small><input type="file" id="file" accept=".xml,application/xml,text/xml"></label>
+        <label class="dropzone" id="dropzone" for="file"><span class="upload-icon">↥</span><strong>Choose an XML file</strong><span>or drag and drop it here</span><small id="upload-limit">UTF-8 XML · up to 20 MiB</small><input type="file" id="file" accept=".xml,application/xml,text/xml"></label>
         <div class="editor-heading"><label for="xml">OR PASTE XML</label><span id="file-name">Untitled document</span></div>
         <div class="editor"><pre id="line-numbers" aria-hidden="true">1</pre><textarea id="xml" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="XML document" placeholder="<?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#10;<ClinicalDocument xmlns=&quot;urn:hl7-org:v3&quot;>&#10;  <!-- Your clinical document goes here -->&#10;</ClinicalDocument>"></textarea></div>
         <div class="editor-footer"><span id="document-size">0 lines · 0 bytes</span><button class="text-button" id="clear">Clear document</button></div>
