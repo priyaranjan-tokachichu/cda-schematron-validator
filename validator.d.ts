@@ -74,12 +74,13 @@ export interface ValidationReport {
   profile: Profile;
   engine: Record<string, string>;
   sources: Array<{id: string; release: string; url: string; sha256: string}>;
+  uploadQueueWaitMs?: number;
   durationMs: number;
   validatedAt: string;
 }
 export interface Client {
   validate(xml: string, options?: {profile?: string; includeWarnings?: boolean}): Promise<ValidationReport>;
-  profiles(): Promise<{profiles: Profile[]; sources: ValidationReport['sources']}>;
+  profiles(): Promise<{profiles: Profile[]; sources: ValidationReport['sources']; limits?: {maxXmlBytes: number; maxRequestBytes: number; uploadMemoryBudgetBytes: number; maxConcurrentUploads: number; requestCapacity: number; uploadQueueWaitSeconds: number}}>;
   version(): Promise<{version: string; engine: string}>;
 }
 export function createClient(options?: {baseUrl?: string; token?: string; timeoutMs?: number}): Client;

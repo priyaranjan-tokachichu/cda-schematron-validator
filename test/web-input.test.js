@@ -8,7 +8,7 @@ async function workspace(maxXmlBytes = 20 * 1024 * 1024) {
   const node = () => ({ value: '', checked: true, hidden: false, disabled: false, firstElementChild: { textContent: '' }, classList: { add() {}, remove() {} }, listeners: {}, addEventListener(type, fn) { this.listeners[type] = fn; }, setAttribute() {}, replaceChildren() {}, append() {} });
   const get = id => { if (!nodes.has(id)) nodes.set(id, node()); return nodes.get(id); };
   const pending = [];
-  const context = vm.createContext({ TextEncoder, TextDecoder, console, document: { getElementById: get, body: node(), createElement: node, createTextNode: node }, fetch: (url, options) => { if (url === '/v1/profiles') return Promise.resolve({ ok: true, json: async () => ({ profiles: [], limits: { maxXmlBytes } }) }); const d = deferred(); pending.push({ url, options, ...d }); return d.promise; } });
+  const context = vm.createContext({ TextEncoder, TextDecoder, console, document: { getElementById: get, body: node(), createElement: node, createTextNode: node }, fetch: (url, options) => { if (url === '/v1/profiles') return Promise.resolve({ ok: true, json: async () => ({ profiles: [], limits: { maxXmlBytes, requestCapacity: 6, maxConcurrentUploads: 1, uploadQueueWaitSeconds: 30 } }) }); const d = deferred(); pending.push({ url, options, ...d }); return d.promise; } });
   vm.runInContext(fs.readFileSync('service/web/app.js', 'utf8'), context);
   vm.runInContext('renderReport = report => { latestReport = report; };', context);
   await new Promise(setImmediate);
@@ -65,4 +65,11 @@ test('upload allowance and label follow the server configuration', async () => {
   await load({ size: 41 * 1024 * 1024, name: 'large.xml', arrayBuffer: () => { throw new Error('must not read oversized input'); } });
   assert.equal(w.get('xml').value, '<allowed/>');
   assert.match(w.get('notice').textContent, /40 MiB/);
+});
+
+test('service capacity explains automatic queuing and heap tuning', async () => {
+  const w = await workspace();
+  assert.match(w.get('capacity-note').textContent, /accepts up to 6 requests/);
+  assert.match(w.get('capacity-note').textContent, /wait in the queue for up to 30 seconds/);
+  assert.match(w.get('capacity-note').textContent, /Increase the Java heap and container memory/);
 });

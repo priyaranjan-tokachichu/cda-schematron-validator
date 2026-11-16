@@ -81,7 +81,7 @@ try:
                 process.stdin.write(b'\\u000a' * (padding % block_count))
                 process.stdin.write(suffix)
             except BrokenPipeError:
-                pass  # Early HTTP 429 intentionally stops the upload.
+                pass  # A transport failure will be reported by the status assertion below.
             finally:
                 try:
                     process.stdin.close()
@@ -92,17 +92,19 @@ try:
             process.wait(timeout=65)
             body, code = stdout.rsplit('\n', 1)
             status = int(code)
-            assert status in (200, 429), (status, stderr, body[:200])
+            assert status == 200, (status, stderr, body[:200])
             report = json.loads(body)
             if status == 200:
                 assert report['executionComplete']
-            return status
+            return {'httpStatus': status, 'uploadQueueWaitMs': report['uploadQueueWaitMs']}
         with ThreadPoolExecutor(max_workers=6) as executor:
-            statuses = list(executor.map(upload, range(6)))
-        assert 200 in statuses and 429 in statuses, statuses
+            results = list(executor.map(upload, range(6)))
+        statuses = [result['httpStatus'] for result in results]
+        assert statuses == [200] * 6, statuses
+        assert any(result['uploadQueueWaitMs'] > 0 for result in results)
         assert get('/health/ready')['status'] == 'ready'
         rounds.append({'framing': framing, 'uploads': 6, 'decodedXmlBytesEach': limits['maxXmlBytes'],
-                       'serializedJsonBytesEach': wire_bytes, 'httpStatuses': statuses})
+                       'serializedJsonBytesEach': wire_bytes, 'httpStatuses': statuses, 'uploadQueueWaitMs': [result['uploadQueueWaitMs'] for result in results]})
         print(f'{framing}: {statuses}; readiness healthy', flush=True)
     request = urllib.request.Request(base + '/v1/validate', data=json.dumps({'xml': sample}).encode(), headers={'Content-Type': 'application/json'})
     with urllib.request.urlopen(request, timeout=35) as response:

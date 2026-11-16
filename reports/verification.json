@@ -1,5 +1,5 @@
 {
-  "verifiedAt": "2026-11-16T15:26:45.350934+00:00",
+  "verifiedAt": "2026-11-16T15:34:25.097547+00:00",
   "checks": [
     {
       "name": "JavaScript API, isolation, and HTTP client tests",
@@ -42,7 +42,7 @@
       "status": "passed"
     }
   ],
-  "javascriptTests": 62,
+  "javascriptTests": 63,
   "javaTests": 20,
   "browserChecks": [
     "XML file chooser upload",
@@ -56,7 +56,8 @@
     "Malformed XML displays the precise parser error",
     "20 MiB active upload allowance displayed",
     "Example validation succeeds after review fixes",
-    "Editing XML hides the previously rendered report after review fixes"
+    "Editing XML hides the previously rendered report after review fixes",
+    "Service capacity panel displays bounded queuing and Java heap/container memory guidance"
   ],
   "npmVulnerabilities": {
     "info": 0,
@@ -74,7 +75,7 @@
     "memoryBytes": 1610612736,
     "nanoCpus": 2000000000,
     "health": "healthy",
-    "startupLog": "CDA Validator ready at http://0.0.0.0:17643 (profiles compiled in 3.7s)"
+    "startupLog": "CDA Validator ready at http://0.0.0.0:17643 (profiles compiled in 4.2s)"
   },
   "exampleResult": {
     "status": "invalid",
@@ -113,10 +114,10 @@
       }
     },
     "engine": {
+      "schxslt": "1.10.1",
       "name": "Saxon-HE / SchXslt",
       "saxon": "12.9",
-      "schemaRelease": "20260205_SDTC",
-      "schxslt": "1.10.1"
+      "schemaRelease": "20260205_SDTC"
     }
   }
 }

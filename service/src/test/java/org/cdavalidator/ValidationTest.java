@@ -124,32 +124,44 @@ class ValidationTest {
             assertThrows(IllegalArgumentException.class, () -> ValidationEngine.xmlLimit(invalid));
     }
 
-    @Test void uploadBudgetRejectsExcessReadersAndRecoversAfterDisconnects() throws Exception {
+
+    @Test void uploadBudgetQueuesAdmittedRequestsBoundsOverflowAndRecoversAfterDisconnects() throws Exception {
         try (var app = new Server(new InetSocketAddress("127.0.0.1",0), assets, Path.of("web"),2,null, 2 * (8L * ValidationEngine.MAX_BYTES + 128 * 1024))) {
             app.start(); var client = HttpClient.newHttpClient(); String base="http://127.0.0.1:"+app.port();
-            int slots = Math.min(6, app.uploadBudgetKiB / app.uploadReservationKiB);
-            assertTrue(slots > 0 && slots < 6, "Use the explicitly constrained upload budget");
+            int slots = app.uploadBudgetKiB / app.uploadReservationKiB;
             var sockets = new ArrayList<Socket>();
+            CompletableFuture<HttpResponse<String>> queued = null;
             try {
-                for (int i=0; i<slots; i++) {
-                    var socket = new Socket("127.0.0.1",app.port()); sockets.add(socket);
-                    socket.getOutputStream().write(("POST /v1/validate HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: "+Server.MAX_REQUEST_BYTES+"\r\n\r\n{\"xml\":\"").getBytes(java.nio.charset.StandardCharsets.UTF_8));
-                    socket.getOutputStream().flush();
-                }
+                for (int i=0; i<slots; i++) sockets.add(pendingUpload(app));
                 long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(5);
                 while (app.uploadMemory.availablePermits() >= app.uploadReservationKiB && System.nanoTime()<deadline) Thread.sleep(10);
                 assertTrue(app.uploadMemory.availablePermits() < app.uploadReservationKiB);
-                var request=HttpRequest.newBuilder(URI.create(base+"/v1/validate")).timeout(java.time.Duration.ofSeconds(5)).header("Content-Type","application/json");
-                var response=client.send(request.POST(HttpRequest.BodyPublishers.ofString(ValidationEngine.JSON.toJson(Map.of("xml",GOOD,"profile","test")))).build(),HttpResponse.BodyHandlers.ofString());
-                assertEquals(429,response.statusCode()); assertEquals("2",response.headers().firstValue("Retry-After").orElseThrow());
+                var request=HttpRequest.newBuilder(URI.create(base+"/v1/validate")).timeout(java.time.Duration.ofSeconds(10)).header("Content-Type","application/json");
+                queued=client.sendAsync(request.POST(HttpRequest.BodyPublishers.ofString(ValidationEngine.JSON.toJson(Map.of("xml",GOOD,"profile","test")))).build(),HttpResponse.BodyHandlers.ofString());
+                Thread.sleep(100);
+                assertFalse(queued.isDone(),"Memory contention should queue the accepted request");
                 assertEquals(200,client.send(HttpRequest.newBuilder(URI.create(base+"/health/ready")).GET().build(),HttpResponse.BodyHandlers.ofString()).statusCode());
+                for (int i=slots+1; i<6; i++) sockets.add(pendingUpload(app));
+                deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(5);
+                while (app.admission.availablePermits()!=0 && System.nanoTime()<deadline) Thread.sleep(10);
+                assertEquals(0,app.admission.availablePermits());
+                var overflow=client.send(request.POST(HttpRequest.BodyPublishers.ofString(ValidationEngine.JSON.toJson(Map.of("xml",GOOD,"profile","test")))).build(),HttpResponse.BodyHandlers.ofString());
+                assertEquals(429,overflow.statusCode());
+                assertEquals("2",overflow.headers().firstValue("Retry-After").orElseThrow());
             } finally { for (var socket : sockets) socket.close(); }
+            assertNotNull(queued);
+            var result=queued.get(10,TimeUnit.SECONDS);
+            assertEquals(200,result.statusCode());
+            assertTrue(JsonParser.parseString(result.body()).getAsJsonObject().get("uploadQueueWaitMs").getAsLong() >= 100);
             long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(5);
             while (app.admission.availablePermits()!=6 && System.nanoTime()<deadline) Thread.sleep(10);
             assertEquals(app.uploadBudgetKiB,app.uploadMemory.availablePermits());
-            var request=HttpRequest.newBuilder(URI.create(base+"/v1/validate")).header("Content-Type","application/json");
-            assertEquals(200,client.send(request.POST(HttpRequest.BodyPublishers.ofString(ValidationEngine.JSON.toJson(Map.of("xml",GOOD,"profile","test")))).build(),HttpResponse.BodyHandlers.ofString()).statusCode());
         }
     }
-
+    static Socket pendingUpload(Server app) throws Exception {
+        var socket = new Socket("127.0.0.1",app.port());
+        socket.getOutputStream().write(("POST /v1/validate HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: "+Server.MAX_REQUEST_BYTES+"\r\n\r\n{\"xml\":\"").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        socket.getOutputStream().flush();
+        return socket;
+    }
 }

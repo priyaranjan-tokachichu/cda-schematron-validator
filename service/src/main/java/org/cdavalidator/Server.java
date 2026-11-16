@@ -12,6 +12,7 @@ import java.util.concurrent.*;
 /** Small stateless HTTP adapter. Submitted documents and findings are never logged or stored. */
 public final class Server implements AutoCloseable {
     // JSON can encode each ASCII XML byte as six bytes (JSON Unicode escapes), plus metadata.
+    static final int UPLOAD_QUEUE_SECONDS = 30;
     static final int MAX_REQUEST_BYTES = 6 * ValidationEngine.MAX_BYTES + 64 * 1024;
     final HttpServer server;
     final ValidationEngine engine;
@@ -31,7 +32,7 @@ public final class Server implements AutoCloseable {
     }
     Server(InetSocketAddress address, Path assets, Path web, int concurrency, String token, long uploadBudgetBytes) throws Exception {
         uploadBudgetKiB = (int)Math.min(Integer.MAX_VALUE, uploadBudgetBytes / 1024);
-        uploadMemory = new Semaphore(uploadBudgetKiB);
+        uploadMemory = new Semaphore(uploadBudgetKiB, true);
         if (uploadReservationKiB > uploadBudgetKiB) throw new IllegalArgumentException("Configured XML size requires a larger Java heap for upload decoding");
         this.engine = new ValidationEngine(assets);
         this.web = web.toAbsolutePath().normalize();
@@ -75,7 +76,7 @@ public final class Server implements AutoCloseable {
                 switch (path) {
                     case "/health/live" -> json(exchange, 200, Map.of("status", "live"));
                     case "/health/ready" -> json(exchange, 200, Map.of("status", "ready", "profiles", engine.profiles.size()));
-                    case "/v1/profiles" -> json(exchange, 200, Map.of("profiles", engine.profileInfo(), "sources", engine.manifest.get("sources"), "limits", Map.of("maxXmlBytes", ValidationEngine.MAX_BYTES, "maxRequestBytes", MAX_REQUEST_BYTES, "uploadMemoryBudgetBytes", 1024L * uploadBudgetKiB, "maxConcurrentUploads", Math.min(workers.getMaximumPoolSize() * 3, uploadBudgetKiB / uploadReservationKiB))));
+                    case "/v1/profiles" -> json(exchange, 200, Map.of("profiles", engine.profileInfo(), "sources", engine.manifest.get("sources"), "limits", Map.of("maxXmlBytes", ValidationEngine.MAX_BYTES, "maxRequestBytes", MAX_REQUEST_BYTES, "uploadMemoryBudgetBytes", 1024L * uploadBudgetKiB, "maxConcurrentUploads", Math.min(workers.getMaximumPoolSize() * 3, uploadBudgetKiB / uploadReservationKiB), "requestCapacity", workers.getMaximumPoolSize() * 3, "uploadQueueWaitSeconds", UPLOAD_QUEUE_SECONDS)));
                     case "/v1/version" -> json(exchange, 200, Map.of("version", "2.0.0-preview.1", "engine", "Saxon-HE 12.9 / SchXslt 1.10.1"));
                     case "/", "/index.html" -> file(exchange, "index.html", "text/html; charset=utf-8");
                     case "/app.js" -> file(exchange, "app.js", "text/javascript; charset=utf-8");
@@ -111,10 +112,12 @@ public final class Server implements AutoCloseable {
             String contentType = Optional.ofNullable(exchange.getRequestHeaders().getFirst("Content-Type")).orElse("").split(";")[0].strip();
             if (!contentType.equals("application/json")) { json(exchange, 415, Map.of("error", "Send application/json with xml and profile fields")); return; }
             int reservation = uploadReservation(exchange);
-            if (!uploadMemory.tryAcquire(reservation)) {
+            long queueStart = System.nanoTime();
+            if (!uploadMemory.tryAcquire(reservation, UPLOAD_QUEUE_SECONDS, TimeUnit.SECONDS)) {
                 exchange.getResponseHeaders().set("Retry-After", "2");
-                json(exchange, 429, Map.of("error", "Upload memory capacity reached; retry shortly")); return;
+                json(exchange, 503, Map.of("error", "Upload queue wait exceeded 30 seconds; retry later")); return;
             }
+            long uploadQueueWaitMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - queueStart);
             ValidationRequest body;
             try { body = ValidationRequest.read(exchange.getRequestBody()); }
             finally { uploadMemory.release(reservation); }
@@ -125,6 +128,7 @@ public final class Server implements AutoCloseable {
             if (!engine.profiles.containsKey(profile)) { json(exchange, 422, Map.of("error", "Unknown profile", "available", engine.profiles.keySet())); return; }
             task = workers.submit(() -> engine.validate(xml, profile, warnings));
             var report = task.get(30, TimeUnit.SECONDS);
+            report.put("uploadQueueWaitMs", uploadQueueWaitMs);
             @SuppressWarnings("unchecked") var stages = (List<Map<String, Object>>) report.get("stages");
             boolean engineFailure = stages.stream().anyMatch(stage -> "failed".equals(stage.get("status")) && "schematron".equals(stage.get("name")));
             json(exchange, engineFailure ? 500 : 200, report);
@@ -135,6 +139,9 @@ public final class Server implements AutoCloseable {
         } catch (TimeoutException e) {
             if (task != null) task.cancel(true);
             json(exchange, 504, Map.of("error", "Validation deadline exceeded", "status", "execution-error", "validationComplete", false));
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            json(exchange, 503, Map.of("error", "Queued request interrupted; service is stopping"));
         } catch (RejectedExecutionException e) {
             json(exchange, 429, Map.of("error", "Validation capacity reached"));
         } catch (Exception e) {
@@ -162,13 +169,24 @@ public final class Server implements AutoCloseable {
     static void json(HttpExchange exchange, int code, Object value) throws IOException {
         byte[] data = ValidationEngine.JSON.toJson(value).getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
+        if (code >= 400) exchange.getResponseHeaders().set("Connection", "close");
         exchange.sendResponseHeaders(code, data.length);
         exchange.getResponseBody().write(data);
+        exchange.getResponseBody().flush();
+        if (code >= 400) {
+            // Deliver early errors before draining unread upload bytes, without buffering them.
+            // This avoids resetting a normal client's connection with its error body unflushed.
+            byte[] discard = new byte[8192];
+            int remaining = MAX_REQUEST_BYTES + 1;
+            try {
+                for (int n; remaining > 0 && (n = exchange.getRequestBody().read(discard, 0, Math.min(discard.length, remaining))) >= 0;) remaining -= n;
+            } catch (IOException ignored) { /* The client may stop sending after receiving the error. */ }
+        }
     }
     @Override public void close() { server.stop(1); workers.shutdownNow(); requests.shutdownNow(); }
     public static void main(String[] args) throws Exception {
-        System.setProperty("sun.net.httpserver.maxReqTime", "35");
-        System.setProperty("sun.net.httpserver.maxRspTime", "40");
+        System.setProperty("sun.net.httpserver.maxReqTime", "65");
+        System.setProperty("sun.net.httpserver.maxRspTime", "70");
         System.setProperty("jdk.httpserver.maxConnections", "128");
         String bind = System.getenv().getOrDefault("HOST", "127.0.0.1");
         int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "17643"));

@@ -28,6 +28,7 @@ async function connect() {
     const configuration = await response.json();
     profiles = configuration.profiles;
     maxXmlBytes = configuration.limits?.maxXmlBytes || 20 * 1024 * 1024;
+    if (configuration.limits?.requestCapacity) $('capacity-note').textContent = `This service accepts up to ${configuration.limits.requestCapacity} requests at once and decodes up to ${configuration.limits.maxConcurrentUploads} maximum-size uploads concurrently. Busy uploads wait in the queue for up to ${configuration.limits.uploadQueueWaitSeconds} seconds. Increase the Java heap and container memory to allow more large uploads concurrently; validation speed also depends on CPU and document complexity.`;
     $('upload-limit').textContent = `UTF-8 XML · up to ${maxXmlBytes / 1024 / 1024} MiB`;
     invalidateReport();
     $('profile').replaceChildren(...profiles.map((p) => { const option = document.createElement('option'); option.value = p.id; option.textContent = p.name; option.selected = p.id === 'ccda-5.0'; return option; }));
@@ -67,7 +68,7 @@ function renderReport(report) {
   latestReport = report; selectedFilter = 'all'; $('empty-results').hidden = true; $('report').hidden = false; $('report').replaceChildren();
   const banner = element('div', `report-banner status-${report.status}`), intro = element('div');
   const title = report.status === 'invalid' ? 'Your document needs attention.' : report.status === 'valid' ? 'The configured checks passed.' : 'No errors found. Coverage is incomplete.';
-  intro.append(element('h3', '', title), element('p', '', `${report.profile.name} · ${report.profile.release} · ${report.durationMs} ms`));
+  intro.append(element('h3', '', title), element('p', '', `${report.profile.name} · ${report.profile.release} · ${report.durationMs} ms${report.uploadQueueWaitMs ? ` · upload queue ${report.uploadQueueWaitMs} ms` : ''}`));
   const stats = element('div', 'stats');
   for (const [label, value, cls] of [['Errors', report.summary.errors, 'error'], ['Warnings', report.summary.warnings, 'warning'], ['Rules fired', report.summary.firedRules, '']]) { const stat = element('div', `stat ${cls}`); stat.append(element('strong', '', value.toLocaleString()), element('span', '', label)); stats.append(stat); }
   banner.append(intro, stats); $('report').append(banner);
@@ -112,7 +113,7 @@ $('validate').onclick = async () => {
   const revision = inputRevision;
   const input = { xml: $('xml').value, profile: $('profile').value, includeWarnings: $('warnings').checked };
   const isCurrent = () => revision === inputRevision && input.xml === $('xml').value && input.profile === $('profile').value && input.includeWarnings === $('warnings').checked;
-  busy = true; document.body.classList.add('busy'); $('results').setAttribute('aria-busy', 'true'); $('validate').firstElementChild.textContent = 'Checking your document…'; updateEditor(); notice();
+  busy = true; document.body.classList.add('busy'); $('results').setAttribute('aria-busy', 'true'); $('validate').firstElementChild.textContent = 'Queued or validating your document…'; updateEditor(); notice();
   for (const id of ['xml', 'file', 'profile', 'warnings', 'clear', 'load-example']) $(id).disabled = true;
   try {
     const response = await fetch('/v1/validate', { method: 'POST', headers: { ...headers(), 'Content-Type': 'application/json' }, body: JSON.stringify(input) });

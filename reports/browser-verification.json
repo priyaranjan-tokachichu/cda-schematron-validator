@@ -11,7 +11,8 @@
     "Malformed XML displays the precise parser error",
     "20 MiB active upload allowance displayed",
     "Example validation succeeds after review fixes",
-    "Editing XML hides the previously rendered report after review fixes"
+    "Editing XML hides the previously rendered report after review fixes",
+    "Service capacity panel displays bounded queuing and Java heap/container memory guidance"
   ],
   "method": "Interactive browser checks with the synthetic example; screenshots saved in this directory."
 }
