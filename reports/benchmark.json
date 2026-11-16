@@ -1,0 +1,80 @@
+{
+  "measuredAt": "2026-11-16T06:52:27.321561+00:00",
+  "hostPlatform": "Darwin",
+  "architecture": "arm64",
+  "method": "15 warmup requests per fixture, followed by independent HTTP POST requests; full XSD and Schematron; no document-result cache; loopback HTTP; limited examples, not an industry-wide ranking.",
+  "results": [
+    {
+      "fixture": "service/web/sample.xml",
+      "profile": "ccda-5.0",
+      "bytes": 913,
+      "requests": 100,
+      "concurrency": 1,
+      "requestsPerSecond": 223.93,
+      "httpP50Ms": 4.11,
+      "httpP95Ms": 5.9,
+      "engineP50Ms": 2.86,
+      "consistentErrorCounts": true
+    },
+    {
+      "fixture": "service/web/sample.xml",
+      "profile": "ccda-5.0",
+      "bytes": 913,
+      "requests": 100,
+      "concurrency": 2,
+      "requestsPerSecond": 248.82,
+      "httpP50Ms": 5.37,
+      "httpP95Ms": 23.0,
+      "engineP50Ms": 3.26,
+      "consistentErrorCounts": true
+    },
+    {
+      "fixture": "service/web/sample.xml",
+      "profile": "ccda-5.0",
+      "bytes": 913,
+      "requests": 100,
+      "concurrency": 4,
+      "requestsPerSecond": 389.07,
+      "httpP50Ms": 6.46,
+      "httpP95Ms": 47.18,
+      "engineP50Ms": 3.2,
+      "consistentErrorCounts": true
+    },
+    {
+      "fixture": "test/VitalSigns.xml",
+      "profile": "ccda-2.1",
+      "bytes": 37647,
+      "requests": 100,
+      "concurrency": 1,
+      "requestsPerSecond": 65.18,
+      "httpP50Ms": 15.3,
+      "httpP95Ms": 16.54,
+      "engineP50Ms": 12.84,
+      "consistentErrorCounts": true
+    },
+    {
+      "fixture": "test/VitalSigns.xml",
+      "profile": "ccda-2.1",
+      "bytes": 37647,
+      "requests": 100,
+      "concurrency": 2,
+      "requestsPerSecond": 121.23,
+      "httpP50Ms": 15.92,
+      "httpP95Ms": 17.52,
+      "engineP50Ms": 13.02,
+      "consistentErrorCounts": true
+    },
+    {
+      "fixture": "test/VitalSigns.xml",
+      "profile": "ccda-2.1",
+      "bytes": 37647,
+      "requests": 100,
+      "concurrency": 4,
+      "requestsPerSecond": 131.69,
+      "httpP50Ms": 26.66,
+      "httpP95Ms": 44.21,
+      "engineP50Ms": 13.09,
+      "consistentErrorCounts": true
+    }
+  ]
+}

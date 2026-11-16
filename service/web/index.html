@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Local CDA and C-CDA XML validation with clear, traceable findings."><title>CDA Validator — Validation workspace</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body>
+  <header class="site-header"><a class="brand" href="/" aria-label="CDA Validator home"><span class="brand-mark">c<span>✓</span></span><span>CDA<span class="brand-light">validator</span></span></a><nav aria-label="Main navigation"><a class="active" href="/">Workspace</a><button id="api-link" class="nav-button">API reference</button><a href="/architecture.html" target="_blank" rel="noopener">Architecture ↗</a></nav><span class="connection" id="connection"><i></i>Connecting</span></header>
+  <main>
+    <div class="intro"><div><div class="eyebrow">CLINICAL DOCUMENT QUALITY</div><h1>Know exactly what needs fixing.</h1><p>Validate CDA XML against published HL7 schemas and Schematron.<br class="desktop-break">Every finding, traced to its rule and location.</p></div><span class="privacy-note"><span>◈</span><span>Self-hosted. Local by default.<small>Documents are not stored or logged.</small></span></span></div>
+    <section class="workspace" aria-label="Validation workspace">
+      <div class="document-panel">
+        <div class="panel-header"><div><span class="step">01</span><h2>Your document</h2></div><button class="text-button" id="load-example">Try an example ↗</button></div>
+        <label class="dropzone" id="dropzone" for="file"><span class="upload-icon">↥</span><strong>Choose an XML file</strong><span>or drag and drop it here</span><small>UTF-8 XML · up to 5 MiB</small><input type="file" id="file" accept=".xml,application/xml,text/xml"></label>
+        <div class="editor-heading"><label for="xml">OR PASTE XML</label><span id="file-name">Untitled document</span></div>
+        <div class="editor"><pre id="line-numbers" aria-hidden="true">1</pre><textarea id="xml" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="XML document" placeholder="<?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#10;<ClinicalDocument xmlns=&quot;urn:hl7-org:v3&quot;>&#10;  <!-- Your clinical document goes here -->&#10;</ClinicalDocument>"></textarea></div>
+        <div class="editor-footer"><span id="document-size">0 lines · 0 bytes</span><button class="text-button" id="clear">Clear document</button></div>
+      </div>
+      <aside class="configuration-panel"><div class="panel-header"><div><span class="step">02</span><h2>Validation settings</h2></div></div>
+        <label class="field-label" for="profile">IMPLEMENTATION GUIDE</label><select id="profile" disabled><option>Loading profiles…</option></select><p class="field-help" id="profile-release">Loading pinned validation resources.</p>
+        <div class="pipeline"><div><span class="pipeline-icon">01</span><span><strong>XML structure</strong><small>Well-formedness and document limits</small></span></div><div><span class="pipeline-icon">02</span><span><strong>CDA schema</strong><small>XSD with approved SDTC extensions</small></span></div><div><span class="pipeline-icon">03</span><span><strong>Template requirements</strong><small>Schematron and bundled vocabulary</small></span></div></div>
+        <label class="toggle-row"><span><strong>Include warnings</strong><small>Show advisory findings alongside errors</small></span><input id="warnings" type="checkbox" checked><span class="switch" aria-hidden="true"></span></label>
+        <details class="coverage"><summary>About validation coverage <span>↗</span></summary><ul id="limitations"></ul><p>A passing result applies to this profile’s implemented checks. It does not certify clinical accuracy.</p></details>
+        <details class="auth"><summary>Service authentication</summary><label for="api-token">Bearer token, if your service requires one</label><input type="password" id="api-token" autocomplete="off" placeholder="Optional API token"><button id="connect" class="text-button">Connect</button></details>
+        <button id="validate" class="primary-button" disabled><span>Validate document</span><span>→</span></button><p class="submit-note">Processed by this service. No external validation calls.</p>
+      </aside>
+    </section>
+    <div id="notice" class="notice" role="alert" hidden></div>
+    <section class="results" id="results" aria-live="polite" aria-busy="false"><div class="results-heading"><h2>Validation results</h2><span class="muted">Clear findings. Traceable rules.</span></div><div id="empty-results" class="empty-results"><span class="empty-icon">⌁</span><h3>A clearer picture starts here.</h3><p>Add a document and select a guide to see errors, warnings,<br>and any validation coverage gaps.</p></div><div id="report" hidden></div></section>
+    <footer><span>CDA Validator <span class="muted">/</span> Community-built document validation</span><span>This product includes software developed by Health Level Seven.</span></footer>
+  </main>
+  <dialog id="api-dialog"><div class="dialog-heading"><h2>One endpoint. Detailed findings.</h2><button id="close-api" aria-label="Close API reference">×</button></div><p>Send XML as a JSON string. The response includes stage results, severity, rule IDs, XPath locations, timing, and exact resource versions.</p><pre>POST /v1/validate
+Content-Type: application/json
+
+{
+  "xml": "&lt;ClinicalDocument …&gt;…&lt;/ClinicalDocument&gt;",
+  "profile": "ccda-5.0",
+  "includeWarnings": true
+}</pre><p>Also available: <code>GET /v1/profiles</code>, <code>GET /v1/version</code>, <code>GET /health/ready</code>.</p><a href="/openapi.json" target="_blank" rel="noopener">Open the complete OpenAPI specification ↗</a></dialog>
+</body></html>

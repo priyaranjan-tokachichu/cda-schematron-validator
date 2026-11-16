@@ -1,0 +1,119 @@
+{
+  "verifiedAt": "2026-11-16T06:52:34.440296+00:00",
+  "checks": [
+    {
+      "name": "JavaScript API, isolation, and HTTP client tests",
+      "status": "passed"
+    },
+    {
+      "name": "npm dependency audit",
+      "status": "passed"
+    },
+    {
+      "name": "TypeScript declaration check",
+      "status": "passed"
+    },
+    {
+      "name": "Java service and official-profile tests",
+      "status": "passed"
+    },
+    {
+      "name": "Compose configuration",
+      "status": "passed"
+    },
+    {
+      "name": "Official upstream release check",
+      "status": "passed"
+    },
+    {
+      "name": "OpenAPI JSON syntax",
+      "status": "passed"
+    },
+    {
+      "name": "Container readiness with both profiles loaded",
+      "status": "passed"
+    },
+    {
+      "name": "CLI, HTTP findings, locations, exit code, and upstream coverage",
+      "status": "passed"
+    },
+    {
+      "name": "Non-root, read-only container",
+      "status": "passed"
+    }
+  ],
+  "javascriptTests": 55,
+  "javaTests": 13,
+  "npmVulnerabilities": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "nodeVersion": "v26.8.2",
+  "container": {
+    "architecture": "linux",
+    "user": "10001:10001",
+    "readOnlyRoot": true,
+    "memoryBytes": 1610612736,
+    "nanoCpus": 2000000000,
+    "health": "healthy",
+    "startupLog": "CDA Validator ready at http://0.0.0.0:8080 (profiles compiled in 3.3s)"
+  },
+  "exampleResult": {
+    "status": "invalid",
+    "validationComplete": false,
+    "executionComplete": true,
+    "summary": {
+      "firedRules": 17,
+      "warnings": 7,
+      "errors": 14,
+      "findings": 21
+    },
+    "profile": {
+      "id": "ccda-5.0",
+      "name": "C-CDA 5.0",
+      "release": "2026JUL",
+      "schematron": "ccda-5.0/CCDA-5.0.sch",
+      "schema": "cda-xsd/infrastructure/cda/CDA_SDTC.xsd",
+      "limitations": [
+        "Generated Schematron is not equivalent to complete StructureDefinition or terminology validation.",
+        "Upstream generation report: 4 errors.",
+        "Upstream generation report: 4 unhandledInvariants.",
+        "Upstream generation report: 9 nonLoadedValueSets."
+      ],
+      "generationCoverage": {
+        "errors": 4,
+        "notices": 0,
+        "skippedTemplates": 0,
+        "unhandledInvariants": 4,
+        "nonLoadedValueSets": 9
+      },
+      "schemaRelease": "20260205_SDTC",
+      "compilation": "SchXslt 1.10.1; explicit phase severity; stable generated assertion IDs; XPath 1.0 backwards-compatible evaluation of these upstream releases",
+      "artifactChecksums": {
+        "schema": "d596141f0a457b7b31c1a5b4e97ae55d16bedf8c08356e644475c339263d76e7",
+        "schematron": "679bfc6bf680a5e7e6afe9086e53e18b92e67882a389590c4647c4424418efc2"
+      }
+    },
+    "engine": {
+      "saxon": "12.9",
+      "schemaRelease": "20260205_SDTC",
+      "schxslt": "1.10.1",
+      "name": "Saxon-HE / SchXslt"
+    }
+  },
+  "browserChecks": [
+    "XML file chooser upload",
+    "Example document submission",
+    "Detailed XSD and Schematron findings",
+    "Warning-only filtering",
+    "Line navigation selects the expected XML element",
+    "JSON report download parses correctly",
+    "Mobile 390px layout has no horizontal overflow",
+    "Editing XML clears stale results before another validation",
+    "Malformed XML displays the precise parser error"
+  ]
+}

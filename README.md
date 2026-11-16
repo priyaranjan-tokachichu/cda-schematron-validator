@@ -1,5 +1,129 @@
 # [cda-schematron-validator](https://github.com/priyaranjan-tokachichu/cda-schematron-validator)
 
+A self-hosted CDA validation workspace and HTTP API, with the original JavaScript Schematron API retained for existing integrations.
+
+**Modern service:** strict XML parsing → CDA XSD → full official HL7 Schematron → detailed JSON findings. The service uses Saxon-HE and SchXslt, compiles profiles at startup, and isolates every submitted document. The browser UI supports paste/upload, profile selection, errors and warnings, line navigation, and JSON report downloads.
+
+This product includes software developed by Health Level Seven.
+
+## Start the UI and API
+
+Install Docker with Compose, then run from this checkout:
+
+```sh
+docker compose up --build -d
+```
+
+Open **http://localhost:8080**. Choose an XML file or paste UTF-8 XML, select a guide, and click **Validate document**. The included synthetic example intentionally fails several rules so you can inspect the findings.
+
+The Compose configuration exposes the service on loopback only. The image includes Java, the application, and pinned validation resources; Node, Java, Maven, and Python are not required on the host when using Docker. Runtime validation makes no external validation or terminology calls. First build requires internet access to fetch checksum-verified resources and dependencies.
+
+An owner-triggered release workflow is included to publish versioned AMD64/ARM64 images to `ghcr.io/priyaranjan-tokachichu/cda-schematron-validator`, with SBOM and provenance. No public registry release has been published by this implementation; until the owner releases it, build from source using Compose. Package visibility must allow public pulls if public distribution is intended.
+
+```sh
+docker compose logs validator
+docker compose down
+```
+
+## Published profiles
+
+| Profile | Schematron release | Schema |
+| --- | --- | --- |
+| `ccda-2.1` | HL7 C-CDA 2.1 `2025SEP` | CDA R2 + SDTC `20260205_SDTC` |
+| `ccda-5.0` (default) | HL7 C-CDA 5.0 `2026JUL` | CDA R2 + SDTC `20260205_SDTC` |
+
+Sources, SHA-256 checksums, transformation metadata, and known limitations are returned by `GET /v1/profiles`. Original release archive locks are in [profiles/sources.lock.json](profiles/sources.lock.json). Files are checked at build time and verified again at service startup. Upstream resources retain their copyright and license notices; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+The C-CDA 5.0 upstream conversion report records **4 generation errors, 4 unhandled invariants, and 9 non-loaded value sets**. Its Schematron includes expansions only for value sets with fewer than 1,000 concepts. The application reports those gaps; it does not claim complete StructureDefinition or terminology validation. The C-CDA 2.1 profile checks its bundled vocabulary snapshot. Neither profile certifies clinical accuracy, regulatory compliance, or all possible terminology semantics.
+
+## Call the API
+
+```sh
+curl http://localhost:8080/v1/profiles
+
+curl http://localhost:8080/v1/validate \
+  -H 'Content-Type: application/json' \
+  --data-binary @request.json
+```
+
+`request.json`:
+
+```json
+{
+  "xml": "<ClinicalDocument xmlns=\"urn:hl7-org:v3\">...</ClinicalDocument>",
+  "profile": "ccda-5.0",
+  "includeWarnings": true
+}
+```
+
+The response includes `status`, `validationComplete`, `executionComplete`, stage results, errors/warnings, rule IDs, XPath, available line/column locations, timing, and the exact data source versions and checksums. XML snippets are not returned by the modern service. Finding messages can contain document values and should be treated as sensitive by callers.
+
+- `valid`: no errors and the selected profile's configured checks completed without recorded conversion gaps.
+- `invalid`: validation found errors; inspect completeness separately.
+- `incomplete`: no errors found, but coverage or execution was incomplete. This is not a pass.
+
+A completed validation report returns HTTP 200 even for an invalid document. Request errors use 400/413/415/422, authentication uses 401, capacity uses 429, engine failures use 500, and deadlines use 504. Partial engine-failure reports may accompany HTTP 500. See the full [OpenAPI specification](service/web/openapi.json), also served at `/openapi.json` and summarized in the UI's API reference.
+
+Other endpoints: `/v1/version`, `/health/live`, `/health/ready`. Readiness becomes available only after both profiles compile. Optional authentication: set `API_TOKEN` in your deployment and send `Authorization: Bearer TOKEN`. Shared/network deployments must configure authenticated HTTPS through a reverse proxy; the default local configuration is not a public hosted service.
+
+## JavaScript and TypeScript client
+
+Requires a supported modern Node runtime (22.12+; CI tests Node 22 and 24). Type declarations are included.
+
+```javascript
+const { createClient } = require('cda-schematron-validator');
+const fs = require('node:fs');
+
+const client = createClient({ baseUrl: 'http://localhost:8080' });
+const report = await client.validate(fs.readFileSync('document.xml', 'utf8'), {
+  profile: 'ccda-5.0',
+  includeWarnings: true
+});
+console.log(report.status, report.findings);
+```
+
+The new client requires the service. Existing `validate`, `validateAsync`, `validateFileListAsync`, `validateFileObjectAsync`, `parseSchematron`, `clearCache`, and `clearCacheAsync` exports continue to run locally without Java or Docker and retain their result shape. They remain a lightweight, partial Schematron interpreter; they do **not** gain the service's XSD and standards-engine coverage. Use `createClient` for the modern pipeline. The legacy default for `includeWarnings` is **false**, despite the older inherited documentation below.
+
+The legacy fixes isolate document caches, avoid mutating caller options, settle empty async patterns, preserve batch ordering, generate missing rule IDs, and distinguish resource paths in the external-document cache.
+
+## Command line
+
+After installing the Node package, or directly from this checkout:
+
+```sh
+node bin/cda-validate.js service/web/sample.xml --profile ccda-5.0 --json
+# Installed package: cda-validate document.xml --profile ccda-2.1
+```
+
+Set `CDA_VALIDATOR_URL` and optionally `CDA_VALIDATOR_TOKEN` for another service. Exit codes: **0** valid, **1** invalid, **2** incomplete or operational failure. The CLI uses the same HTTP service and accepts `-` for stdin.
+
+## Limits, privacy, and throughput
+
+The service stores no submitted documents or reports and logs no request bodies, filenames, or validation findings. The UI retains input only in the current page's memory; downloading a report is an explicit local action. Reverse proxies and client applications must configure their own logging and retention appropriately.
+
+Limits: 5 MiB XML, 128-element nesting depth, 100,000 elements, 256 attributes per element, and 2,000 findings. DTDs and external entities are prohibited. Schematron resource access is restricted to the bundled asset directories. Workers and the admission queue are bounded; default is 2 workers plus 4 waiting requests. SVRL findings are collected as a stream and capped rather than building an unlimited result tree.
+
+The HTTP deadline is 30 seconds with cooperative cancellation checked during SVRL output. This is not process-level hard termination of an arbitrary XPath expression. Only the fixed, reviewed profiles can execute; user-supplied Schematron, paths, and remote URLs are not accepted. Container CPU/memory/PID limits provide additional isolation. Scale by increasing `VALIDATION_WORKERS` deliberately or running more container replicas behind a gateway.
+
+No document-result cache is used: warm performance comes from immutable shared compiled profiles and schema objects, not reuse of previous patient documents. Run the repeatable benchmark with `python3 scripts/benchmark.py`; the generated report records fixture sizes, concurrency, HTTP p50/p95, throughput, and result consistency. These measurements are not a claim to be the fastest validator across all workloads.
+
+## Develop and verify
+
+Local service development requires Java 21+, Maven 3.9+, and Python 3.11+:
+
+```sh
+npm ci --ignore-scripts
+npm test
+npm run service:build
+npm run service:start
+```
+
+`npm run service:test` runs focused Java tests and full official-profile integration tests. JavaScript tests use Node's built-in runner with no development dependencies. The Docker build runs service tests too. The CI workflow tests both supported Node lines, service behavior, official resources, and the container build. The weekly upstream watch reports new HL7 releases without updating packages or opening PRs automatically.
+
+All changes must use descriptive branches and owner-authored PRs. Development tool names are forbidden in branch names. See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md).
+
+The original release history and API documentation follow for provenance. Where an older example conflicts with the modern instructions above, use the instructions above.
+
 ## Release History
 
 ### 1.1.12

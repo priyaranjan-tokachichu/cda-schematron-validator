@@ -1,5 +1,6 @@
 const fs = require('fs');
-const expect = require('chai').expect;
+const assert = require('node:assert/strict');
+const { describe, it, beforeEach } = require('node:test');
 
 const validator = require('../validator');
 
@@ -15,110 +16,110 @@ describe('Async validator should', function() {
     let results;
     it('return results', async function() {
         results = await validator.validateAsync(xml, schematron, { includeWarnings: true });
-        expect(results).to.be.an('object');
+        assert.equal(typeof results, 'object');
     });
     it('return errorCount', function() {
-        expect(results.errorCount).to.be.a('number');
+        assert.equal(typeof results.errorCount, 'number');
     });
     it('return warningCount', function() {
-        expect(results.warningCount).to.be.a('number');
+        assert.equal(typeof results.warningCount, 'number');
     });
     it('return ignoredCount', function() {
-        expect(results.ignoredCount).to.be.a('number');
+        assert.equal(typeof results.ignoredCount, 'number');
     });
     it('return errors array', function() {
-        expect(results.errors).to.be.a('array');
+        assert.ok(Array.isArray(results.errors));
     });
     it('return warnings array', function() {
-        expect(results.warnings).to.be.a('array');
+        assert.ok(Array.isArray(results.warnings));
     });
     it('return ignored array', function() {
-        expect(results.ignored).to.be.a('array');
+        assert.ok(Array.isArray(results.ignored));
     });
     it('return matching errorCount', function() {
-        expect(results.errorCount).to.be.equal(results.errors.length);
+        assert.equal(results.errorCount, results.errors.length);
     });
     it('return matching warningCount', function() {
-        expect(results.warningCount).to.be.equal(results.warnings.length);
+        assert.equal(results.warningCount, results.warnings.length);
     });
     it('return matching ignoredCount', function() {
-        expect(results.ignoredCount).to.be.equal(results.ignored.length);
+        assert.equal(results.ignoredCount, results.ignored.length);
     });
     it('return correct number of errors', function() {
-        expect(results.errorCount).to.be.equal(16);
+        assert.equal(results.errorCount, 16);
     });
     it('return correct number of warnings', function() {
-        expect(results.warningCount).to.be.equal(15);
+        assert.equal(results.warningCount, 15);
     });
     it('return correct number of ignored', function() {
-        expect(results.ignoredCount).to.be.equal(1);
+        assert.equal(results.ignoredCount, 1);
     });
 
     it('return similar results without warnings', async function() {
         results = await validator.validateAsync(xml, schematron);
-        expect(results).to.be.an('object');
-        expect(results.errorCount).to.be.a('number');
-        expect(results.warningCount).to.be.a('number');
-        expect(results.ignoredCount).to.be.a('number');
-        expect(results.errors).to.be.a('array');
-        expect(results.warnings).to.be.a('array');
-        expect(results.ignored).to.be.a('array');
-        expect(results.errorCount).to.be.equal(results.errors.length);
-        expect(results.warningCount).to.be.equal(results.warnings.length);
-        expect(results.ignoredCount).to.be.equal(results.ignored.length);
-        expect(results.errorCount).to.be.equal(16);
-        expect(results.warningCount).to.be.equal(0);
-        expect(results.ignoredCount).to.be.equal(1);
+        assert.equal(typeof results, 'object');
+        assert.equal(typeof results.errorCount, 'number');
+        assert.equal(typeof results.warningCount, 'number');
+        assert.equal(typeof results.ignoredCount, 'number');
+        assert.ok(Array.isArray(results.errors));
+        assert.ok(Array.isArray(results.warnings));
+        assert.ok(Array.isArray(results.ignored));
+        assert.equal(results.errorCount, results.errors.length);
+        assert.equal(results.warningCount, results.warnings.length);
+        assert.equal(results.ignoredCount, results.ignored.length);
+        assert.equal(results.errorCount, 16);
+        assert.equal(results.warningCount, 0);
+        assert.equal(results.ignoredCount, 1);
     });
 
     it('return similar results given xml filepath', async function() {
         results = await validator.validateAsync(xmlPath, schematron, { includeWarnings: true });
-        expect(results).to.be.an('object');
-        expect(results.errorCount).to.be.a('number');
-        expect(results.warningCount).to.be.a('number');
-        expect(results.ignoredCount).to.be.a('number');
-        expect(results.errors).to.be.a('array');
-        expect(results.warnings).to.be.a('array');
-        expect(results.ignored).to.be.a('array');
-        expect(results.errorCount).to.be.equal(results.errors.length);
-        expect(results.warningCount).to.be.equal(results.warnings.length);
-        expect(results.ignoredCount).to.be.equal(results.ignored.length);
-        expect(results.errorCount).to.be.equal(16);
-        expect(results.warningCount).to.be.equal(15);
-        expect(results.ignoredCount).to.be.equal(1);
+        assert.equal(typeof results, 'object');
+        assert.equal(typeof results.errorCount, 'number');
+        assert.equal(typeof results.warningCount, 'number');
+        assert.equal(typeof results.ignoredCount, 'number');
+        assert.ok(Array.isArray(results.errors));
+        assert.ok(Array.isArray(results.warnings));
+        assert.ok(Array.isArray(results.ignored));
+        assert.equal(results.errorCount, results.errors.length);
+        assert.equal(results.warningCount, results.warnings.length);
+        assert.equal(results.ignoredCount, results.ignored.length);
+        assert.equal(results.errorCount, 16);
+        assert.equal(results.warningCount, 15);
+        assert.equal(results.ignoredCount, 1);
     });
 
     it('return similar results given schematron filepath', async function() {
         results = await validator.validateAsync(xml, schematronPath, { includeWarnings: true });
-        expect(results).to.be.an('object');
-        expect(results.errorCount).to.be.a('number');
-        expect(results.warningCount).to.be.a('number');
-        expect(results.ignoredCount).to.be.a('number');
-        expect(results.errors).to.be.a('array');
-        expect(results.warnings).to.be.a('array');
-        expect(results.ignored).to.be.a('array');
-        expect(results.errorCount).to.be.equal(results.errors.length);
-        expect(results.warningCount).to.be.equal(results.warnings.length);
-        expect(results.ignoredCount).to.be.equal(results.ignored.length);
-        expect(results.errorCount).to.be.equal(16);
-        expect(results.warningCount).to.be.equal(15);
-        expect(results.ignoredCount).to.be.equal(1);
+        assert.equal(typeof results, 'object');
+        assert.equal(typeof results.errorCount, 'number');
+        assert.equal(typeof results.warningCount, 'number');
+        assert.equal(typeof results.ignoredCount, 'number');
+        assert.ok(Array.isArray(results.errors));
+        assert.ok(Array.isArray(results.warnings));
+        assert.ok(Array.isArray(results.ignored));
+        assert.equal(results.errorCount, results.errors.length);
+        assert.equal(results.warningCount, results.warnings.length);
+        assert.equal(results.ignoredCount, results.ignored.length);
+        assert.equal(results.errorCount, 16);
+        assert.equal(results.warningCount, 15);
+        assert.equal(results.ignoredCount, 1);
     });
 
     it('return similar results given xml filepath and schematron filepath', async function() {
         results = await validator.validateAsync(xmlPath, schematronPath, { includeWarnings: true });
-        expect(results).to.be.an('object');
-        expect(results.errorCount).to.be.a('number');
-        expect(results.warningCount).to.be.a('number');
-        expect(results.ignoredCount).to.be.a('number');
-        expect(results.errors).to.be.a('array');
-        expect(results.warnings).to.be.a('array');
-        expect(results.ignored).to.be.a('array');
-        expect(results.errorCount).to.be.equal(results.errors.length);
-        expect(results.warningCount).to.be.equal(results.warnings.length);
-        expect(results.ignoredCount).to.be.equal(results.ignored.length);
-        expect(results.errorCount).to.be.equal(16);
-        expect(results.warningCount).to.be.equal(15);
-        expect(results.ignoredCount).to.be.equal(1);
+        assert.equal(typeof results, 'object');
+        assert.equal(typeof results.errorCount, 'number');
+        assert.equal(typeof results.warningCount, 'number');
+        assert.equal(typeof results.ignoredCount, 'number');
+        assert.ok(Array.isArray(results.errors));
+        assert.ok(Array.isArray(results.warnings));
+        assert.ok(Array.isArray(results.ignored));
+        assert.equal(results.errorCount, results.errors.length);
+        assert.equal(results.warningCount, results.warnings.length);
+        assert.equal(results.ignoredCount, results.ignored.length);
+        assert.equal(results.errorCount, 16);
+        assert.equal(results.warningCount, 15);
+        assert.equal(results.ignoredCount, 1);
     });
 });

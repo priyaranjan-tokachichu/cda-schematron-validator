@@ -1,0 +1,311 @@
+{
+  "requestId": "8fb22237-d412-4da2-89a3-775bf85d17c9",
+  "applicationVersion": "2.0.0-preview.1",
+  "status": "invalid",
+  "validationComplete": false,
+  "executionComplete": true,
+  "truncated": false,
+  "options": {
+    "includeWarnings": true
+  },
+  "summary": {
+    "warnings": 7,
+    "firedRules": 17,
+    "findings": 21,
+    "errors": 14
+  },
+  "findings": [
+    {
+      "severity": "error",
+      "stage": "xsd",
+      "message": "cvc-complex-type.2.4.a: Invalid content was found starting with element '{\"urn:hl7-org:v3\":component}'. One of '{\"urn:hl7-org:v3\":setId, \"urn:hl7-org:v3\":versionNumber, \"urn:hl7-org:v3\":copyTime, \"urn:hl7-org:v3\":recordTarget}' is expected.",
+      "line": 15,
+      "column": 14
+    },
+    {
+      "severity": "error",
+      "stage": "xsd",
+      "message": "cvc-complex-type.2.4.b: The content of element 'structuredBody' is not complete. One of '{\"urn:hl7-org:v3\":realmCode, \"urn:hl7-org:v3\":typeId, \"urn:hl7-org:v3\":templateId, \"urn:hl7-org:v3\":confidentialityCode, \"urn:hl7-org:v3\":languageCode, \"urn:hl7-org:v3\":component}' is expected.",
+      "line": 15,
+      "column": 31
+    },
+    {
+      "severity": "error",
+      "stage": "schematron",
+      "message": "Cardinality of author is 1..*",
+      "ruleId": "generated-43-4",
+      "xpath": "/Q{urn:hl7-org:v3}ClinicalDocument[1]",
+      "test": "count(cda:author)>=1",
+      "patternId": "ContinuityofCareDocumentCCD-errors",
+      "context": "cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.2' and @extension='2024-05-01']]",
+      "line": 3
+    },
+    {
+      "severity": "error",
+      "stage": "schematron",
+      "message": "Cardinality of documentationOf is 1..1",
+      "ruleId": "generated-43-5",
+      "xpath": "/Q{urn:hl7-org:v3}ClinicalDocument[1]",
+      "test": "count(cda:documentationOf)=1",
+      "patternId": "ContinuityofCareDocumentCCD-errors",
+      "context": "cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.2' and @extension='2024-05-01']]",
+      "line": 3
+    },
+    {
+      "severity": "error",
+      "stage": "schematron",
+      "message": "Cardinality of component is 6..*",
+      "ruleId": "generated-43-24",
+      "xpath": "/Q{urn:hl7-org:v3}ClinicalDocument[1]/Q{urn:hl7-org:v3}component[1]/Q{urn:hl7-org:v3}structuredBody[1]",
+      "test": "count(cda:component)>=6",
+      "patternId": "ContinuityofCareDocumentCCD-errors",
+      "context": "cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.2' and @extension='2024-05-01']]/cda:component/cda:structuredBody",
+      "line": 15
+    },
+    {
+      "severity": "error",
+      "stage": "schematron",
+      "message": "Cardinality of component:allergies is 1..1",
+      "ruleId": "generated-43-25",
+      "xpath": "/Q{urn:hl7-org:v3}ClinicalDocument[1]/Q{urn:hl7-org:v3}component[1]/Q{urn:hl7-org:v3}structuredBody[1]",
+      "test": "count(cda:component[cda:section[(cda:templateId[@root='2.16.840.1.113883.10.20.22.2.6.1' and @extension='2015-08-01'])]])=1",
+      "patternId": "ContinuityofCareDocumentCCD-errors",
+      "context": "cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.2' and @extension='2024-05-01']]/cda:component/cda:structuredBody",
+      "line": 15
+    },
+    {
+      "severity": "error",
+      "stage": "schematron",
+      "message": "Cardinality of component:medications is 1..1",
+      "ruleId": "generated-43-26",
+      "xpath": "/Q{urn:hl7-org:v3}ClinicalDocument[1]/Q{urn:hl7-org:v3}component[1]/Q{urn:hl7-org:v3}structuredBody[1]",
+      "test": "count(cda:component[cda:section[(cda:templateId[@root='2.16.840.1.113883.10.20.22.2.1.1' and @extension='2014-06-09'])]])=1",
+      "patternId": "ContinuityofCareDocumentCCD-errors",
+      "context": "cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.2' and @extension='2024-05-01']]/cda:component/cda:structuredBody",
+      "line": 15
+    },
+    {
+      "severity": "error",
+      "stage": "schematron",
+      "message": "Cardinality of component:problems is 1..1",
+      "ruleId": "generated-43-27",
+      "xpath": "/Q{urn:hl7-org:v3}ClinicalDocument[1]/Q{urn:hl7-org:v3}component[1]/Q{urn:hl7-org:v3}structuredBody[1]",
+      "test": "count(cda:component[cda:section[(cda:templateId[@root='2.16.840.1.113883.10.20.22.2.5.1' and @extension='2015-08-01'])]])=1",
+      "patternId": "ContinuityofCareDocumentCCD-errors",
+      "context": "cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.2' and @extension='2024-05-01']]/cda:component/cda:structuredBody",
+      "line": 15
+    },
+    {
+      "severity": "error",
+      "stage": "schematron",
+      "message": "Cardinality of component:results is 1..1",
+      "ruleId": "generated-43-29",
+      "xpath": "/Q{urn:hl7-org:v3}ClinicalDocument[1]/Q{urn:hl7-org:v3}component[1]/Q{urn:hl7-org:v3}structuredBody[1]",
+      "test": "count(cda:component[cda:section[(cda:templateId[@root='2.16.840.1.113883.10.20.22.2.3.1' and @extension='2015-08-01'])]])=1",
+      "patternId": "ContinuityofCareDocumentCCD-errors",
+      "context": "cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.2' and @extension='2024-05-01']]/cda:component/cda:structuredBody",
+      "line": 15
+    },
+    {
+      "severity": "error",
+      "stage": "schematron",
+      "message": "Cardinality of component:socialHist is 1..1",
+      "ruleId": "generated-43-38",
+      "xpath": "/Q{urn:hl7-org:v3}ClinicalDocument[1]/Q{urn:hl7-org:v3}component[1]/Q{urn:hl7-org:v3}structuredBody[1]",
+      "test": "count(cda:component[cda:section[(cda:templateId[@root='2.16.840.1.113883.10.20.22.2.17' and @extension='2015-08-01'])]])=1",
+      "patternId": "ContinuityofCareDocumentCCD-errors",
+      "context": "cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.2' and @extension='2024-05-01']]/cda:component/cda:structuredBody",
+      "line": 15
+    },
+    {
+      "severity": "error",
+      "stage": "schematron",
+      "message": "Cardinality of component:vitalSigns is 1..1",
+      "ruleId": "generated-43-39",
+      "xpath": "/Q{urn:hl7-org:v3}ClinicalDocument[1]/Q{urn:hl7-org:v3}component[1]/Q{urn:hl7-org:v3}structuredBody[1]",
+      "test": "count(cda:component[cda:section[(cda:templateId[@root='2.16.840.1.113883.10.20.22.2.4.1' and @extension='2015-08-01'])]])=1",
+      "patternId": "ContinuityofCareDocumentCCD-errors",
+      "context": "cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.2' and @extension='2024-05-01']]/cda:component/cda:structuredBody",
+      "line": 15
+    },
+    {
+      "severity": "error",
+      "stage": "schematron",
+      "message": "Cardinality of recordTarget is 1..*",
+      "ruleId": "generated-216-11",
+      "xpath": "/Q{urn:hl7-org:v3}ClinicalDocument[1]",
+      "test": "count(cda:recordTarget)>=1",
+      "patternId": "USRealmHeader-errors",
+      "context": "cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.1' and @extension='2024-05-01']]",
+      "line": 3
+    },
+    {
+      "severity": "error",
+      "stage": "schematron",
+      "message": "Cardinality of author is 1..*",
+      "ruleId": "generated-216-12",
+      "xpath": "/Q{urn:hl7-org:v3}ClinicalDocument[1]",
+      "test": "count(cda:author)>=1",
+      "patternId": "USRealmHeader-errors",
+      "context": "cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.1' and @extension='2024-05-01']]",
+      "line": 3
+    },
+    {
+      "severity": "error",
+      "stage": "schematron",
+      "message": "Cardinality of custodian is 1..1",
+      "ruleId": "generated-216-14",
+      "xpath": "/Q{urn:hl7-org:v3}ClinicalDocument[1]",
+      "test": "count(cda:custodian)=1",
+      "patternId": "USRealmHeader-errors",
+      "context": "cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.1' and @extension='2024-05-01']]",
+      "line": 3
+    },
+    {
+      "severity": "warning",
+      "stage": "schematron",
+      "message": "SHOULD contain legalAuthenticator",
+      "ruleId": "generated-263-0",
+      "xpath": "/Q{urn:hl7-org:v3}ClinicalDocument[1]",
+      "test": "cda:legalAuthenticator",
+      "patternId": "ContinuityofCareDocumentCCD-warnings",
+      "context": "cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.2' and @extension='2024-05-01']]",
+      "line": 3
+    },
+    {
+      "severity": "warning",
+      "stage": "schematron",
+      "message": "Documents SHOULD contain a RelatedPerson participant",
+      "ruleId": "generated-263-1",
+      "xpath": "/Q{urn:hl7-org:v3}ClinicalDocument[1]",
+      "test": "cda:participant[cda:templateId[@root='2.16.840.1.113883.10.20.22.5.8' and @extension='2023-05-01']]",
+      "patternId": "ContinuityofCareDocumentCCD-warnings",
+      "context": "cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.2' and @extension='2024-05-01']]",
+      "line": 3
+    },
+    {
+      "severity": "warning",
+      "stage": "schematron",
+      "message": "SHOULD contain a Procedures Section",
+      "ruleId": "generated-263-10",
+      "xpath": "/Q{urn:hl7-org:v3}ClinicalDocument[1]/Q{urn:hl7-org:v3}component[1]/Q{urn:hl7-org:v3}structuredBody[1]",
+      "test": "cda:component[cda:section[cda:templateId[@root='2.16.840.1.113883.10.20.22.2.7.1' and @extension='2014-06-09']]]",
+      "patternId": "ContinuityofCareDocumentCCD-warnings",
+      "context": "cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.2' and @extension='2024-05-01']]/cda:component/cda:structuredBody",
+      "line": 15
+    },
+    {
+      "severity": "warning",
+      "stage": "schematron",
+      "message": "SHOULD contain a Plan of Treatment Section",
+      "ruleId": "generated-263-11",
+      "xpath": "/Q{urn:hl7-org:v3}ClinicalDocument[1]/Q{urn:hl7-org:v3}component[1]/Q{urn:hl7-org:v3}structuredBody[1]",
+      "test": "cda:component[cda:section[cda:templateId[@root='2.16.840.1.113883.10.20.22.2.10' and @extension='2014-06-09']]]",
+      "patternId": "ContinuityofCareDocumentCCD-warnings",
+      "context": "cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.2' and @extension='2024-05-01']]/cda:component/cda:structuredBody",
+      "line": 15
+    },
+    {
+      "severity": "warning",
+      "stage": "schematron",
+      "message": "SHOULD contain legalAuthenticator",
+      "ruleId": "generated-390-0",
+      "xpath": "/Q{urn:hl7-org:v3}ClinicalDocument[1]",
+      "test": "cda:legalAuthenticator",
+      "patternId": "USRealmHeader-warnings",
+      "context": "cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.1' and @extension='2024-05-01']]",
+      "line": 3
+    },
+    {
+      "severity": "warning",
+      "stage": "schematron",
+      "message": "Documents SHOULD contain a RelatedPerson participant",
+      "ruleId": "generated-390-1",
+      "xpath": "/Q{urn:hl7-org:v3}ClinicalDocument[1]",
+      "test": "cda:participant[cda:templateId[@root='2.16.840.1.113883.10.20.22.5.8' and @extension='2023-05-01']]",
+      "patternId": "USRealmHeader-warnings",
+      "context": "cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.1' and @extension='2024-05-01']]",
+      "line": 3
+    },
+    {
+      "severity": "warning",
+      "stage": "schematron",
+      "message": "**SHOULD** be precise to at least the minute",
+      "ruleId": "generated-398-0",
+      "xpath": "/Q{urn:hl7-org:v3}ClinicalDocument[1]/Q{urn:hl7-org:v3}effectiveTime[1]",
+      "test": "@nullFlavor or string-length(@value) > 8",
+      "patternId": "USRealmDateTime-warnings",
+      "context": "cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.15' and @extension='2024-05-01']]/cda:authenticator/cda:time | cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.1' and @extension='2024-05-01']]/cda:effectiveTime | cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.1' and @extension='2024-05-01']]/cda:author/cda:time | cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.1' and @extension='2024-05-01']]/cda:dataEnterer/cda:time | cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.1' and @extension='2024-05-01']]/cda:legalAuthenticator/cda:time | cda:ClinicalDocument[cda:templateId[@root='2.16.840.1.113883.10.20.22.1.1' and @extension='2024-05-01']]/cda:authenticator/cda:time",
+      "line": 11
+    }
+  ],
+  "stages": [
+    {
+      "name": "xml",
+      "status": "completed"
+    },
+    {
+      "name": "xsd",
+      "status": "completed"
+    },
+    {
+      "firedRules": 17,
+      "status": "completed",
+      "name": "schematron"
+    }
+  ],
+  "profile": {
+    "id": "ccda-5.0",
+    "name": "C-CDA 5.0",
+    "release": "2026JUL",
+    "schematron": "ccda-5.0/CCDA-5.0.sch",
+    "schema": "cda-xsd/infrastructure/cda/CDA_SDTC.xsd",
+    "limitations": [
+      "Generated Schematron is not equivalent to complete StructureDefinition or terminology validation.",
+      "Upstream generation report: 4 errors.",
+      "Upstream generation report: 4 unhandledInvariants.",
+      "Upstream generation report: 9 nonLoadedValueSets."
+    ],
+    "generationCoverage": {
+      "errors": 4,
+      "notices": 0,
+      "skippedTemplates": 0,
+      "unhandledInvariants": 4,
+      "nonLoadedValueSets": 9
+    },
+    "schemaRelease": "20260205_SDTC",
+    "compilation": "SchXslt 1.10.1; explicit phase severity; stable generated assertion IDs; XPath 1.0 backwards-compatible evaluation of these upstream releases",
+    "artifactChecksums": {
+      "schema": "d596141f0a457b7b31c1a5b4e97ae55d16bedf8c08356e644475c339263d76e7",
+      "schematron": "679bfc6bf680a5e7e6afe9086e53e18b92e67882a389590c4647c4424418efc2"
+    }
+  },
+  "sources": [
+    {
+      "id": "cda-xsd",
+      "release": "20260205_SDTC",
+      "url": "https://github.com/HL7/CDA-core-2.0/releases/download/20260205_SDTC/20260205_SDTC.zip",
+      "sha256": "0b957c26f64d6b609e48806d1c93040ada4cc51bc5345317e5af607807f3927a"
+    },
+    {
+      "id": "ccda-2.1",
+      "release": "2025SEP",
+      "url": "https://github.com/HL7/CDA-ccda-2.1/releases/download/2025SEP/CDAR2_IG_CCDA_CLINNOTES_R1_DSTU2.1_2025SEP.zip",
+      "sha256": "9c9a73294fbc4bea2c31e3650184609fa2d8894a848da6240c0916cd1e1c0d23"
+    },
+    {
+      "id": "ccda-5.0",
+      "release": "2026JUL",
+      "url": "https://github.com/HL7/CDA-ccda/releases/download/2026JUL/CCDA_5.0_2026JUL.zip",
+      "sha256": "d6ed229b225edc6210774cb3ed46c1b2abc0342b7ef19032ddc1911dfb3002b6"
+    }
+  ],
+  "engine": {
+    "schemaRelease": "20260205_SDTC",
+    "saxon": "12.9",
+    "name": "Saxon-HE / SchXslt",
+    "schxslt": "1.10.1"
+  },
+  "durationMs": 6.95,
+  "validatedAt": "2026-11-16T06:42:27.340109875Z"
+}

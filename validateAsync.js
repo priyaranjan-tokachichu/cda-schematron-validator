@@ -4,14 +4,10 @@ const processRulesAsync = require('./lib/processRulesAsync');
 const getReturnObject = require('./lib/getReturnObject');
 
 // Parsed object cache
-let parsedMap = Object.create({});
-let contextMap = Object.create({});
-let schematronMap = Object.create({});
+let parsedMap = Object.create(null);
 
 function clearCache() {
-    parsedMap = Object.create({});
-    contextMap = Object.create({});
-    schematronMap = Object.create({});
+    parsedMap = Object.create(null);
 }
 
 /**
@@ -28,19 +24,19 @@ function clearCache() {
  */
 
 async function validateAsync(xml, schematron, options = {}) {
+    options = Object.assign({}, options);
     const resultInfo = {
         errors: [],
         warnings: [],
         ignored: []
     };
     options.parsedMap = parsedMap;
-    options.contextMap = contextMap;
-    options.schematronMap = schematronMap;
+    options.contextMap = Object.create(null);
     initializeProcess(xml, schematron, options);
     return Promise.all(
         Object.keys(options.schematronMap.patternRuleMap).map(async (patternId) => {
-            if (options.schematronMap.patternRuleMap.hasOwnProperty(patternId)) {
-                const assertionInfo = Object.create({});
+            if (Object.hasOwn(options.schematronMap.patternRuleMap, patternId)) {
+                const assertionInfo = Object.create(null);
                 assertionInfo.patternId = patternId;
                 const rules = options.schematronMap.patternRuleMap[patternId];
                 await processRulesAsync(rules, assertionInfo, resultInfo, options);
@@ -66,18 +62,13 @@ async function validateAsync(xml, schematron, options = {}) {
  */
 
 async function validateFileListAsync(xmlArray, schematron, options = {}) {
-    const resultInfo = [];
     return Promise.all(
         xmlArray.map(async (xml, index) => {
             const resultObject = await validateAsync(xml, schematron, options);
             resultObject.fileIndex = index;
-            resultInfo.push(resultObject);
-            console.log(`Number of files processed: ${resultInfo.length}`);
-            console.log(`Processed file index: ${index}`);
+            return resultObject;
         })
-    ).then(() => {
-        return resultInfo;
-    });
+    );
 }
 
 /**
@@ -95,18 +86,13 @@ async function validateFileListAsync(xmlArray, schematron, options = {}) {
  */
 
 async function validateFileObjectAsync(xmlDataObject, schematron, options = {}) {
-    const resultInfo = [];
     return Promise.all(
         Object.entries(xmlDataObject).map(async ([xmlFileInfo, xml]) => {
             const resultObject = await validateAsync(xml, schematron, options);
             resultObject.fileInfo = xmlFileInfo;
-            resultInfo.push(resultObject);
-            console.log(`Number of files processed: ${resultInfo.length}`);
-            console.log(`Processed file info: ${xmlFileInfo}`);
+            return resultObject;
         })
-    ).then(() => {
-        return resultInfo;
-    });
+    );
 }
 
 module.exports = {

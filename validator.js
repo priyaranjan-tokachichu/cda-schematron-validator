@@ -6,6 +6,7 @@
  */
 
 module.exports = {
+    createClient: require('./lib/createClient'),
     validate: require('./validateSync').validateSync,
     validateAsync: require('./validateAsync').validateAsync,
     validateFileListAsync: require('./validateAsync').validateFileListAsync,

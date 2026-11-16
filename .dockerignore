@@ -1,0 +1,9 @@
+.git
+node_modules
+service/target
+service/assets
+.cache
+.DS_Store
+*.log
+.env*
+reports

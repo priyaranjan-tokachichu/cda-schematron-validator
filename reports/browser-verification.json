@@ -1,0 +1,14 @@
+{
+  "checks": [
+    "XML file chooser upload",
+    "Example document submission",
+    "Detailed XSD and Schematron findings",
+    "Warning-only filtering",
+    "Line navigation selects the expected XML element",
+    "JSON report download parses correctly",
+    "Mobile 390px layout has no horizontal overflow",
+    "Editing XML clears stale results before another validation",
+    "Malformed XML displays the precise parser error"
+  ],
+  "method": "Interactive browser checks with the synthetic example; screenshots saved in this directory."
+}
