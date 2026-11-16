@@ -12,7 +12,7 @@ import time
 import urllib.request
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--base-url', default='http://127.0.0.1:8080')
+parser.add_argument('--base-url', default='http://127.0.0.1:17643')
 parser.add_argument('--requests', type=int, default=100)
 parser.add_argument('--concurrency', type=int, nargs='+', default=[1, 2, 4])
 parser.add_argument('--output', default='reports/benchmark.json')

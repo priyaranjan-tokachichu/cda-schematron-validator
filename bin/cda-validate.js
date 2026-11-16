@@ -5,7 +5,7 @@ const createClient = require('../lib/createClient');
 
 async function main() {
     const args = process.argv.slice(2);
-    let file, profile = 'ccda-5.0', baseUrl = process.env.CDA_VALIDATOR_URL || 'http://127.0.0.1:8080';
+    let file, profile = 'ccda-5.0', baseUrl = process.env.CDA_VALIDATOR_URL || 'http://127.0.0.1:17643';
     let json = false, includeWarnings = true;
     for (let i = 0; i < args.length; i++) {
         if (args[i] === '--help' || args[i] === '-h') {

@@ -23,7 +23,7 @@ COPY --from=assets /build/service/assets assets
 COPY service/web web
 COPY LICENSE.md THIRD_PARTY_NOTICES.md ./
 COPY licenses licenses
-ENV HOST=0.0.0.0 PORT=8080 ASSET_DIR=/app/assets WEB_DIR=/app/web VALIDATION_WORKERS=2
+ENV HOST=0.0.0.0 PORT=17643 ASSET_DIR=/app/assets WEB_DIR=/app/web VALIDATION_WORKERS=2
 USER 10001:10001
-EXPOSE 8080
+EXPOSE 17643
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=70", "-XX:+ExitOnOutOfMemoryError", "-jar", "/app/app.jar"]

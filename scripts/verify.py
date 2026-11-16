@@ -2,6 +2,7 @@
 """Produce reviewable local verification evidence without storing submitted XML."""
 from datetime import datetime, timezone
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -35,11 +36,12 @@ run('Official upstream release check', ['python3', 'scripts/check-upstream.py'])
 json.loads((root/'service/web/openapi.json').read_text())
 checks.append({'name': 'OpenAPI JSON syntax', 'status': 'passed'})
 
-with urllib.request.urlopen('http://127.0.0.1:8080/health/ready',timeout=5) as response:
+base_url = os.environ.get('CDA_VALIDATOR_URL', 'http://127.0.0.1:'+os.environ.get('CDA_VALIDATOR_PORT', '17643')).rstrip('/')
+with urllib.request.urlopen(base_url+'/health/ready',timeout=5) as response:
     ready=json.load(response)
 assert ready['profiles'] == 2
 checks.append({'name': 'Container readiness with both profiles loaded', 'status': 'passed'})
-cli=subprocess.run(['node','bin/cda-validate.js','service/web/sample.xml','--json'],cwd=root,text=True,capture_output=True)
+cli=subprocess.run(['node','bin/cda-validate.js','service/web/sample.xml','--url',base_url,'--json'],cwd=root,text=True,capture_output=True)
 assert cli.returncode==1
 result=json.loads(cli.stdout)
 assert result['status']=='invalid' and result['executionComplete'] and not result['validationComplete']

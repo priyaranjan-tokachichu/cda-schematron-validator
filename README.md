@@ -14,7 +14,9 @@ Install Docker with Compose, then run from this checkout:
 docker compose up --build -d
 ```
 
-Open **http://localhost:8080**. Choose an XML file or paste UTF-8 XML, select a guide, and click **Validate document**. The included synthetic example intentionally fails several rules so you can inspect the findings.
+Open **http://localhost:17643**. Choose an XML file or paste UTF-8 XML, select a guide, and click **Validate document**. The included synthetic example intentionally fails several rules so you can inspect the findings.
+
+The default host port is **17643**. If it is already occupied, choose another port: `CDA_VALIDATOR_PORT=17644 docker compose up -d`, then open `http://localhost:17644`. Point CLI clients at the same address using `CDA_VALIDATOR_URL=http://localhost:17644` (or `--url`), and set `baseUrl` for JavaScript clients. No fixed port can guarantee availability on every installation.
 
 The Compose configuration exposes the service on loopback only. The image includes Java, the application, and pinned validation resources; Node, Java, Maven, and Python are not required on the host when using Docker. Runtime validation makes no external validation or terminology calls. First build requires internet access to fetch checksum-verified resources and dependencies.
 
@@ -39,9 +41,9 @@ The C-CDA 5.0 upstream conversion report records **4 generation errors, 4 unhand
 ## Call the API
 
 ```sh
-curl http://localhost:8080/v1/profiles
+curl http://localhost:17643/v1/profiles
 
-curl http://localhost:8080/v1/validate \
+curl http://localhost:17643/v1/validate \
   -H 'Content-Type: application/json' \
   --data-binary @request.json
 ```
@@ -74,7 +76,7 @@ Requires a supported modern Node runtime (22.12+; CI tests Node 22 and 24). Type
 const { createClient } = require('cda-schematron-validator');
 const fs = require('node:fs');
 
-const client = createClient({ baseUrl: 'http://localhost:8080' });
+const client = createClient({ baseUrl: 'http://localhost:17643' });
 const report = await client.validate(fs.readFileSync('document.xml', 'utf8'), {
   profile: 'ccda-5.0',
   includeWarnings: true

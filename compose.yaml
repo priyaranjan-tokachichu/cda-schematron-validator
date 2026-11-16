@@ -3,7 +3,7 @@ services:
     build: .
     image: cda-validator:local
     ports:
-      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:${CDA_VALIDATOR_PORT:-17643}:17643"
     environment:
       VALIDATION_WORKERS: "2"
       # For shared deployments, supply API_TOKEN through your secret manager.

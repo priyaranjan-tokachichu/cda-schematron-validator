@@ -148,7 +148,7 @@ public final class Server implements AutoCloseable {
         System.setProperty("sun.net.httpserver.maxRspTime", "40");
         System.setProperty("jdk.httpserver.maxConnections", "128");
         String bind = System.getenv().getOrDefault("HOST", "127.0.0.1");
-        int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "8080"));
+        int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "17643"));
         int workers = Integer.parseInt(System.getenv().getOrDefault("VALIDATION_WORKERS", "2"));
         if (workers < 1 || workers > 16) throw new IllegalArgumentException("VALIDATION_WORKERS must be 1..16");
         long start = System.nanoTime();
