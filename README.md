@@ -37,12 +37,17 @@ Install Docker with Compose, then:
 ```sh
 git clone https://github.com/priyaranjan-tokachichu/cda-schematron-validator.git
 cd cda-schematron-validator
+```
+
+**Preview reviewers:** until PR #50 is merged, run `git checkout feature/modern-validator`. After merge, use the default branch.
+
+Start the service:
+
+```sh
 docker compose up --build -d
 ```
 
 **Open [the validation workspace](http://localhost:17643).** Try the synthetic example, or upload a UTF-8 XML document. The example intentionally contains errors so you can explore the findings.
-
-During this PR's review, check out `feature/modern-validator` before starting Compose. After merge, the default branch will contain the service.
 
 | Open locally | Purpose |
 | --- | --- |
