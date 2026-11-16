@@ -60,7 +60,8 @@
     "bin/",
     "LICENSE.md",
     "README.md",
-    "validator.d.ts"
+    "validator.d.ts",
+    "docs/"
   ],
   "types": "validator.d.ts"
 }

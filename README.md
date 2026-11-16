@@ -1,117 +1,205 @@
-# [cda-schematron-validator](https://github.com/priyaranjan-tokachichu/cda-schematron-validator)
+<div align="center">
 
-A self-hosted CDA validation workspace and HTTP API, with the original JavaScript Schematron API retained for existing integrations.
+<h1>CDA Validator</h1>
+<p><strong>Validate clinical XML. Understand every finding.</strong></p>
+<p>A self-hosted API and browser workspace for CDA and C-CDA,<br>with the original JavaScript APIs preserved.</p>
 
-**Modern service:** strict XML parsing → CDA XSD → full official HL7 Schematron → detailed JSON findings. The service uses Saxon-HE and SchXslt, compiles profiles at startup, and isolates every submitted document. The browser UI supports paste/upload, profile selection, errors and warnings, line navigation, and JSON report downloads.
+<p>
+<a href="#quick-start">Quick start</a> ·
+<a href="docs/api.md">API reference</a> ·
+<a href="docs/deployment.md">Deployment</a> ·
+<a href="docs/architecture.md">Architecture</a> ·
+<a href="docs/legacy-api.md">Legacy API</a>
+</p>
 
-This product includes software developed by Health Level Seven.
+</div>
 
-## Start the UI and API
+---
 
-Install Docker with Compose, then run from this checkout:
+> [!NOTE]
+> **2.0 implementation preview.** Build the container from this checkout. The new service, client, and CLI are awaiting release; npm's published `1.1.12` package remains the legacy library. Merging this PR does not publish a new npm package or container image.
+
+<table>
+<tr>
+<td width="50%"><h3>Findings you can investigate</h3><p>XML parsing, CDA schema validation, and official HL7 Schematron checks. Reports include severity, rule identifiers, XPath, and available line/column locations.</p></td>
+<td width="50%"><h3>A workspace anyone can use</h3><p>Upload or paste XML, choose an implementation guide, inspect errors and warnings, jump to a line, and download the JSON report.</p></td>
+</tr>
+<tr>
+<td width="50%"><h3>Self-hosted and offline at runtime</h3><p>One container includes the UI, API, Java runtime, and pinned validation resources. Submitted documents are not persisted or sent to external validation services.</p></td>
+<td width="50%"><h3>Existing integrations preserved</h3><p>The seven legacy npm exports remain available locally. A new typed HTTP client and CLI connect applications to the modern validation engine.</p></td>
+</tr>
+</table>
+
+## Quick start
+
+Install Docker with Compose, then:
 
 ```sh
+git clone https://github.com/priyaranjan-tokachichu/cda-schematron-validator.git
+cd cda-schematron-validator
 docker compose up --build -d
 ```
 
-Open **http://localhost:17643**. Choose an XML file or paste UTF-8 XML, select a guide, and click **Validate document**. The included synthetic example intentionally fails several rules so you can inspect the findings.
+**Open [the validation workspace](http://localhost:17643).** Try the synthetic example, or upload a UTF-8 XML document. The example intentionally contains errors so you can explore the findings.
 
-The default host port is **17643**. If it is already occupied, choose another port: `CDA_VALIDATOR_PORT=17644 docker compose up -d`, then open `http://localhost:17644`. Point CLI clients at the same address using `CDA_VALIDATOR_URL=http://localhost:17644` (or `--url`), and set `baseUrl` for JavaScript clients. No fixed port can guarantee availability on every installation.
+During this PR's review, check out `feature/modern-validator` before starting Compose. After merge, the default branch will contain the service.
 
-The Compose configuration exposes the service on loopback only. The image includes Java, the application, and pinned validation resources; Node, Java, Maven, and Python are not required on the host when using Docker. Runtime validation makes no external validation or terminology calls. First build requires internet access to fetch checksum-verified resources and dependencies.
+| Open locally | Purpose |
+| --- | --- |
+| [Workspace](http://localhost:17643/) | Upload, paste, validate, and inspect findings |
+| [Architecture report](http://localhost:17643/architecture.html) | Design, sources, limitations, and verification evidence |
+| [OpenAPI contract](http://localhost:17643/openapi.json) | Integrate the HTTP API |
+| [Readiness](http://localhost:17643/health/ready) | Confirm the profiles have compiled |
 
-An owner-triggered release workflow is included to publish versioned AMD64/ARM64 images to `ghcr.io/priyaranjan-tokachichu/cda-schematron-validator`, with SBOM and provenance. No public registry release has been published by this implementation; until the owner releases it, build from source using Compose. Package visibility must allow public pulls if public distribution is intended.
+The first build downloads checksum-verified resources and dependencies. Normal validation runs offline. You do not need to install Java, Maven, Python, or Node on the host to run the container.
+
+<details>
+<summary><strong>Change the port, inspect logs, or stop the service</strong></summary>
+
+The default host port is **17643**, bound to loopback. Choose a different port if needed:
 
 ```sh
+CDA_VALIDATOR_PORT=17644 docker compose up -d
 docker compose logs validator
 docker compose down
 ```
 
-## Published profiles
+When changing the port, use the matching URL in browsers and API clients. See [deployment and configuration](docs/deployment.md).
 
-| Profile | Schematron release | Schema |
+</details>
+
+## Choose your integration
+
+| Use case | Interface | Runtime |
 | --- | --- | --- |
-| `ccda-2.1` | HL7 C-CDA 2.1 `2025SEP` | CDA R2 + SDTC `20260205_SDTC` |
-| `ccda-5.0` (default) | HL7 C-CDA 5.0 `2026JUL` | CDA R2 + SDTC `20260205_SDTC` |
+| Validate a document manually | Browser workspace | Docker |
+| Integrate any application or language | `POST /v1/validate` | HTTP + JSON |
+| Integrate a Node application | `createClient()` | Node 22.12+ and the service |
+| Validate from a terminal or script | `cda-validate` | Node 22.12+ and the service |
+| Keep an existing JavaScript integration | Original `validate*`, parser, and cache APIs | Node only; no Java or Docker |
 
-Sources, SHA-256 checksums, transformation metadata, and known limitations are returned by `GET /v1/profiles`. Original release archive locks are in [profiles/sources.lock.json](profiles/sources.lock.json). Files are checked at build time and verified again at service startup. Upstream resources retain their copyright and license notices; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+The legacy API remains a partial Schematron interpreter. Use the service for CDA XSD validation and execution of the pinned full official Schematron packages.
 
-The C-CDA 5.0 upstream conversion report records **4 generation errors, 4 unhandled invariants, and 9 non-loaded value sets**. Its Schematron includes expansions only for value sets with fewer than 1,000 concepts. The application reports those gaps; it does not claim complete StructureDefinition or terminology validation. The C-CDA 2.1 profile checks its bundled vocabulary snapshot. Neither profile certifies clinical accuracy, regulatory compliance, or all possible terminology semantics.
+## Supported standards
+
+| Profile | Official Schematron release | CDA schema |
+| --- | --- | --- |
+| **C-CDA 2.1** · `ccda-2.1` | `2025SEP`, with bundled vocabulary | CDA R2 + SDTC `20260205_SDTC` |
+| **C-CDA 5.0** · `ccda-5.0` · default | `2026JUL` | CDA R2 + SDTC `20260205_SDTC` |
+
+Sources are pinned by immutable release URL and SHA-256. The build verifies downloads; startup verifies extracted files. `GET /v1/profiles` exposes provenance, active limits, and known coverage gaps. [Inspect the source lock](profiles/sources.lock.json).
+
+> [!IMPORTANT]
+> **C-CDA 5.0 has known upstream conversion gaps:** 4 generation errors, 4 unhandled invariants, and 9 non-loaded value sets. Its embedded value-set expansions cover sets with fewer than 1,000 concepts. The service reports incomplete coverage even when execution succeeds. A supported document-level template is required for complete document validation; nested templates alone are insufficient.
+
+Neither profile certifies clinical accuracy or every terminology requirement. See [standards, provenance, and coverage](docs/architecture.md#standards-and-coverage).
 
 ## Call the API
 
-```sh
-curl http://localhost:17643/v1/profiles
+Save this minimal example as `request.json`. It intentionally produces validation findings:
 
+```json
+{
+  "xml": "<ClinicalDocument xmlns=\"urn:hl7-org:v3\"/>",
+  "profile": "ccda-2.1",
+  "includeWarnings": true
+}
+```
+
+```sh
 curl http://localhost:17643/v1/validate \
   -H 'Content-Type: application/json' \
   --data-binary @request.json
 ```
 
-`request.json`:
+| Report status | Meaning |
+| --- | --- |
+| `valid` | No errors; configured checks and document coverage completed without recorded generation gaps or truncation |
+| `invalid` | Errors found; inspect completeness separately |
+| `incomplete` | No errors found, but execution or coverage is incomplete; this is not a pass |
 
-```json
-{
-  "xml": "<ClinicalDocument xmlns=\"urn:hl7-org:v3\">...</ClinicalDocument>",
-  "profile": "ccda-5.0",
-  "includeWarnings": true
-}
+**HTTP 200 means a report was produced, not that the document passed.** Inspect `status`, `executionComplete`, `validationComplete`, and `findings`.
+
+[Request/response examples, endpoints, authentication, and error codes →](docs/api.md)
+
+## JavaScript, TypeScript, and CLI
+
+For the unpublished preview, install this checkout into your Node project:
+
+```sh
+npm install /path/to/cda-schematron-validator
 ```
-
-The response includes `status`, `validationComplete`, `executionComplete`, stage results, errors/warnings, rule IDs, XPath, available line/column locations, timing, and the exact data source versions and checksums. XML snippets are not returned by the modern service. Finding messages can contain document values and should be treated as sensitive by callers.
-
-- `valid`: no errors and the selected profile's configured checks completed without recorded conversion gaps.
-- `invalid`: validation found errors; inspect completeness separately.
-- `incomplete`: no errors found, but coverage or execution was incomplete. This is not a pass.
-
-A completed validation report returns HTTP 200 even for an invalid document. Request errors use 400/413/415/422, authentication uses 401, capacity uses 429, engine failures use 500, and deadlines use 504. Partial engine-failure reports may accompany HTTP 500. See the full [OpenAPI specification](service/web/openapi.json), also served at `/openapi.json` and summarized in the UI's API reference.
-
-Other endpoints: `/v1/version`, `/health/live`, `/health/ready`. Readiness becomes available only after both profiles compile. Optional authentication: set `API_TOKEN` in your deployment and send `Authorization: Bearer TOKEN`. Shared/network deployments must configure authenticated HTTPS through a reverse proxy; the default local configuration is not a public hosted service.
-
-## JavaScript and TypeScript client
-
-Requires a supported modern Node runtime (22.12+; CI tests Node 22 and 24). Type declarations are included.
 
 ```javascript
 const { createClient } = require('cda-schematron-validator');
-const fs = require('node:fs');
+const { readFileSync } = require('node:fs');
 
-const client = createClient({ baseUrl: 'http://localhost:17643' });
-const report = await client.validate(fs.readFileSync('document.xml', 'utf8'), {
-  profile: 'ccda-5.0',
-  includeWarnings: true
+async function main() {
+  const client = createClient({ baseUrl: 'http://localhost:17643' });
+  const report = await client.validate(readFileSync('document.xml', 'utf8'), {
+    profile: 'ccda-2.1',
+    includeWarnings: true
+  });
+  console.log(report.status, report.findings);
+}
+
+main().catch(error => {
+  console.error(error.message);
+  process.exitCode = 1;
 });
-console.log(report.status, report.findings);
 ```
 
-The new client requires the service. Existing `validate`, `validateAsync`, `validateFileListAsync`, `validateFileObjectAsync`, `parseSchematron`, `clearCache`, and `clearCacheAsync` exports continue to run locally without Java or Docker and retain their result shape. They remain a lightweight, partial Schematron interpreter; they do **not** gain the service's XSD and standards-engine coverage. Use `createClient` for the modern pipeline. The legacy default for `includeWarnings` is **false**, despite the older inherited documentation below.
-
-The legacy fixes isolate document caches, avoid mutating caller options, settle empty async patterns, preserve batch ordering, generate missing rule IDs, and distinguish resource paths in the external-document cache.
-
-## Command line
-
-After installing the Node package, or directly from this checkout:
+From the checkout, with the service running:
 
 ```sh
-node bin/cda-validate.js service/web/sample.xml --profile ccda-5.0 --json
-# Installed package: cda-validate document.xml --profile ccda-2.1
+node bin/cda-validate.js document.xml --profile ccda-2.1 --json
+# After package installation:
+cda-validate document.xml --profile ccda-2.1 --json
 ```
 
-Set `CDA_VALIDATOR_URL` and optionally `CDA_VALIDATOR_TOKEN` for another service. Exit codes: **0** valid, **1** invalid, **2** incomplete or operational failure. The CLI uses the same HTTP service and accepts `-` for stdin.
+CLI exit codes: **0** valid · **1** invalid · **2** incomplete or operational failure. Use `CDA_VALIDATOR_URL`, `CDA_VALIDATOR_TOKEN`, or `--url` for your deployment. The CLI accepts `-` for stdin. Type declarations are included; CI checks Node 22 and 24.
 
-## Limits, privacy, and throughput
+[Client configuration →](docs/api.md#node-client-and-cli) · [Legacy API and migration →](docs/legacy-api.md)
 
-The service stores no submitted documents or reports and logs no request bodies, filenames, or validation findings. The UI retains input only in the current page's memory; downloading a report is an explicit local action. Reverse proxies and client applications must configure their own logging and retention appropriately.
+## Capacity, queue, and privacy
 
-Limits: **20 MiB XML by default**, configurable through `MAX_XML_MIB` (for example, `MAX_XML_MIB=40 docker compose up -d`). `/v1/profiles` advertises the active byte limits and the UI follows them; the CLI defers size enforcement to the service. The serialized JSON allowance is six times the XML byte limit plus 64 KiB for escaping and metadata. JSON is decoded incrementally without retaining the serialized request. A shared upload budget uses at most one quarter of the Java maximum heap and reserves conservatively for decoded strings and builder growth before reading each body. Known-length small bodies reserve less; chunked bodies reserve the full allowance. Admitted uploads wait fairly for memory for up to 30 seconds; they complete on the same HTTP request without client retries. Default total request capacity is six, including active and queued work. Only a full request queue returns HTTP 429 (`Retry-After: 2`); an expired upload queue wait returns HTTP 503. Health checks remain available. The reservation is released on completion, malformed input, oversize input, or disconnect. `/v1/profiles` advertises the budget and worst-case concurrent upload count. JSON accepts only `xml`, `profile` (up to 128 UTF-8 bytes), and `includeWarnings`; duplicate fields are rejected. Increase container memory and heap when raising limits for large workloads; startup rejects a heap too small to reserve one maximum-size upload. For more concurrent large uploads, increase both the container memory and Java heap, for example `VALIDATOR_MEMORY_LIMIT=3g VALIDATOR_JAVA_OPTIONS=-Xmx2g docker compose up -d`. The UI explains current capacity and heap tuning. More heap increases upload concurrency; CPU and document complexity still affect validation speed. Other limits: 128-element nesting depth, 100,000 elements, 256 attributes per element, and 2,000 findings. DTDs and external entities are prohibited. Schematron resource access is restricted to the bundled asset directories. Workers and the admission queue are bounded; default is 2 validation workers with 6 total admitted requests across upload, queue, and validation stages. SVRL findings are collected as a stream and capped rather than building an unlimited result tree.
+| Default | Behavior |
+| --- | --- |
+| **20 MiB XML** | Configurable with `MAX_XML_MIB`; the API and UI advertise the active limit |
+| **6 admitted requests** | Includes upload, queued, and validation work; 2 validation workers |
+| **30-second upload queue wait** | Admitted uploads wait fairly for memory on their original HTTP request |
+| **Shared upload memory budget** | Streaming decoding reserves memory before reading; serialized JSON is never retained in full |
+| **No document persistence** | No patient-document/result cache, database, or application logging of submitted XML/findings |
 
-Upload memory queue wait is bounded to 30 seconds, the total HTTP upload/read window to 65 seconds, and validation has its own 30-second deadline with cooperative cancellation checked during SVRL output. This is not process-level hard termination of an arbitrary XPath expression. Only the fixed, reviewed profiles can execute; user-supplied Schematron, paths, and remote URLs are not accepted. Container CPU/memory/PID limits provide additional isolation. Scale by increasing `VALIDATION_WORKERS` deliberately or running more container replicas behind a gateway.
+**For more concurrent large uploads, increase Java heap and container memory together:**
 
-No document-result cache is used: warm performance comes from immutable shared compiled profiles and schema objects, not reuse of previous patient documents. Run the repeatable benchmark with `python3 scripts/benchmark.py`; the generated report records fixture sizes, concurrency, HTTP p50/p95, throughput, and result consistency. These measurements are not a claim to be the fastest validator across all workloads.
+```sh
+VALIDATOR_MEMORY_LIMIT=3g VALIDATOR_JAVA_OPTIONS=-Xmx2g docker compose up -d
+```
 
-## Develop and verify
+More heap can permit more large uploads concurrently. CPU and document complexity still affect validation speed. The UI's **Service capacity and queue** panel explains the active configuration. A full queue returns HTTP 429; an expired upload queue wait returns HTTP 503.
 
-Local service development requires Java 21+, Maven 3.9+, and Python 3.11+:
+The isolated 1 GiB-heap regression processes **six simultaneous 20 MiB documents**, each encoded as roughly 120 MiB JSON, with both known-length and chunked uploads. All six complete without retries; health probes and post-load validation pass. [Recorded evidence](reports/upload-memory.json).
+
+[Memory tuning, security, authentication, deadlines, and all limits →](docs/deployment.md)
+
+## Documentation
+
+| Guide | What you will find |
+| --- | --- |
+| [HTTP API](docs/api.md) | Payloads, reports, endpoints, errors, Node client, and CLI |
+| [Deployment](docs/deployment.md) | Docker, configuration, queueing, heap tuning, and secure shared access |
+| [Architecture](docs/architecture.md) | Runtime design, standards, provenance, privacy, and verification |
+| [Legacy API](docs/legacy-api.md) | Existing exports, defaults, examples, and migration boundaries |
+| [Historical documentation](docs/history.md) | Original release history, inherited examples, and attribution |
+| [Contributing](CONTRIBUTING.md) | Development checks and owner-managed contribution policy |
+| [Security](SECURITY.md) | Reporting vulnerabilities and deployment responsibilities |
+
+For the complete HTML engineering report, start the service and open [localhost:17643/architecture.html](http://localhost:17643/architecture.html). Its source and evidence are in [reports/](reports/).
+
+## Development
+
+Local service development requires Java 21+, Maven 3.9+, and Python 3.11+. Node is required for the JavaScript library and its tests.
 
 ```sh
 npm ci --ignore-scripts
@@ -120,250 +208,12 @@ npm run service:build
 npm run service:start
 ```
 
-`npm run service:test` runs focused Java tests and full official-profile integration tests. JavaScript tests use Node's built-in runner with no development dependencies. The Docker build runs service tests too. The CI workflow tests both supported Node lines, service behavior, official resources, and the container build. `python3 scripts/check-upload-memory.py` (Docker and curl required) exercises six concurrent maximum-size uploads with both known-length and chunked framing in a separate container with a 1 GiB heap, requiring all six requests to complete without retries, readiness during load, and validation after load. This regression also runs in CI. The weekly upstream watch reports new HL7 releases without updating packages or opening PRs automatically.
+`npm run service:test` exercises both official HL7 packages. `python3 scripts/check-upload-memory.py` runs the constrained-heap queue regression using Docker and curl. These checks run in CI alongside CodeQL. [Verification details](docs/architecture.md#verification).
 
-All changes must use descriptive branches and owner-authored PRs. Development tool names are forbidden in branch names. See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md).
-
-The original release history and API documentation follow for provenance. Where an older example conflicts with the modern instructions above, use the instructions above.
-
-## Release History
-
-### 1.1.12
-
-- Update xmldom to the latest version
-
-### 1.1.11
-
-- License file added
-
-### 1.1.10
-
-- Fix grunt race condition reported by github
-
-    "file.copy operations in GruntJS are vulnerable to a TOCTOU race condition leading to arbitrary file write in GitHub repository gruntjs/grunt prior to 1.5.3. This vulnerability is capable of arbitrary file writes which can lead to local privilege escalation to the GruntJS user if a lower-privileged user has write access to both source and destination directories as the lower-privileged user can create a symlink to the GruntJS user's .bashrc file or replace /etc/shadow file if the GruntJS user is root."
-
-### 1.1.9
-
-- Fix grunt vulnerability
-
-### 1.1.8
-
-- jsdoc module added
-- parseSchematron.js moved to lib
-
-### 1.1.7
-
-- Introduced a new method called `validateFileObjectAsync` which allows to supply an object with key, value pairs where key represents the identifier of the xml, and the value represents xml file content or path to validate
-- An array of results will be returned from the `validateFileObjectAsync` method
-- Test file `test/asyncFileList.test.js` has the example usage
-- The result object has the property `fileInfo` that would return the `key` the identifier of the xml to identify and debug issues
-- The result object of the array result from the method `validateFileListAsync` now has the property `fileIndex` that will give an indication of which xml file the result belongs to for debugging purposes
-
-### 1.1.6
-
-- Methods have been moved to js files and relocated to lib directory
-- Introduced a new method called `validateFileListAsync` which allows to supply an array of xml file content or paths to validate
-- An array of results will be returned from the `validateFileListAsync` method
-- Test file `test/asyncFileList.test.js` has the example usage
-- Started to make use of Promise.all for async methods
-- Documentation of the methods completed by 40%
-
-### 1.1.5
-
-- Major methods have been divided into multiple small methods to avoid redundancy across sync and async methods, and reduce maintenance
-
-### 1.1.4 (Stable Release)
-
-- Major deviations from the source repository
-
-  - By default the warning will be turned off in contrast to the parent repository
-
-  - To get warnings, users have to explicitly specify the option `includeWarnings` with value boolean `true`
-
-  - We also deviate from the previous behavior where all the checks for warnings were done at the assertion
-    level just before testing the xpath. We now would not even parse the phase with @id="warnings" which should
-    improve the performance.
-
-- Minor cosmetic changes to the code
-
-### 1.1.1 to 1.1.3
-
-- Only keeping the necessary data in the test files taken from HL7 C-CDA schematron repository to avoid bloating the module
-
-- Added pre-commit hooks with husky
-
-- Added code standardization with prettier, ESLint, and lint-staged
-
-### 1.1.0
-
-- Fix the issue with the rule check which was working in the original repository, but not in the fork
-- Added HL7 C-CDA schematron file and resource file from <https://github.com/HL7/CDA-ccda-2.1/releases/tag/2019JUN>
-- Added a test case vitalSigns.test.js that tests the resource file and sub assertions
-- Used resources <https://github.com/jddamore/ccda-samples> and <https://github.com/HL7/C-CDA-Examples/tree/master/Vital%20Signs> to create the test file vitalSigns.xml
-
-### 1.0.10
-
-- Fix null context issue associated with assertions within assertions
-- Skip abstract rules associated with assertions within assertions
-
-### 1.0.9
-
-- Fixed the bug introduced in 1.0.8 trying to adjust to different data types of the return value
-- Changed variable names to improve understanding of the process
-
-### 1.0.8
-
-- Bug fix identifying the ignored errors
-
-### 1.0.7
-
-- Added async validate function `validateAsync`
-- Added `testsAsync` to test `validateAsync`
-- Plan to use common functions between sync and async methods in the future release
-
-### 1.0.0 to 1.0.6
-
-A fork to the original cda-schematron. All credit to Eric Wadkins. Visit the github <https://github.com/ewadkins/cda-schematron> for the original repo.
-
-This is just a cosmetic change with updated node modules, a couple of minor bugs observed, and esversion 6 changes.
-
-The changes are fully backward compatible. So, leaving the original documentation as is below.
-
-### New option parameter parsedSchematronMap
-
-In addition to everything that was possible,
-you can now supply a new option parameter `parsedSchematronMap`. You can create a schematron map as follows.
-
-```javascript
-const fs = require('fs');
-const dom = require('@xmldom/xmldom').DOMParser;
-const { parseSchematron, validate } = require('cda-schematron-validator');
-const schematronString = fs.readFileSync('SchematronFilePath', 'utf-8').toString();
-const schematronDoc = new dom().parseFromString(schematronString);
-const schematronMap = parseSchematron(schematronDoc);
-const options = { 
-    parsedSchematronMap: schematronMap
-    };
-const results =  validate('xml string or file path', 'schematron sting, file path or null', options);
-```
-
-If a schematron map is provided, the schematron string or path will not be read.
-
-To install this npm module, it will be
-
-```javascript
-npm i cda-schematron-validator
-```
-
-Mocha VS Code configuratin added to directly execute the test file in `test/tests.js` using VS Code.
-
-## Documentation of the parent repo [cda-schematron](https://github.com/ewadkins/cda-schematron)
-
-A javascript implementation of schematron testing for XML documents. This specifically resolves a need for a package that allows a quick, reliable install for validating HL7 clinical documents, such as C-CDA.
-
-Check out [cda-schematron-server](https://github.com/ewadkins/cda-schematron-server), a server wrapper of **cda-schematron**, for easy schematron validation.
-
-### Validating xml
-
-```javascript
-var validator = require('cda-schematron');
-
-var xmlPath = 'someFile.xml';
-var schematronPath = 'someFile.sch';
-
-var fs = require('fs');
-var xml = fs.readFileSync(xmlPath).toString();
-var schematron = fs.readFileSync(schematronPath).toString();
-
-var results = validator.validate(xml, schematron);
-```
-
-File paths can also be passed to the validator directly. The following lines all return the same results:
-
-```javascript
-var results = validator.validate(xml, schematronPath);
-```
-
-```javascript
-var results = validator.validate(xmlPath, schematron);
-```
-
-```javascript
-var results = validator.validate(xmlPath, schematronPath);
-```
-
-### Results
-
-```results``` is an object containing arrays  ```errors```, ```warnings```, and ```ignoreds```.
-
-**Errors** and **warnings** are reported as determined by the schematron and test descriptions. They are of the following form:
-
-```javascript
-{
-    type: type,                     // "error" or "warning"
-    test: test,                     // xpath test
-    simplifiedTest: simplifiedTest, // xpath test with resource values included, if applicable, null otherwise
-    description: description,       // schematron description of the test case
-    line: line,                     // line number of the violating context
-    path: path,                     // xpath path of the violating context
-    patternId: patternId,           // schematron-assigned pattern id
-    ruleId: ruleId,                 // schematron-assigned rule id
-    assertionId: assertionId,       // schematron-assigned assertion id
-    context: context,               // xpath context of the rule
-    xml: xml                        // xml snippet of the violating context
-}
-```
-
-**Ignored** tests are those that resulted in an exception while running (eg. the test is invalid xpath and could not be parsed properly) and require manual inspection. They are of the following form:
-
-```javascript
-{
-    errorMessage: errorMessage,     // reason for the exception/ignoring the test
-    type: type,                     // "error" or "warning"
-    test: test,                     // xpath test
-    simplifiedTest: simplifiedTest, // xpath test with resource values included, if applicable, null otherwise
-    description: description,       // schematron description of the test case
-    patternId: patternId,           // schematron-assigned pattern id
-    ruleId: ruleId,                 // schematron-assigned rule id
-    assertionId: assertionId,       // schematron-assigned assertion id
-    context: context,               // xpath context of the rule
-}
-```
-
-### Options
-
-The ```validate``` function takes in an ```options``` object as an optional third argument. The three fields that can be included in ```options``` are as follows:
-
-- **```includeWarnings```**: ```true``` or ```false```, this determines whether or not warnings should be tested and returned. Defaults to ```true```.
-
-- **```resourceDir```**: the path to a directory containing resource files (eg. voc.xml) which may be necessary for some schematron tests. Defaults to ```'./'```, the current directory.
-
-- **```xmlSnippetMaxLength```**: an integer, which is the maximum length of the ```xml``` field in validation results. Defaults to ```200```. Set to ```0``` for unlimited length.
-
-Here is an example with warnings disabled:
-
-```javascript
-var results = validator.validate(xml, schematron, { includeWarnings: false });
-```
-
-### Cache
-
-The validator uses a cache to store parsed schematrons, an intermediate data structure used to store revelant schematron information. This reduces the runtime of the validator when validating against the same schematron multiple times. You can clear the cache at any time with:
-
-```javascript
-validator.clearCache();
-```
+Public issues are welcome. This repository accepts owner-authored PRs; changes reach `main` through review. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
-## License (MIT)
+**License and attribution** · [MIT](LICENSE.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
-Copyright &copy; 2017 [Eric Wadkins](http://www.ericwadkins.com/)
-
-Copyright &copy; 2022 [Priyaranjan (Raj) Tokachichu](https://github.com/priyaranjan-tokachichu)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Original JavaScript implementation by **Eric Wadkins**, developed further by **Priyaranjan (Raj) Tokachichu**. John D'Amore's public clinical samples are credited in the source fixtures. This product includes software developed by Health Level Seven. HL7 resources and bundled dependencies retain their own licenses and notices.
