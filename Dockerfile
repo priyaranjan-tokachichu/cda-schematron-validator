@@ -5,6 +5,10 @@ COPY profiles profiles
 COPY scripts/prepare-assets.py scripts/prepare-assets.py
 RUN python3 scripts/prepare-assets.py
 
+FROM assets AS public-assets
+COPY scripts/package-public-assets.py scripts/package-public-assets.py
+RUN python3 scripts/package-public-assets.py service/assets
+
 FROM maven:3.9-eclipse-temurin-21@sha256:99e61abcff91a9b1333463bd8451fb18495d6eba9250ac66a338b518f8278320 AS build
 WORKDIR /build/service
 COPY service/pom.xml pom.xml
@@ -19,11 +23,11 @@ FROM eclipse-temurin:21-jre-jammy@sha256:dff6eb46527bd293a3c06bbbe9e64e8c9f91f01
 WORKDIR /app
 RUN groupadd --gid 10001 validator && useradd --uid 10001 --gid validator --no-create-home validator
 COPY --from=build /build/service/target/cda-validator-service.jar app.jar
-COPY --from=assets /build/service/assets assets
+COPY --from=public-assets /build/service/assets assets
 COPY service/web web
 COPY LICENSE.md THIRD_PARTY_NOTICES.md ./
 COPY licenses licenses
-ENV HOST=0.0.0.0 PORT=17643 ASSET_DIR=/app/assets WEB_DIR=/app/web VALIDATION_WORKERS=2
+ENV HOST=0.0.0.0 PORT=17643 ASSET_DIR=/app/assets TERMINOLOGY_DIR=/app/terminology WEB_DIR=/app/web VALIDATION_WORKERS=2
 USER 10001:10001
 EXPOSE 17643
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=70", "-XX:+ExitOnOutOfMemoryError", "-jar", "/app/app.jar"]

@@ -60,6 +60,21 @@ class SvsImportTest(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     module.import_exports([source], [{'oid': '1.2.3', 'expectedCount': 1}], Path(directory) / 'pack')
 
+    def test_adding_an_export_preserves_other_data_and_grammar_configuration(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            source, pack = root / 'source.xml', root / 'pack'
+            def xml(oid):
+                return f'<RetrieveMultipleValueSetsResponse xmlns="urn:ihe:iti:svs:2008"><DescribedValueSet ID="{oid}"><ConceptList><Concept code="SYNTHETIC" codeSystem="1.2"/></ConceptList></DescribedValueSet></RetrieveMultipleValueSetsResponse>'
+            source.write_text(xml('1.2.3'))
+            manifest = module.import_exports([source], [{'oid': '1.2.3', 'expectedCount': 1}], pack)
+            manifest['grammars'] = {'synthetic': {'version': 'test'}}
+            (pack / 'manifest.json').write_text(json.dumps(manifest))
+            source.write_text(xml('1.2.4'))
+            result = module.import_exports([source], [{'oid': '1.2.4', 'expectedCount': 1}], pack)
+            self.assertEqual(2, len(result['valueSets']))
+            self.assertEqual(manifest['grammars'], result['grammars'])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,0 +1,81 @@
+{
+  "verifiedAt": "2026-11-17T03:34:15.036060+00:00",
+  "reference": "HL7 FHIR Validator 7.0.6",
+  "referenceSha256": "2686590539f0b3ba7683149b25d78249f6886c04e2c326e884c5049d8947df89",
+  "profile": "hl7.cda.us.ccda#5.0.0",
+  "network": "disabled during both local validation and cached reference run",
+  "terminology": "Reference run uses -tx n/a; no terminology conformance comparison is claimed.",
+  "cases": [
+    {
+      "case": "name-valid",
+      "rule": "81-9371",
+      "expectedFailure": false,
+      "referenceFailure": false,
+      "serviceFailure": false,
+      "serviceReportsIndeterminateCoverage": false
+    },
+    {
+      "case": "name-missing-family",
+      "rule": "81-9371",
+      "expectedFailure": true,
+      "referenceFailure": true,
+      "serviceFailure": true,
+      "serviceReportsIndeterminateCoverage": false
+    },
+    {
+      "case": "name-invalid-token",
+      "rule": "81-9371",
+      "expectedFailure": true,
+      "referenceFailure": true,
+      "serviceFailure": true,
+      "serviceReportsIndeterminateCoverage": false
+    },
+    {
+      "case": "date-future",
+      "rule": "ts-value-before-document",
+      "expectedFailure": true,
+      "referenceFailure": true,
+      "serviceFailure": true,
+      "serviceReportsIndeterminateCoverage": false
+    },
+    {
+      "case": "date-offset-before",
+      "rule": "ts-value-before-document",
+      "expectedFailure": true,
+      "referenceFailure": true,
+      "serviceFailure": true,
+      "serviceReportsIndeterminateCoverage": false
+    },
+    {
+      "case": "date-offset-after",
+      "rule": "ts-value-before-document",
+      "expectedFailure": true,
+      "referenceFailure": true,
+      "serviceFailure": true,
+      "serviceReportsIndeterminateCoverage": false
+    },
+    {
+      "case": "date-unknown",
+      "rule": "ts-value-before-document",
+      "expectedFailure": null,
+      "referenceFailure": false,
+      "serviceFailure": false,
+      "serviceReportsIndeterminateCoverage": true
+    },
+    {
+      "case": "careplan-addresses-act",
+      "review": "Base CDA profile in a type union does not require an invented templateId",
+      "observation": "Reference reports no missing-templateId requirement for the unprofiled base CDA child; this is a targeted union probe, not proof of full model equivalence."
+    },
+    {
+      "case": "careplan-addresses-observation",
+      "review": "Base CDA profile in a type union does not require an invented templateId",
+      "observation": "Reference reports no missing-templateId requirement for the unprofiled base CDA child; this is a targeted union probe, not proof of full model equivalence."
+    },
+    {
+      "case": "careplan-activity-act",
+      "review": "Base CDA profile in a type union does not require an invented templateId",
+      "observation": "Reference reports no missing-templateId requirement for the unprofiled base CDA child; this is a targeted union probe, not proof of full model equivalence."
+    }
+  ]
+}

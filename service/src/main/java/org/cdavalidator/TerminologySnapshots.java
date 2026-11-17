@@ -13,27 +13,36 @@ final class TerminologySnapshots {
     static final String NAMESPACE = "urn:cdavalidator:terminology";
     static final String PROCEDURE = "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.88.12.80.28";
     final Map<String, Set<String>> members;
+    final Map<String,Set<String>> codeMembers;
     final JsonArray metadata;
     private TerminologySnapshots(Map<String,Set<String>> members, JsonArray metadata) {
         this.members = Map.copyOf(members); this.metadata = metadata;
+        var codeIndex=new HashMap<String,Set<String>>();
+        members.forEach((canonical,values)->{var codes=new HashSet<String>();for(String key:values)codes.add(key.substring(key.indexOf('|')+1));codeIndex.put(canonical,Set.copyOf(codes));});
+        codeMembers=Map.copyOf(codeIndex);
     }
     static TerminologySnapshots load(Path assets) throws Exception {
-        Path directory = assets.resolve("terminology");
+        return load(assets,Set.of(PROCEDURE));
+    }
+    static TerminologySnapshots load(Path assets,Set<String> activeCanonicals) throws Exception {
+        return loadDirectory(assets.resolve("terminology"),activeCanonicals);
+    }
+    static TerminologySnapshots loadDirectory(Path directory,Set<String> activeCanonicals) throws Exception {
         Path manifest = directory.resolve("manifest.json");
         if (!Files.exists(manifest)) return new TerminologySnapshots(Map.of(), new JsonArray());
-        Path root = assets.toRealPath();
         directory = directory.toRealPath();
-        if (!directory.startsWith(root) || !manifest.toRealPath().startsWith(directory) || Files.size(manifest)>2*1024*1024) throw new IOException("Invalid terminology manifest");
+        if (!manifest.toRealPath().startsWith(directory) || Files.size(manifest)>2*1024*1024) throw new IOException("Invalid terminology manifest");
         var config = JsonParser.parseString(Files.readString(manifest)).getAsJsonObject();
         if(config.get("schemaVersion").getAsInt()!=1)throw new IOException("Unsupported terminology snapshot format");
         var result = new LinkedHashMap<String,Set<String>>();
         var metadata = new JsonArray();
+        var seen=new HashSet<String>();
         long bytes=0, concepts=0;
         for(var entry:config.getAsJsonArray("valueSets")) {
             var info=entry.getAsJsonObject();
             String canonical=info.get("canonical").getAsString();
             if(!canonical.startsWith("http://") && !canonical.startsWith("https://")) throw new IOException("Invalid terminology canonical");
-            if(result.containsKey(canonical)) throw new IOException("Duplicate terminology snapshot canonical");
+            if(!seen.add(canonical)) throw new IOException("Duplicate terminology snapshot canonical");
             Path file=directory.resolve(info.get("file").getAsString()).toRealPath();
             if(!file.startsWith(directory))throw new IOException("Invalid terminology snapshot path");
             bytes+=Files.size(file);
@@ -56,7 +65,7 @@ final class TerminologySnapshots {
             if(codes.size()!=count)throw new IOException("Terminology concept count mismatch");
             // Only retain indexes with implemented, reviewed checks. Other imported
             // snapshots are verified and disclosed, but their presence is not coverage.
-            boolean active = canonical.equals(PROCEDURE);
+            boolean active = activeCanonicals.contains(canonical);
             if (active) result.put(canonical,Set.copyOf(codes));
             var publicInfo=info.deepCopy();publicInfo.remove("file");publicInfo.addProperty("activeForValidation",active);publicInfo.addProperty("distribution","Local terminology pack; not included in the public image");metadata.add(publicInfo);
         }
@@ -71,6 +80,12 @@ final class TerminologySnapshots {
             public SequenceType getResultType(){return SequenceType.makeSequenceType(ItemType.BOOLEAN,OccurrenceIndicator.ONE);}
             public SequenceType[] getArgumentTypes(){var string=SequenceType.makeSequenceType(ItemType.STRING,OccurrenceIndicator.ONE);return new SequenceType[]{string,string,string};}
             public XdmValue call(XdmValue[] args){return new XdmAtomicValue(contains(args[0].itemAt(0).getStringValue(),args[1].itemAt(0).getStringValue(),args[2].itemAt(0).getStringValue()));}
+        });
+        processor.registerExtensionFunction(new ExtensionFunction() {
+            public QName getName(){return new QName("local-term",NAMESPACE,"code-member-of");}
+            public SequenceType getResultType(){return SequenceType.makeSequenceType(ItemType.BOOLEAN,OccurrenceIndicator.ONE);}
+            public SequenceType[] getArgumentTypes(){var s=SequenceType.makeSequenceType(ItemType.STRING,OccurrenceIndicator.ONE);return new SequenceType[]{s,s};}
+            public XdmValue call(XdmValue[] args){return new XdmAtomicValue(codeMembers.getOrDefault(args[0].itemAt(0).getStringValue(),Set.of()).contains(args[1].itemAt(0).getStringValue()));}
         });
     }
 }

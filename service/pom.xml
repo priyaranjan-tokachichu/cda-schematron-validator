@@ -3,6 +3,7 @@
   <groupId>org.cdavalidator</groupId><artifactId>cda-validator-service</artifactId><version>2.0.0-preview.2</version>
   <properties><maven.compiler.release>21</maven.compiler.release><project.build.sourceEncoding>UTF-8</project.build.sourceEncoding></properties>
   <dependencies>
+    <dependency><groupId>org.fhir</groupId><artifactId>ucum</artifactId><version>1.0.10</version></dependency>
     <dependency><groupId>net.sf.saxon</groupId><artifactId>Saxon-HE</artifactId><version>12.9</version></dependency>
     <dependency><groupId>name.dmaus.schxslt</groupId><artifactId>schxslt</artifactId><version>1.10.1</version></dependency>
     <dependency><groupId>com.google.code.gson</groupId><artifactId>gson</artifactId><version>2.13.2</version></dependency>
@@ -15,7 +16,7 @@
       <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-surefire-plugin</artifactId><version>3.5.3</version><configuration><argLine>-Xmx1g</argLine><!-- Exercise size boundaries with small payloads; runtime default remains 20 MiB. --><environmentVariables><MAX_XML_MIB>2</MAX_XML_MIB></environmentVariables></configuration></plugin>
       <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-shade-plugin</artifactId><version>3.6.0</version><executions><execution><phase>package</phase><goals><goal>shade</goal></goals><configuration>
         <createDependencyReducedPom>false</createDependencyReducedPom>
-        <filters><filter><artifact>*:*</artifact><excludes><exclude>META-INF/*.SF</exclude><exclude>META-INF/*.DSA</exclude><exclude>META-INF/*.RSA</exclude></excludes></filter></filters>
+        <filters><filter><artifact>*:*</artifact><excludes><exclude>META-INF/*.SF</exclude><exclude>META-INF/*.DSA</exclude><exclude>META-INF/*.RSA</exclude></excludes></filter><filter><artifact>org.fhir:ucum</artifact><excludes><exclude>ucum-essence.xml</exclude></excludes></filter></filters>
         <transformers><transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer"><mainClass>org.cdavalidator.Server</mainClass></transformer><transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/></transformers>
       </configuration></execution></executions></plugin>
     </plugins>
