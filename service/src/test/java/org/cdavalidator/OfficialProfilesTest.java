@@ -19,6 +19,47 @@ class OfficialProfilesTest {
             if(profile.equals("ccda-5.0")) assertEquals(false,report.get("validationComplete"),"Upstream conversion gaps must be visible");
         }
     }
+    @Test void personNamesMustMeetPatientNameConstraintsOrBePlainText() throws Exception {
+        var engine = new ValidationEngine(Path.of("assets"));
+        String fixture = Files.readString(Path.of("web/sample.xml"));
+        var cases = new LinkedHashMap<String, Boolean>();
+        cases.put("<name><given>Alex</given><family>Example</family></name>", true);
+        cases.put("<name use='L'><given>Alex</given><given>Robin</given><family>Example</family><suffix>Jr</suffix></name>", true);
+        cases.put("<name>Alex Example</name>", true);
+        cases.put("<name nullFlavor='UNK'/>", true);
+        cases.put("<name><given>Alex</given><family nullFlavor='NA'/></name>", true);
+        cases.put("<name/>", false);
+        cases.put("<name>   </name>", false);
+        cases.put("<name><family>Example</family></name>", false);
+        cases.put("<name><given>Alex</given></name>", false);
+        cases.put("<name><given>Alex</given><family>One</family><family>Two</family></name>", false);
+        cases.put("<name><given>Alex</given><family>Example</family><suffix>Jr</suffix><suffix>MD</suffix></name>", false);
+        cases.put("<name use='INVALID_USE'><given>Alex</given><family>Example</family></name>", false);
+        cases.put("<name><given qualifier='INVALID_QUALIFIER'>Alex</given><family>Example</family></name>", false);
+        for (var entry : cases.entrySet()) {
+            String author = "<author><time value='20261116'/><assignedAuthor><id root='1.2.3'/><assignedPerson>" + entry.getKey() + "</assignedPerson></assignedAuthor></author>";
+            var report = engine.validate(fixture.replace("  <component>", author + "<component>"), "ccda-5.0", false);
+            assertEquals(true, report.get("executionComplete"), entry.getKey());
+            boolean failed = ((List<Map<String,Object>>) report.get("findings")).stream().anyMatch(f -> "81-9371".equals(f.get("ruleId")));
+            assertEquals(!entry.getValue(), failed, entry.getKey());
+            assertEquals(false, report.get("validationComplete"), "Other upstream gaps are still unresolved");
+        }
+        String mixed = "<author><time value='20261116'/><assignedAuthor><id root='1.2.3'/><assignedPerson><name>Alex<family>Example</family></name></assignedPerson></assignedAuthor></author>";
+        var mixedReport = engine.validate(fixture.replace("  <component>", mixed + "<component>"), "ccda-5.0", false);
+        assertTrue(((List<Map<String,Object>>) mixedReport.get("findings")).stream().anyMatch(f -> ((String) f.get("message")).contains("81-9372")), "The existing no-mixed-content rule still applies");
+    }
+    @Test void supplementalNameCheckRejectsUnexpectedUpstreamLayout() throws Exception {
+        var file = Path.of("assets/ccda-5.0/CCDA-5.0.sch");
+        byte[] original = Files.readAllBytes(file);
+        var doc = ValidationEngine.trustedSchematron(file);
+        var rules = doc.getElementsByTagNameNS(ValidationEngine.SCH, "rule");
+        for (int i = 0; i < rules.getLength(); i++) {
+            var rule = (org.w3c.dom.Element) rules.item(i);
+            if (rule.getAttribute("id").equals("USRealmPatientNamePTNUSFIELDED-errors-use")) rule.setAttribute("context", "unexpected/name/@use");
+        }
+        assertThrows(IllegalArgumentException.class, () -> SupplementalRules.addPersonNameInvariant(doc));
+        assertArrayEquals(original, Files.readAllBytes(file), "Local layering must never rewrite the upstream asset");
+    }
     @Test void coverageCountsOmissionsRatherThanReasonCategories() throws Exception {
         var manifest = com.google.gson.JsonParser.parseString(Files.readString(Path.of("assets/manifest.json"))).getAsJsonObject();
         var profile = manifest.getAsJsonArray("profiles").get(1).getAsJsonObject();

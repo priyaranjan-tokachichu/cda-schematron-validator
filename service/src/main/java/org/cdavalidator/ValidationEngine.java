@@ -101,6 +101,15 @@ public final class ValidationEngine {
                 schemas.put(xsd, schema);
             }
             var doc = trustedSchematron(sch);
+            if (info.get("id").getAsString().equals("ccda-5.0")) {
+                SupplementalRules.addPersonNameInvariant(doc);
+                var supplement = new JsonObject();
+                supplement.addProperty("ruleId", SupplementalRules.NAME_INVARIANT);
+                supplement.addProperty("method", "Reapply all pinned patient-name Schematron constraints at person-name locations, with the permitted plain-text alternative");
+                supplement.addProperty("scope", "Pinned Schematron profile; not a general FHIR conformsTo implementation");
+                var supplements = new JsonArray(); supplements.add(supplement);
+                info.add("supplementalChecks", supplements);
+            }
             var destination = new XdmDestination();
             var transform = pipeline.load();
             transform.setSource(new DOMSource(doc, sch.toUri().toString()));
