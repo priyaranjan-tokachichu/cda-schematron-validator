@@ -49,7 +49,7 @@ The application does not implement full FHIR StructureDefinition validation or e
 
 A weekly workflow checks official latest releases against the lock. It signals differences without silently replacing rules or opening automated PRs. An update requires review of checksums, generation gaps, vocabulary changes, tests, and benchmark results.
 
-The container is the primary service distribution. The npm package preserves legacy integrations and supplies the thin modern client/CLI. These release paths can evolve independently. This PR prepares container publishing; npm publishing still needs configuration before the preview is released. Merging does not publish either artifact.
+The container is the primary service distribution. The npm package preserves legacy integrations and supplies the thin modern client/CLI. These release paths can evolve independently. Owner-authorized releases publish versioned container and npm artifacts separately. Merging does not publish either artifact.
 
 ## Verification
 

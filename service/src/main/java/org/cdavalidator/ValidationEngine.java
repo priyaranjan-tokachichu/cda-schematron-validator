@@ -343,7 +343,7 @@ public final class ValidationEngine {
         boolean complete = executed && coverageComplete && !truncated && findings.stream().noneMatch(f -> "coverage".equals(f.get("stage")));
         var result = new LinkedHashMap<String, Object>();
         result.put("requestId", UUID.randomUUID().toString());
-        result.put("applicationVersion", "2.0.0-preview.1");
+        result.put("applicationVersion", "2.0.0");
         result.put("status", errors > 0 ? "invalid" : complete ? "valid" : "incomplete");
         result.put("validationComplete", complete);
         result.put("executionComplete", executed && !truncated);
