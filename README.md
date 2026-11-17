@@ -17,7 +17,7 @@
 ---
 
 > [!NOTE]
-> **2.0 implementation preview.** Build the container from this checkout. The new service, client, and CLI are awaiting release; npm's published `1.1.12` package remains the legacy library. Merging this PR does not publish a new npm package or container image.
+> **Version 2.0.0-preview.1.** The container includes the validation API and browser UI. The npm package includes the preserved legacy APIs, a typed HTTP client, and the CLI. Node 22.12+ is required. This is a preview while C-CDA 5.0 coverage gaps are addressed; npm’s stable default remains 1.1.12. See the [release notes](https://github.com/priyaranjan-tokachichu/cda-schematron-validator/releases/tag/v2.0.0-preview.1) for artifacts and compatibility details.
 
 <table>
 <tr>
@@ -38,8 +38,6 @@ Install Docker with Compose, then:
 git clone https://github.com/priyaranjan-tokachichu/cda-schematron-validator.git
 cd cda-schematron-validator
 ```
-
-**Preview reviewers:** until PR #50 is merged, run `git checkout feature/modern-validator`. After merge, use the default branch.
 
 Start the service:
 
@@ -95,7 +93,7 @@ The legacy API remains a partial Schematron interpreter. Use the service for CDA
 Sources are pinned by immutable release URL and SHA-256. The build verifies downloads; startup verifies extracted files. `GET /v1/profiles` exposes provenance, active limits, and known coverage gaps. [Inspect the source lock](profiles/sources.lock.json).
 
 > [!IMPORTANT]
-> **C-CDA 5.0 has known upstream conversion gaps:** 4 generation errors, 4 unhandled invariants, and 9 non-loaded value sets. Its embedded value-set expansions cover sets with fewer than 1,000 concepts. The service reports incomplete coverage even when execution succeeds. A supported document-level template is required for complete document validation; nested templates alone are insufficient.
+> **C-CDA 5.0 has known upstream conversion gaps:** 4 generation errors, 6 unhandled invariants across 4 categories, and 28 non-loaded value-set entries across 9 categories. Its embedded value-set expansions cover sets with fewer than 1,000 concepts. The service reports incomplete coverage even when execution succeeds. A supported document-level template is required for complete document validation; nested templates alone are insufficient.
 
 Neither profile certifies clinical accuracy or every terminology requirement. See [standards, provenance, and coverage](docs/architecture.md#standards-and-coverage).
 
@@ -129,10 +127,10 @@ curl http://localhost:17643/v1/validate \
 
 ## JavaScript, TypeScript, and CLI
 
-For the unpublished preview, install this checkout into your Node project:
+Install the package into your Node project:
 
 ```sh
-npm install /path/to/cda-schematron-validator
+npm install cda-schematron-validator@next
 ```
 
 ```javascript

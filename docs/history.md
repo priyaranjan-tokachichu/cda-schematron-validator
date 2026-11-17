@@ -1,6 +1,6 @@
 # Historical release notes and inherited documentation
 
-> This archive preserves the original release history, examples, and attribution. Some examples use the parent package name or older defaults. Use the [current legacy API guide](legacy-api.md) and [project README](../README.md) for this preview. Paths in the archived text were relative to the repository root.
+> This archive preserves the original release history, examples, and attribution. Some examples use the parent package name or older defaults. Use the [current legacy API guide](legacy-api.md) and [project README](../README.md) for version 2. Paths in the archived text were relative to the repository root.
 
 ## Release History
 

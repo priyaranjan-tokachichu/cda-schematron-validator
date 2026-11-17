@@ -61,9 +61,14 @@ manifest = {
     ]
 }
 report = json.loads((DEST / 'ccda-5.0/CCDA-5.0-Results.json').read_text())
-manifest['profiles'][1]['generationCoverage'] = {k: len(v) for k, v in report.items()}
+# Grouped reports map a reason to a list of actual omissions. Count entries,
+# not reason categories, so API consumers see the real coverage gap totals.
+def coverage_count(value):
+    return sum(len(items) for items in value.values()) if isinstance(value, dict) else len(value)
+manifest['profiles'][1]['generationCoverage'] = {k: coverage_count(v) for k, v in report.items()}
+manifest['profiles'][1]['generationReport'] = report
 manifest['profiles'][1]['limitations'].extend(
-    f'Upstream generation report: {len(v)} {k}.' for k, v in report.items() if len(v)
+    f'Upstream generation report: {coverage_count(v)} {k}.' for k, v in report.items() if len(v)
 )
 for profile in manifest['profiles']:
     profile['schemaRelease'] = '20260205_SDTC'

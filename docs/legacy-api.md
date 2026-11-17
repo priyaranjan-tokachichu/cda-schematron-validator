@@ -2,7 +2,7 @@
 
 [← Project home](../README.md) · [Modern API](api.md) · [Historical documentation](history.md)
 
-The original JavaScript APIs remain local and retain their result shape and synchronous/Promise contracts. They do not require the Java service or Docker. The preview package targets Node **22.12+**; older runtimes should retain a compatible earlier release.
+The original JavaScript APIs remain local and retain their result shape and synchronous/Promise contracts. They do not require the Java service or Docker. The version 2 package targets Node **22.12+**; older runtimes should retain a compatible earlier release.
 
 > [!IMPORTANT]
 > The legacy implementation is a **partial Schematron interpreter**, with no XSD validation. Installing the modern package does not turn `validate()` into the full service engine. Use `createClient()` for the modern pipeline.
@@ -50,7 +50,7 @@ Results retain `errorCount`, `warningCount`, `ignoredCount`, `errors`, `warnings
 
 [Type declarations](../validator.d.ts) describe result/finding fields and batch signatures. The [archived documentation](history.md) preserves inherited examples, including the parent package name; use `cda-schematron-validator` for this package.
 
-## Correctness fixes in the preview
+## Correctness fixes in version 2
 
 Document context caches are isolated, caller options are not mutated, asynchronous empty patterns settle, batches retain input ordering, and rules without IDs receive generated identifiers. Resource caches distinguish absolute paths and file versions, with a bounded parsed-map cache. Missing files and empty input fail explicitly.
 
@@ -67,4 +67,4 @@ The modern service accepts installed profile IDs and XML text; it does not accep
 
 ## Release boundary
 
-The npm registry currently publishes `1.1.12`. The checkout contains `2.0.0-preview.1`; install the checkout for the new client and CLI until a preview release is published. Merging the PR does not publish a new npm version or change packages already installed by consumers. The npm publishing path still needs configuring.
+Preview `2.0.0-preview.1` preserves the seven legacy exports and adds the HTTP client and CLI. It requires Node 22.12+. Version `1.1.12` remains available for older integrations; the stable default remains `1.1.12`, and the preview is selected explicitly with `@next`. The Java service is distributed separately as a container. Merging alone does not publish either artifact.

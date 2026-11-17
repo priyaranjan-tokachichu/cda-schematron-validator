@@ -19,6 +19,17 @@ class OfficialProfilesTest {
             if(profile.equals("ccda-5.0")) assertEquals(false,report.get("validationComplete"),"Upstream conversion gaps must be visible");
         }
     }
+    @Test void coverageCountsOmissionsRatherThanReasonCategories() throws Exception {
+        var manifest = com.google.gson.JsonParser.parseString(Files.readString(Path.of("assets/manifest.json"))).getAsJsonObject();
+        var profile = manifest.getAsJsonArray("profiles").get(1).getAsJsonObject();
+        var counts = profile.getAsJsonObject("generationCoverage");
+        assertEquals(4, counts.get("errors").getAsInt());
+        assertEquals(6, counts.get("unhandledInvariants").getAsInt());
+        assertEquals(28, counts.get("nonLoadedValueSets").getAsInt());
+        var report = profile.getAsJsonObject("generationReport");
+        assertEquals(4, report.getAsJsonObject("unhandledInvariants").size());
+        assertEquals(9, report.getAsJsonObject("nonLoadedValueSets").size());
+    }
     @Test void nestedTemplatesCannotEstablishDocumentCoverage() throws Exception {
         var engine = new ValidationEngine(Path.of("assets"));
         String original = Files.readString(Path.of("../test/VitalSigns.xml"));

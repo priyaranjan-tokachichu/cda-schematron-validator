@@ -97,10 +97,10 @@ Admitted uploads queue fairly for up to 30 seconds while waiting for memory. Val
 
 ## Node client and CLI
 
-Requires Node 22.12+. The current npm registry release is the legacy package; install this preview checkout until a new release is published:
+Requires Node 22.12+. Install the version 2 preview:
 
 ```sh
-npm install /path/to/cda-schematron-validator
+npm install cda-schematron-validator@next
 ```
 
 ```javascript
