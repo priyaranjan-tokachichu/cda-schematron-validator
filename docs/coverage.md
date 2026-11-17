@@ -10,7 +10,7 @@ The earlier summary of 4 invariants and 9 value sets counted categories and unde
 
 ## Local person-name check (follow-up to preview.1)
 
-The local `81-9371` supplement reuses all 11 assertions in the pinned patient-name Schematron profile at the person-name locations, with the permitted plain-text alternative. This adds the missing given/family cardinality, suffix, use, qualifier, and mixed-content checks at those locations. The existing `81-9372` prohibition on mixing text and name parts still runs.
+The local `81-9371` supplement reuses all 11 assertions in the pinned patient-name Schematron profile at the person-name locations, with the permitted plain-text alternative. List-valued use and qualifier attributes are checked token by token against complete vocabulary codes. This adds the missing given/family cardinality, suffix, use, qualifier, and mixed-content checks at those locations. The existing `81-9372` prohibition on mixing text and name parts still runs.
 
 The check is layered onto the in-memory compilation input. Original downloaded files and the upstream generation report remain unchanged. Profile metadata lists the added rule in `supplementalChecks`; the application still reports incomplete C-CDA 5.0 coverage. This is reuse of the pinned Schematron constraints, not a general FHIR `conformsTo()` implementation.
 

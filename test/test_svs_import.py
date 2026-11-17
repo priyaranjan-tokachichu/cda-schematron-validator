@@ -28,6 +28,30 @@ class SvsImportTest(unittest.TestCase):
                     module.import_exports([source], expected, root / 'pack')
             self.assertEqual(manifest, json.loads((root / 'pack/manifest.json').read_text()))
 
+    def test_encoding_aware_dtd_rejection_preserves_existing_pack(self):
+        xml = '''<RetrieveMultipleValueSetsResponse xmlns="urn:ihe:iti:svs:2008"><DescribedValueSet ID="1.2.3"><ConceptList><Concept code="safe" codeSystem="1.2"/></ConceptList></DescribedValueSet></RetrieveMultipleValueSetsResponse>'''
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source, output = root / 'source.xml', root / 'pack'
+            expected = [{'oid': '1.2.3', 'expectedCount': 1}]
+            source.write_text(xml)
+            module.import_exports([source], expected, output)
+            original = {p.name: p.read_bytes() for p in output.iterdir()}
+            for encoding in ('utf-8', 'utf-16', 'utf-16-le', 'utf-16-be'):
+                for dtd in ('<!DOCTYPE RetrieveMultipleValueSetsResponse>',
+                            '<!DOCTYPE RetrieveMultipleValueSetsResponse SYSTEM "file:///nonexistent-svs.dtd">',
+                            '<!DOCTYPE RetrieveMultipleValueSetsResponse [<!ENTITY code "expanded">]>'):
+                    with self.subTest(encoding=encoding, dtd=dtd):
+                        payload = xml.replace('code="safe"', 'code="&code;"') if '<!ENTITY' in dtd else xml
+                        declaration = 'utf-8' if encoding == 'utf-8' else 'utf-16'
+                        source.write_bytes((f'<?xml version="1.0" encoding="{declaration}"?>' + dtd + payload).encode(encoding))
+                        with self.assertRaisesRegex(ValueError, 'DTDs or entities'):
+                            module.import_exports([source], expected, output)
+                        self.assertEqual(original, {p.name: p.read_bytes() for p in output.iterdir()})
+            # Legitimate UTF-16 SVS exports remain supported.
+            source.write_bytes(('<?xml version="1.0" encoding="utf-16"?>' + xml).encode('utf-16'))
+            self.assertEqual(1, module.import_exports([source], expected, output)['valueSets'][0]['count'])
+
     def test_rejects_entities_and_empty_expansions(self):
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory) / 'source.xml'

@@ -63,6 +63,13 @@ class OfficialProfilesTest {
         var cases = new LinkedHashMap<String, Boolean>();
         cases.put("<name><given>Alex</given><family>Example</family></name>", true);
         cases.put("<name use='L'><given>Alex</given><given>Robin</given><family>Example</family><suffix>Jr</suffix></name>", true);
+        cases.put("<name use='L P'><given qualifier='BR IN'>Alex</given><family qualifier='BR IN'>Example</family></name>", true);
+        cases.put("<name use='  P   L '><prefix qualifier='AC TITLE'>Dr</prefix><given>Alex</given><family>Example</family><suffix qualifier='AC TITLE'>MD</suffix></name>", true);
+        cases.put("<name use='L INVALID_USE'><given>Alex</given><family>Example</family></name>", false);
+        cases.put("<name><given qualifier='BR INVALID'>Alex</given><family>Example</family></name>", false);
+        cases.put("<name use='S'><given>Alex</given><family>Example</family></name>", false);
+        cases.put("<name><given qualifier='B'>Alex</given><family>Example</family></name>", false);
+        cases.put("<name><given qualifier='BR LS'>Alex</given><family>Example</family></name>", false);
         cases.put("<name>Alex Example</name>", true);
         cases.put("<name nullFlavor='UNK'/>", true);
         cases.put("<name><given>Alex</given><family nullFlavor='NA'/></name>", true);

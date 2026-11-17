@@ -10,6 +10,13 @@ import re
 import xml.etree.ElementTree as ET
 
 
+class NoDtdTreeBuilder(ET.TreeBuilder):
+    def doctype(self, name, pubid, system):
+        # The parser decodes the input encoding before invoking this callback,
+        # and invokes it before processing declarations in the internal subset.
+        raise ValueError('SVS exports must not contain DTDs or entities')
+
+
 def import_exports(inputs, expected, output):
     expected = {item['oid']: item['expectedCount'] for item in expected if 'expectedCount' in item}
     output = Path(output)
@@ -19,9 +26,7 @@ def import_exports(inputs, expected, output):
         if source.stat().st_size > 500 * 1024 * 1024:
             raise ValueError('SVS input exceeds supported size')
         raw = source.read_bytes()
-        if b'<!DOCTYPE' in raw or b'<!ENTITY' in raw:
-            raise ValueError('SVS exports must not contain DTDs or entities')
-        root = ET.fromstring(raw)
+        root = ET.fromstring(raw, parser=ET.XMLParser(target=NoDtdTreeBuilder()))
         if root.tag != '{urn:ihe:iti:svs:2008}RetrieveMultipleValueSetsResponse':
             raise ValueError('Expected an IHE SVS RetrieveMultipleValueSetsResponse')
         for value_set in root.findall('{urn:ihe:iti:svs:2008}DescribedValueSet'):

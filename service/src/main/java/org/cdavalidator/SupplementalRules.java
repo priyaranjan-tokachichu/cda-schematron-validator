@@ -31,6 +31,16 @@ final class SupplementalRules {
             for (int j = 0; j < checks.getLength(); j++) {
                 String test = ((Element) checks.item(j)).getAttribute("test");
                 if (test.isBlank()) throw new IllegalArgumentException("Empty patient-name assertion");
+                // CDA name use/qualifier attributes are whitespace-separated lists.
+                // Compare complete tokens, never substrings of the vocabulary string.
+                if (context.endsWith("/@use") || context.endsWith("/@qualifier")) {
+                    String vocabulary = context.endsWith("/@use") ? "$CDAEntityNameUse" : "$EntityPersonNamePartQualifier";
+                    if (!test.equals("contains(" + vocabulary + ", .)"))
+                        throw new IllegalArgumentException("Name vocabulary constraint changed; review supplemental rule");
+                    test = "normalize-space(.) != '' and (every $nameToken in tokenize(normalize-space(.), '\\s+') satisfies $nameToken = tokenize(" + vocabulary + ", '\\s+'))";
+                } else if (test.equals("not(((cda:delimiter | cda:family | cda:given | cda:prefix | cda:suffix))[@qualifier[self::node() = 'LS']])")) {
+                    test = "not((cda:delimiter | cda:family | cda:given | cda:prefix | cda:suffix)[tokenize(normalize-space(@qualifier), '\\s+') = 'LS'])";
+                }
                 tests.add(root ? "(" + test + ")" :
                     "(every $patientNameNode in (" + relative + ") satisfies exists($patientNameNode[(" + test + ")]))");
                 assertions++;

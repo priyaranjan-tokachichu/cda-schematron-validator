@@ -1,9 +1,9 @@
 {
   "state": "Development follow-up; not included in published preview.1",
-  "verifiedAt": "2026-11-17T01:10:07.989879+00:00",
+  "verifiedAt": "2026-11-17T01:31:38.116849+00:00",
   "javascriptTests": 64,
   "javaTests": 27,
-  "pythonTests": 2,
+  "pythonTests": 3,
   "supplementalRules": [
     "81-9371",
     "1198-8487",
@@ -21,9 +21,9 @@
   },
   "sourceFiles": {
     "service/src/main/java/org/cdavalidator/ValidationEngine.java": "0f144d4b03ca2ef79baa9f328ecdbb1487ee4aaa4b901ba6e7bce9f61eadbc78",
-    "service/src/main/java/org/cdavalidator/SupplementalRules.java": "255b9c2e1577430bf6e6080e3b3aa2b36766c475318ed3aca6fd65bfa04a6a19",
+    "service/src/main/java/org/cdavalidator/SupplementalRules.java": "2ab9729fc74e581663fec35b17d9ee74c1c8b06e67a54c3dc51efeb1852fcb33",
     "service/src/main/java/org/cdavalidator/TerminologySnapshots.java": "22d1c3534bac101937c3108642e9602aa4625d967d6535e168ba1cc6d5f400c8",
-    "scripts/import-svs.py": "72c6a1e5a6e3979f51256829235ffb83b4704bd5a23ffda60cadc6ece0c97b84",
+    "scripts/import-svs.py": "c420276c544a101e3cfbd3b1d96a538bbca247f9992341d981b6694b824af8c9",
     "service/web/app.js": "4940ffc35329891e7ee8fbe3b06fd5ac60c30eca04632565a6004e7e821184c4"
   },
   "privateTerminologyUploadRegression": {
@@ -89,5 +89,9 @@
     "postLoadValidationPassed": true,
     "outOfMemory": false
   },
-  "remainingGaps": "Date invariants, location union, generation errors, full missing-binding integration and grammar/code-system requirements remain unresolved. Downloading a definition does not establish executed coverage."
+  "remainingGaps": "Date invariants, location union, generation errors, full missing-binding integration and grammar/code-system requirements remain unresolved. Downloading a definition does not establish executed coverage.",
+  "reviewRegressions": [
+    "Name use and qualifier lists validate each complete whitespace-separated token; mixed invalid tokens and substrings fail.",
+    "Parser rejects internal, external, and bare DTDs in UTF-8 and UTF-16 (both byte orders); existing pack stays unchanged after rejection. Ordinary UTF-16 exports import successfully."
+  ]
 }
