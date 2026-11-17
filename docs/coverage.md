@@ -16,6 +16,10 @@ The check is layered onto the in-memory compilation input. Original downloaded f
 
 Tests exercise valid fielded names, plain strings, null flavors, missing/duplicate name parts, multiple suffixes, invalid use/qualifier values, mixed content, and rejection of an unexpected upstream profile layout. This change is separate from the published preview.1 artifact and requires review before inclusion in a later release.
 
+## Local procedure checks and recovered data
+
+The optional [offline terminology adapter](terminology.md) restores `1198-8487` and `1198-8511` when a reviewed Procedure snapshot is installed. It checks exact SNOMED CT code/system membership and preserves the original alternative code systems. Other recovered expansions are not counted as implemented binding checks simply because their data are now available.
+
 ## Rule-conversion work
 
 | Invariant | Template | Why omitted | Required fix and verification |

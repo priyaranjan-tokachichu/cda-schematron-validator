@@ -45,6 +45,27 @@ final class SupplementalRules {
         personRoot.appendChild(assertion);
     }
 
+    static void addProcedureInvariants(Document doc) {
+        var namespace = doc.createElementNS(ValidationEngine.SCH, "ns");
+        namespace.setAttribute("prefix", "local-term"); namespace.setAttribute("uri", TerminologySnapshots.NAMESPACE);
+        doc.getDocumentElement().appendChild(namespace);
+        for (String template : List.of("OperativeNote", "ProcedureNote")) {
+            Element pattern = pattern(doc, template + "-errors");
+            Element root = rule(pattern.getElementsByTagNameNS(ValidationEngine.SCH, "rule"), template + "-errors-root");
+            Element rule = doc.createElementNS(ValidationEngine.SCH, "rule");
+            rule.setAttribute("context", root.getAttribute("context") + "/cda:documentationOf/cda:serviceEvent/cda:code");
+            rule.setAttribute("id", "local-" + template + "-procedure-code");
+            Element assertion = doc.createElementNS(ValidationEngine.SCH, "assert");
+            assertion.setAttribute("id", template.equals("OperativeNote") ? "1198-8487" : "1198-8511");
+            assertion.setAttribute("role", "error");
+            String alternatives = "@codeSystem = '2.16.840.1.113883.6.104' or @codeSystem = '2.16.840.1.113883.6.4' or @codeSystem = '2.16.840.1.113883.6.12'";
+            if (template.equals("ProcedureNote")) alternatives += " or @codeSystem = '2.16.840.1.113883.6.285'";
+            assertion.setAttribute("test", alternatives + " or (@codeSystem = '2.16.840.1.113883.6.96' and local-term:member-of('" + TerminologySnapshots.PROCEDURE + "', string(@codeSystem), string(@code)))");
+            assertion.setTextContent("Service-event code SHALL use an allowed procedure code system; SNOMED CT codes SHALL belong to the pinned Procedure value-set expansion (CONF:" + assertion.getAttribute("id") + "). Local supplemental terminology check.");
+            rule.appendChild(assertion); pattern.appendChild(rule);
+        }
+    }
+
     private static Element pattern(Document doc, String id) {
         return rule(doc.getElementsByTagNameNS(ValidationEngine.SCH, "pattern"), id);
     }

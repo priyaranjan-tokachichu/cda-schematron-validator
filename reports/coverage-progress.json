@@ -1,0 +1,92 @@
+{
+  "state": "Development follow-up; not included in published preview.1",
+  "verifiedAt": "2026-11-17T01:10:07.989879+00:00",
+  "javascriptTests": 63,
+  "javaTests": 27,
+  "pythonTests": 2,
+  "supplementalRules": [
+    "81-9371",
+    "1198-8487",
+    "1198-8511"
+  ],
+  "procedureRulesRequireLocalSnapshot": true,
+  "localSvsExports": 20,
+  "localMembershipEntries": 383629,
+  "activeLocalIndexes": [
+    "Procedure"
+  ],
+  "phinvadsDefinitionConcepts": {
+    "7900": 19254,
+    "7901": 59583
+  },
+  "sourceFiles": {
+    "service/src/main/java/org/cdavalidator/ValidationEngine.java": "0f144d4b03ca2ef79baa9f328ecdbb1487ee4aaa4b901ba6e7bce9f61eadbc78",
+    "service/src/main/java/org/cdavalidator/SupplementalRules.java": "255b9c2e1577430bf6e6080e3b3aa2b36766c475318ed3aca6fd65bfa04a6a19",
+    "service/src/main/java/org/cdavalidator/TerminologySnapshots.java": "22d1c3534bac101937c3108642e9602aa4625d967d6535e168ba1cc6d5f400c8",
+    "scripts/import-svs.py": "72c6a1e5a6e3979f51256829235ffb83b4704bd5a23ffda60cadc6ece0c97b84"
+  },
+  "privateTerminologyUploadRegression": {
+    "verifiedAt": "2026-11-17T00:57:15.201907+00:00",
+    "javaMaxHeapBytes": 1073741824,
+    "containerMemoryBytes": 1610612736,
+    "limits": {
+      "uploadMemoryBudgetBytes": 259489792,
+      "maxRequestBytes": 125894656,
+      "uploadQueueWaitSeconds": 30,
+      "requestCapacity": 6,
+      "maxXmlBytes": 20971520,
+      "maxConcurrentUploads": 1
+    },
+    "rounds": [
+      {
+        "framing": "known-length",
+        "uploads": 6,
+        "decodedXmlBytesEach": 20971520,
+        "serializedJsonBytesEach": 125824640,
+        "httpStatuses": [
+          200,
+          200,
+          200,
+          200,
+          200,
+          200
+        ],
+        "uploadQueueWaitMs": [
+          846,
+          3251,
+          4041,
+          2467,
+          1683,
+          0
+        ]
+      },
+      {
+        "framing": "chunked",
+        "uploads": 6,
+        "decodedXmlBytesEach": 20971520,
+        "serializedJsonBytesEach": 125824640,
+        "httpStatuses": [
+          200,
+          200,
+          200,
+          200,
+          200,
+          200
+        ],
+        "uploadQueueWaitMs": [
+          1600,
+          3665,
+          3037,
+          2386,
+          766,
+          0
+        ]
+      }
+    ],
+    "healthSamples": 89,
+    "allHealthChecksPassed": true,
+    "postLoadValidationPassed": true,
+    "outOfMemory": false
+  },
+  "remainingGaps": "Date invariants, location union, generation errors, full missing-binding integration and grammar/code-system requirements remain unresolved. Downloading a definition does not establish executed coverage."
+}

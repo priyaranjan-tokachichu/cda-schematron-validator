@@ -1,6 +1,6 @@
 {
   "openapi": "3.1.0",
-  "info": {"title": "CDA Validator API", "version": "2.0.0-preview.1", "description": "Stateless local CDA XML validation. Documents are not persisted or logged. Results apply to the selected, pinned profile and its disclosed coverage. A 200 response does not mean that a document is valid."},
+  "info": {"title": "CDA Validator API", "version": "2.0.0-preview.2", "description": "Stateless local CDA XML validation. Documents are not persisted or logged. Results apply to the selected, pinned profile and its disclosed coverage. A 200 response does not mean that a document is valid."},
   "servers": [{"url": "/"}],
   "paths": {
     "/v1/validate": {"post": {

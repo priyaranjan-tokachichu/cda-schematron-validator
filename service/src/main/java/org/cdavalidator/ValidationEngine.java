@@ -83,6 +83,8 @@ public final class ValidationEngine {
             } catch (Exception ignored) { }
             throw new net.sf.saxon.trans.XPathException("External resource access denied");
         });
+        var terminology = TerminologySnapshots.load(assets);
+        terminology.register(processor);
         var compiler = processor.newXsltCompiler();
         var pipeline = compiler.compile(new StreamSource(compilerURL.toString()));
         var schemaFactory = SchemaFactory.newDefaultInstance();
@@ -109,6 +111,15 @@ public final class ValidationEngine {
                 supplement.addProperty("scope", "Pinned Schematron profile; not a general FHIR conformsTo implementation");
                 var supplements = new JsonArray(); supplements.add(supplement);
                 info.add("supplementalChecks", supplements);
+                if (terminology.members.containsKey(TerminologySnapshots.PROCEDURE)) {
+                    SupplementalRules.addProcedureInvariants(doc);
+                    for (String id : List.of("1198-8487", "1198-8511")) {
+                        var check = new JsonObject(); check.addProperty("ruleId", id);
+                        check.addProperty("method", "Exact code-system and code membership in a local checksum-pinned Procedure expansion, with the original permitted code-system alternatives");
+                        check.addProperty("scope", "Pinned invariant and local terminology edition"); supplements.add(check);
+                    }
+                }
+                if (!terminology.metadata.isEmpty()) info.add("terminologySnapshots", terminology.metadata.deepCopy());
             }
             var destination = new XdmDestination();
             var transform = pipeline.load();
@@ -352,7 +363,7 @@ public final class ValidationEngine {
         boolean complete = executed && coverageComplete && !truncated && findings.stream().noneMatch(f -> "coverage".equals(f.get("stage")));
         var result = new LinkedHashMap<String, Object>();
         result.put("requestId", UUID.randomUUID().toString());
-        result.put("applicationVersion", "2.0.0-preview.1");
+        result.put("applicationVersion", "2.0.0-preview.2");
         result.put("status", errors > 0 ? "invalid" : complete ? "valid" : "incomplete");
         result.put("validationComplete", complete);
         result.put("executionComplete", executed && !truncated);

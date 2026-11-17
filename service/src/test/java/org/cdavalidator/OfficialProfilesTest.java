@@ -19,6 +19,44 @@ class OfficialProfilesTest {
             if(profile.equals("ccda-5.0")) assertEquals(false,report.get("validationComplete"),"Upstream conversion gaps must be visible");
         }
     }
+    @Test void localProcedureSnapshotRestoresBothOmittedInvariants(@org.junit.jupiter.api.io.TempDir Path localAssets) throws Exception {
+        Path upstream = Path.of("assets");
+        try (var files = Files.walk(upstream)) {
+            for (var source : files.toList()) {
+                Path relative = upstream.relativize(source);
+                if (relative.startsWith("terminology")) continue;
+                Path target = localAssets.resolve(relative);
+                if (Files.isDirectory(source)) Files.createDirectories(target); else Files.copy(source, target);
+            }
+        }
+        TerminologySnapshotsTest.snapshot(localAssets, List.of("2.16.840.1.113883.6.96|12345"));
+        var engine = new ValidationEngine(localAssets);
+        String sample = Files.readString(Path.of("web/sample.xml"));
+        for (String note : List.of("7", "6")) {
+            String template = sample.replace("10.20.22.1.2", "10.20.22.1." + note);
+            String id = note.equals("7") ? "1198-8487" : "1198-8511";
+            var cases = new LinkedHashMap<String, Boolean>();
+            cases.put("code='12345' codeSystem='2.16.840.1.113883.6.96'", true);
+            cases.put("code='1234' codeSystem='2.16.840.1.113883.6.96'", false);
+            cases.put("code='12345' codeSystem='9.9'", false);
+            cases.put("code='99' codeSystem='2.16.840.1.113883.6.104'", true);
+            cases.put("code='99' codeSystem='2.16.840.1.113883.6.4'", true);
+            cases.put("code='99' codeSystem='2.16.840.1.113883.6.12'", true);
+            cases.put("code='99' codeSystem='2.16.840.1.113883.6.285'", note.equals("6"));
+            cases.put("codeSystem='2.16.840.1.113883.6.96'", false);
+            for (var entry : cases.entrySet()) {
+                String event = "<documentationOf><serviceEvent classCode='PROC'><code " + entry.getKey() + "/></serviceEvent></documentationOf>";
+                var result = engine.validate(template.replace("  <component>", event + "<component>"), "ccda-5.0", false);
+                assertEquals(true, result.get("executionComplete"), entry.getKey());
+                boolean failed = ((List<Map<String,Object>>) result.get("findings")).stream().anyMatch(f -> id.equals(f.get("ruleId")));
+                assertEquals(!entry.getValue(), failed, note + ": " + entry.getKey());
+                assertEquals(false, result.get("validationComplete"), "Other gaps must remain visible");
+            }
+        }
+        var info = engine.profileInfo().stream().filter(p -> "ccda-5.0".equals(p.get("id").getAsString())).findFirst().orElseThrow();
+        assertEquals(3, info.getAsJsonArray("supplementalChecks").size());
+        assertEquals(1, info.getAsJsonArray("terminologySnapshots").size());
+    }
     @Test void personNamesMustMeetPatientNameConstraintsOrBePlainText() throws Exception {
         var engine = new ValidationEngine(Path.of("assets"));
         String fixture = Files.readString(Path.of("web/sample.xml"));
