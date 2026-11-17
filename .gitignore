@@ -4,3 +4,4 @@ node_modules*
 service/target/
 service/assets/
 .cache/
+__pycache__/

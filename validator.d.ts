@@ -47,6 +47,8 @@ export interface Profile {
   artifactChecksums: Record<string, string>;
   generationCoverage?: Record<string, number>;
   generationReport?: Record<string, unknown>;
+  terminologySnapshots?: Array<Record<string, unknown>>;
+  supplementalChecks?: Array<{ ruleId: string; method: string; scope: string }>;
 }
 export interface Finding {
   messageTruncated?: boolean;

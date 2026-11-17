@@ -14,6 +14,7 @@ import uuid
 parser = argparse.ArgumentParser()
 parser.add_argument('--image', default='cda-validator:local')
 parser.add_argument('--output', default='reports/upload-memory.json')
+parser.add_argument('--assets-dir', help='Optional local asset bundle including private terminology; mounted read-only')
 args = parser.parse_args()
 root = Path(__file__).resolve().parent.parent
 name = 'validator-upload-regression-' + uuid.uuid4().hex[:8]
@@ -24,7 +25,9 @@ try:
     container = subprocess.check_output(['docker', 'run', '--rm', '-d', '--name', name,
         '--memory', '1536m', '--cpus', '2', '--read-only', '--tmpfs', '/tmp:size=64m,noexec,nosuid',
         '-e', 'JAVA_TOOL_OPTIONS=-Xmx1g', '-e', 'MAX_XML_MIB=20',
-        '-p', '127.0.0.1::17643', args.image], text=True).strip()
+        '-p', '127.0.0.1::17643',
+        *(['--mount', 'type=bind,source=' + str(Path(args.assets_dir).resolve()) + ',target=/app/assets,readonly'] if args.assets_dir else []),
+        args.image], text=True).strip()
     inspection = json.loads(subprocess.check_output(['docker', 'inspect', container], text=True))[0]
     port = inspection['NetworkSettings']['Ports']['17643/tcp'][0]['HostPort']
     base = 'http://127.0.0.1:' + port

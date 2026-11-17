@@ -8,6 +8,18 @@ This inventory is derived from the checksum-pinned `2026JUL/CCDA-5.0-Results.jso
 
 The earlier summary of 4 invariants and 9 value sets counted categories and understated the omissions. This preview corrects the accounting; it does not turn missing checks into passes.
 
+## Local person-name check (follow-up to preview.1)
+
+The local `81-9371` supplement reuses all 11 assertions in the pinned patient-name Schematron profile at the person-name locations, with the permitted plain-text alternative. List-valued use and qualifier attributes are checked token by token against complete vocabulary codes. This adds the missing given/family cardinality, suffix, use, qualifier, and mixed-content checks at those locations. The existing `81-9372` prohibition on mixing text and name parts still runs.
+
+The check is layered onto the in-memory compilation input. Original downloaded files and the upstream generation report remain unchanged. Profile metadata lists the added rule in `supplementalChecks`; the application still reports incomplete C-CDA 5.0 coverage. This is reuse of the pinned Schematron constraints, not a general FHIR `conformsTo()` implementation.
+
+Tests exercise valid fielded names, plain strings, null flavors, missing/duplicate name parts, multiple suffixes, invalid use/qualifier values, mixed content, and rejection of an unexpected upstream profile layout. This change is separate from the published preview.1 artifact and requires review before inclusion in a later release.
+
+## Local procedure checks and recovered data
+
+The optional [offline terminology adapter](terminology.md) restores `1198-8487` and `1198-8511` when a reviewed Procedure snapshot is installed. It checks exact SNOMED CT code/system membership and preserves the original alternative code systems. Other recovered expansions are not counted as implemented binding checks simply because their data are now available.
+
 ## Rule-conversion work
 
 | Invariant | Template | Why omitted | Required fix and verification |

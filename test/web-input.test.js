@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const deferred = () => { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; };
 async function workspace(maxXmlBytes = 20 * 1024 * 1024) {
   const nodes = new Map();
-  const node = () => ({ value: '', checked: true, hidden: false, disabled: false, firstElementChild: { textContent: '' }, classList: { add() {}, remove() {} }, listeners: {}, addEventListener(type, fn) { this.listeners[type] = fn; }, setAttribute() {}, replaceChildren() {}, append() {} });
+  const node = () => ({ value: '', checked: true, hidden: false, disabled: false, firstElementChild: { textContent: '' }, classList: { add() {}, remove() {} }, listeners: {}, addEventListener(type, fn) { this.listeners[type] = fn; }, setAttribute() {}, replaceChildren(...children) { this.children = children; }, append() {} });
   const get = id => { if (!nodes.has(id)) nodes.set(id, node()); return nodes.get(id); };
   const pending = [];
   const context = vm.createContext({ TextEncoder, TextDecoder, console, document: { getElementById: get, body: node(), createElement: node, createTextNode: node }, fetch: (url, options) => { if (url === '/v1/profiles') return Promise.resolve({ ok: true, json: async () => ({ profiles: [], limits: { maxXmlBytes, requestCapacity: 6, maxConcurrentUploads: 1, uploadQueueWaitSeconds: 30 } }) }); const d = deferred(); pending.push({ url, options, ...d }); return d.promise; } });
@@ -72,4 +72,18 @@ test('service capacity explains automatic queuing and heap tuning', async () => 
   assert.match(w.get('capacity-note').textContent, /accepts up to 6 requests/);
   assert.match(w.get('capacity-note').textContent, /wait in the queue for up to 30 seconds/);
   assert.match(w.get('capacity-note').textContent, /Increase the Java heap and container memory/);
+});
+
+test('profile details distinguish active checks from imported terminology data', async () => {
+  const w = await workspace();
+  w.get('profile').value = 'ccda-5.0';
+  w.run("profiles = [{id:'ccda-5.0',release:'2026JUL',limitations:['Coverage remains incomplete'],supplementalChecks:[{ruleId:'81-9371'}],terminologySnapshots:[{activeForValidation:true},{activeForValidation:false}]}]; profileChanged();");
+  let text = w.get('limitations').children.map(node => node.textContent).join('\n');
+  assert.match(text, /Additional checks installed: 81-9371/);
+  assert.match(text, /1 active snapshot\(s\), 2 imported/);
+  assert.match(text, /Imported data alone does not establish complete validation coverage/);
+  assert.match(text, /Coverage remains incomplete/);
+  w.run('profiles[0].terminologySnapshots[0].activeForValidation = false; profileChanged();');
+  text = w.get('limitations').children.map(node => node.textContent).join('\n');
+  assert.match(text, /0 active snapshot\(s\), 2 imported/);
 });

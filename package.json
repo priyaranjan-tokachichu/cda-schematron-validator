@@ -1,6 +1,6 @@
 {
   "name": "cda-schematron-validator",
-  "version": "2.0.0-preview.1",
+  "version": "2.0.0-preview.2",
   "description": "Self-hosted CDA validation API and UI with pinned HL7 profiles, detailed findings, and a compatible legacy Schematron API.",
   "main": "validator.js",
   "scripts": {

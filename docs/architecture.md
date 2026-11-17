@@ -15,7 +15,7 @@ flowchart LR
     G --> H[Findings and coverage report]
 ```
 
-Java 21+ hosts the HTTP adapter and validation engine. Saxon-HE 12.9 executes XSLT compiled from the pinned Schematron using SchXslt 1.10.1. The JDK XML Schema validator checks the pinned CDA schema; Gson serializes JSON reports. No database or application framework is required.
+Java 21+ hosts the HTTP adapter and validation engine. Saxon-HE 12.9 executes XSLT compiled from the pinned Schematron using SchXslt 1.10.1. The JDK XML Schema validator checks the pinned CDA schema; Gson serializes JSON reports. No database or application framework is required. Reviewed local supplements run inside the compiled Schematron. An optional offline membership index answers exact code-system/code lookups from a checksum-pinned local pack; it does not perform terminology network calls or load whole patient documents into a shared cache. See [local terminology snapshots](terminology.md).
 
 The browser uses HTML, CSS, and JavaScript. The original JavaScript library remains independent of Java; the new Node client communicates with the service over HTTP/JSON. Python scripts prepare assets, check upstream releases, benchmark, verify, and generate the HTML report.
 

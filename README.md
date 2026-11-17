@@ -17,7 +17,7 @@
 ---
 
 > [!NOTE]
-> **Version 2.0.0-preview.1.** The container includes the validation API and browser UI. The npm package includes the preserved legacy APIs, a typed HTTP client, and the CLI. Node 22.12+ is required. This is a preview while C-CDA 5.0 coverage gaps are addressed; npm’s stable default remains 1.1.12. See the [release notes](https://github.com/priyaranjan-tokachichu/cda-schematron-validator/releases/tag/v2.0.0-preview.1) for artifacts and compatibility details.
+> **Version 2 preview.** The container includes the validation API and browser UI. The npm package includes the preserved legacy APIs, a typed HTTP client, and the CLI. Node 22.12+ is required. This is a preview while C-CDA 5.0 coverage gaps are addressed; npm’s stable default remains 1.1.12. See the [release notes](https://github.com/priyaranjan-tokachichu/cda-schematron-validator/releases) for artifacts and compatibility details.
 
 <table>
 <tr>
@@ -90,7 +90,7 @@ The legacy API remains a partial Schematron interpreter. Use the service for CDA
 | **C-CDA 2.1** · `ccda-2.1` | `2025SEP`, with bundled vocabulary | CDA R2 + SDTC `20260205_SDTC` |
 | **C-CDA 5.0** · `ccda-5.0` · default | `2026JUL` | CDA R2 + SDTC `20260205_SDTC` |
 
-Sources are pinned by immutable release URL and SHA-256. The build verifies downloads; startup verifies extracted files. `GET /v1/profiles` exposes provenance, active limits, and known coverage gaps. [Inspect the source lock](profiles/sources.lock.json).
+Sources are pinned by immutable release URL and SHA-256. The build verifies downloads; startup verifies extracted files. `GET /v1/profiles` exposes provenance, active limits, and known coverage gaps. [Inspect the source lock](profiles/sources.lock.json). [Coverage remediation and local terminology work](docs/coverage.md).
 
 > [!IMPORTANT]
 > **C-CDA 5.0 has known upstream conversion gaps:** 4 generation errors, 6 unhandled invariants across 4 categories, and 28 non-loaded value-set entries across 9 categories. Its embedded value-set expansions cover sets with fewer than 1,000 concepts. The service reports incomplete coverage even when execution succeeds. A supported document-level template is required for complete document validation; nested templates alone are insufficient.
