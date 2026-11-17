@@ -1,0 +1,26 @@
+{
+  "limits": {
+    "maxXmlBytes": 20971520,
+    "maxRequestBytes": 125894656
+  },
+  "containerChecks": [
+    "Exact 20 MiB decoded XML accepted with completed execution",
+    "20 MiB + 1 byte rejected with HTTP 413"
+  ],
+  "regressions": [
+    "Document templates checked separately from nested rules",
+    "Stale file and example loads and validation responses discarded",
+    "Worst-case JSON escaping and decoded size checked independently"
+  ],
+  "nestedTemplateReproduction": {
+    "status": "invalid",
+    "executionComplete": true,
+    "validationComplete": false,
+    "summary": {
+      "firedRules": 65,
+      "findings": 2,
+      "errors": 1,
+      "warnings": 1
+    }
+  }
+}

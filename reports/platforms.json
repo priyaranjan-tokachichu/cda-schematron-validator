@@ -1,0 +1,4 @@
+{
+  "linux/arm64": "Native Docker build, test suite, API, UI, and benchmark passed",
+  "linux/amd64": "Emulated Docker build, test suite, startup, and API smoke test passed"
+}

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "sources": [
+    {
+      "id": "cda-xsd",
+      "release": "20260205_SDTC",
+      "url": "https://github.com/HL7/CDA-core-2.0/releases/download/20260205_SDTC/20260205_SDTC.zip",
+      "sha256": "0b957c26f64d6b609e48806d1c93040ada4cc51bc5345317e5af607807f3927a"
+    },
+    {
+      "id": "ccda-2.1",
+      "release": "2025SEP",
+      "url": "https://github.com/HL7/CDA-ccda-2.1/releases/download/2025SEP/CDAR2_IG_CCDA_CLINNOTES_R1_DSTU2.1_2025SEP.zip",
+      "sha256": "9c9a73294fbc4bea2c31e3650184609fa2d8894a848da6240c0916cd1e1c0d23"
+    },
+    {
+      "id": "ccda-5.0",
+      "release": "2026JUL",
+      "url": "https://github.com/HL7/CDA-ccda/releases/download/2026JUL/CCDA_5.0_2026JUL.zip",
+      "sha256": "d6ed229b225edc6210774cb3ed46c1b2abc0342b7ef19032ddc1911dfb3002b6"
+    }
+  ]
+}

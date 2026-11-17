@@ -4,14 +4,10 @@ const processRules = require('./lib/processRules');
 const getReturnObject = require('./lib/getReturnObject');
 
 // Parsed object cache
-let parsedMap = Object.create({});
-let contextMap = Object.create({});
-let schematronMap = Object.create({});
+let parsedMap = Object.create(null);
 
 function clearCache() {
-    parsedMap = Object.create({});
-    contextMap = Object.create({});
-    schematronMap = Object.create({});
+    parsedMap = Object.create(null);
 }
 
 
@@ -28,20 +24,20 @@ function clearCache() {
  */
 
 function validateSync(xml, schematron, options = {}) {
+    options = Object.assign({}, options);
     const resultInfo = {
         errors: [],
         warnings: [],
         ignored: []
     };
     options.parsedMap = parsedMap;
-    options.contextMap = contextMap;
-    options.schematronMap = schematronMap;
+    options.contextMap = Object.create(null);
     initializeProcess(xml, schematron, options);
     for (const patternId in options.schematronMap.patternRuleMap) {
-        if (!options.schematronMap.patternRuleMap.hasOwnProperty(patternId)) {
+        if (!Object.hasOwn(options.schematronMap.patternRuleMap, patternId)) {
             continue;
         }
-        const assertionInfo = Object.create({});
+        const assertionInfo = Object.create(null);
         assertionInfo.patternId = patternId;
         const rules = options.schematronMap.patternRuleMap[patternId];
         processRules(rules, assertionInfo, resultInfo, options);

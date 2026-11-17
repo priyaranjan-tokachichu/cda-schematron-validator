@@ -1,0 +1,59 @@
+{
+  "openapi": "3.1.0",
+  "info": {"title": "CDA Validator API", "version": "2.0.0-preview.1", "description": "Stateless local CDA XML validation. Documents are not persisted or logged. Results apply to the selected, pinned profile and its disclosed coverage. A 200 response does not mean that a document is valid."},
+  "servers": [{"url": "/"}],
+  "paths": {
+    "/v1/validate": {"post": {
+      "operationId": "validateDocument", "summary": "Validate one UTF-8 CDA XML document",
+      "description": "Runs strict XML parsing, the pinned CDA XSD, and the selected full HL7 Schematron. Default maximum decoded UTF-8 XML size 20 MiB, configurable with MAX_XML_MIB. GET /v1/profiles advertises active limits. Serialized JSON allowance is six times the XML limit plus 64 KiB to allow escaping; maximum 2,000 findings. Supply Authorization: Bearer TOKEN when API_TOKEN is configured. Admitted uploads wait up to 30 seconds for memory, then validation has a separate 30-second deadline; cancellation is cooperative. The total HTTP upload/read window is bounded to 65 seconds. Unknown profiles are rejected rather than guessed. JSON decoding is streamed; duplicate or unknown fields are rejected. Profile IDs are limited to 128 UTF-8 bytes. Admitted uploads queue automatically for shared memory. HTTP 429 indicates the bounded request capacity is full; HTTP 503 indicates the 30-second upload queue wait expired.",
+      "security": [{"bearerAuth": []}, {}],
+      "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "required": ["xml"], "additionalProperties": false, "properties": {
+        "xml": {"type": "string", "minLength": 1, "description": "XML text, never a file path or URL"},
+        "profile": {"type": "string", "enum": ["ccda-2.1", "ccda-5.0"], "default": "ccda-5.0"},
+        "includeWarnings": {"type": "boolean", "default": true}
+      }}}}},
+      "responses": {
+        "200": {"description": "Validation report; inspect status and validationComplete", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Report"}}}},
+        "400": {"$ref": "#/components/responses/BadRequest"},
+        "401": {"description": "Missing or incorrect bearer token"},
+        "403": {"description": "Cross-origin submission blocked"},
+        "413": {"description": "Request or document exceeds size limit"},
+        "415": {"description": "Content type must be application/json"},
+        "422": {"description": "Unknown profile"},
+        "429": {"description": "Bounded request capacity is full; Retry-After: 2"},
+        "503": {"description": "Upload queue wait expired or service is stopping"},
+        "500": {"description": "Engine failure; may include a partial report with validationComplete false"},
+        "504": {"description": "Deadline exceeded; validationComplete false"}
+      }
+    }},
+    "/v1/profiles": {"get": {"operationId": "listProfiles", "summary": "List pinned profiles, source checksums, and coverage limitations", "security": [{"bearerAuth": []}, {}], "responses": {"200": {"description": "Profile and source manifest"}, "401": {"description": "Authentication required"}}}},
+    "/v1/version": {"get": {"operationId": "getVersion", "summary": "Application and engine versions", "security": [{"bearerAuth": []}, {}], "responses": {"200": {"description": "Version metadata"}}}},
+    "/health/live": {"get": {"operationId": "liveness", "summary": "Process liveness", "responses": {"200": {"description": "Live"}}}},
+    "/health/ready": {"get": {"operationId": "readiness", "summary": "Profiles compiled and ready", "responses": {"200": {"description": "Ready; includes loaded profile count"}}}}
+  },
+  "components": {
+    "securitySchemes": {"bearerAuth": {"type": "http", "scheme": "bearer"}},
+    "responses": {"BadRequest": {"description": "Invalid JSON, field types, UTF-8, or empty XML"}},
+    "schemas": {
+      "Finding": {"type": "object", "required": ["severity", "stage", "message"], "properties": {
+        "severity": {"type": "string", "enum": ["error", "warning"]},
+        "stage": {"type": "string", "enum": ["xml", "xsd", "schematron", "coverage", "engine"]},
+        "message": {"type": "string"}, "ruleId": {"type": "string"}, "patternId": {"type": ["string", "null"]},
+        "line": {"type": "integer", "minimum": 1}, "column": {"type": "integer", "minimum": 1},
+        "xpath": {"type": "string"}, "context": {"type": ["string", "null"]}, "test": {"type": "string"}
+      }},
+      "Report": {"type": "object", "required": ["requestId", "status", "validationComplete", "executionComplete", "truncated", "summary", "findings", "stages", "profile", "engine", "durationMs", "validatedAt"], "properties": {
+        "requestId": {"type": "string", "format": "uuid"},
+        "status": {"type": "string", "enum": ["valid", "invalid", "incomplete"]},
+        "validationComplete": {"type": "boolean", "description": "All configured stages completed, no truncation, and no recorded upstream conversion gaps. Not a claim of clinical correctness or universal terminology conformance."},
+        "executionComplete": {"type": "boolean", "description": "Configured engine stages completed and findings were not truncated"},
+        "truncated": {"type": "boolean"}, "summary": {"type": "object"},
+        "findings": {"type": "array", "items": {"$ref": "#/components/schemas/Finding"}},
+        "stages": {"type": "array", "items": {"type": "object"}},
+        "profile": {"type": "object"}, "engine": {"type": "object"},
+        "uploadQueueWaitMs": {"type": "integer", "minimum": 0, "description": "Time waiting for upload memory, before decoding"},
+        "durationMs": {"type": "number"}, "validatedAt": {"type": "string", "format": "date-time"}
+      }}
+    }
+  }
+}

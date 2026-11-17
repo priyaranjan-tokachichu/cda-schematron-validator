@@ -2,15 +2,9 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "args": [
-        "--timeout",
-        "999999",
-        "--colors",
-        "${workspaceFolder}/test"
-      ],
+      "runtimeArgs": ["--test", "--test-concurrency=1", "--test-reporter=spec", "test/*.test.js", "test/tests.js"],
       "internalConsoleOptions": "openOnSessionStart",
-      "name": "Mocha Tests",
-      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "name": "All JavaScript tests",
       "request": "launch",
       "skipFiles": [
         "<node_internals>/**"
@@ -18,15 +12,9 @@
       "type": "pwa-node"
     },
     {
-      "args": [
-        "--timeout",
-        "999999",
-        "--colors",
-        "${relativeFile}"
-      ],
+      "runtimeArgs": ["--test", "${file}"],
       "internalConsoleOptions": "openOnSessionStart",
-      "name": "Mocha Test Current File",
-      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "name": "Test current file",
       "request": "launch",
       "skipFiles": [
         "<node_internals>/**"

@@ -1,0 +1,27 @@
+name: Validation issue
+description: Report a bug, incorrect finding, or missing validation coverage.
+body:
+  - type: markdown
+    attributes:
+      value: "Please use synthetic examples only. Do not include patient information, access tokens, or credentials. External contributions are welcome through issues; pull requests are reserved for the repository owner."
+  - type: input
+    id: version
+    attributes:
+      label: Application version and validation profile
+      description: Include the service version, profile ID, and source release from your report.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and actual behavior
+      description: Include rule IDs and relevant findings, with sensitive values removed.
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Minimal synthetic XML example or reproduction steps
+      render: xml
+    validations:
+      required: true

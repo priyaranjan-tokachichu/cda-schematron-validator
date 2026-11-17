@@ -1,11 +1,15 @@
 {
   "name": "cda-schematron-validator",
-  "version": "1.1.12",
-  "description": "Fork of Eric Wadkins' javascript implementation of schematron testing for C-CDA XML documents. This includes bug fixes and some house keeping.",
+  "version": "2.0.0-preview.1",
+  "description": "Self-hosted CDA validation API and UI with pinned HL7 profiles, detailed findings, and a compatible legacy Schematron API.",
   "main": "validator.js",
   "scripts": {
-    "test": "grunt",
-    "prepare": "husky install"
+    "test": "node --test --test-concurrency=1 --test-reporter=spec test/*.test.js test/tests.js",
+    "assets": "python3 scripts/prepare-assets.py",
+    "service:build": "npm run assets && mvn -B -f service/pom.xml package",
+    "service:start": "java -Xmx1g -jar service/target/cda-validator-service.jar",
+    "service:test": "npm run assets && mvn -B -f service/pom.xml verify",
+    "benchmark": "python3 scripts/benchmark.py"
   },
   "repository": {
     "type": "git",
@@ -23,28 +27,14 @@
       "url": "https://github.com/priyaranjan-tokachichu"
     }
   ],
-  "license": "LICENSE.md",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/priyaranjan-tokachichu/cda-schematron-validator/issues"
   },
   "homepage": "https://github.com/priyaranjan-tokachichu/cda-schematron-validator#readme",
-  "devDependencies": {
-    "chai": "^4.3.6",
-    "eslint": "^8.12.0",
-    "eslint-config-google": "^0.14.0",
-    "grunt": "^1.5.3",
-    "grunt-contrib-jshint": "^3.2.0",
-    "grunt-mocha-test": "^0.13.3",
-    "husky": "^7.0.4",
-    "jsdoc": "^3.6.10",
-    "lint-staged": "^12.3.7",
-    "mocha": "^9.2.2",
-    "prettier": "^2.6.2"
-  },
   "dependencies": {
-    "@xmldom/xmldom": "^0.8.3",
-    "lodash.get": "^4.4.2",
-    "xpath": "^0.0.32"
+    "@xmldom/xmldom": "0.8.15",
+    "xpath": "0.0.36"
   },
   "directories": {
     "test": "test"
@@ -55,5 +45,23 @@
     "Schematron",
     "CCD",
     "XML"
-  ]
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "bin": {
+    "cda-validate": "bin/cda-validate.js"
+  },
+  "files": [
+    "validator.js",
+    "validateSync.js",
+    "validateAsync.js",
+    "lib/",
+    "bin/",
+    "LICENSE.md",
+    "README.md",
+    "validator.d.ts",
+    "docs/"
+  ],
+  "types": "validator.d.ts"
 }

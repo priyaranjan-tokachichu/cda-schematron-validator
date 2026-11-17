@@ -1,0 +1,59 @@
+name: Validation checks
+on:
+  push:
+    branches-ignore: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  policy:
+    name: Owner and branch policy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce owner-authored pull requests and descriptive branch names
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        run: |
+          python3 - <<'PY'
+          import os, re
+          branch = os.environ['BRANCH_NAME']
+          assert re.fullmatch(r'(feature|fix|docs|test|chore|release|refactor|perf)/[a-z0-9][a-z0-9._/-]*', branch), 'Use a descriptive work branch prefix'
+          assert not re.search(r'(^|[/_.-])(codex|chatgpt|claude|copilot|cursor|vscode|bbedit|aider|gemini|openai|anthropic)([/_.-]|$)', branch, re.I), 'Development tool names are forbidden in branch names'
+          if os.environ['EVENT_NAME'] == 'pull_request':
+              assert os.environ['PR_AUTHOR'] == 'priyaranjan-tokachichu', 'Only the repository owner may author pull requests; external contributions should use issues'
+          PY
+  legacy:
+    name: Legacy API / Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npm audit --omit=dev --audit-level=high
+  service:
+    name: Service and official HL7 profiles
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.13'
+      - run: python3 scripts/prepare-assets.py
+      - run: mvn -B -f service/pom.xml verify
+      - run: docker build --tag cda-validator:test .
+      - run: python3 scripts/check-upload-memory.py --image cda-validator:test

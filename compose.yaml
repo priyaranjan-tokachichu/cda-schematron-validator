@@ -1,0 +1,26 @@
+services:
+  validator:
+    build: .
+    image: cda-validator:local
+    ports:
+      - "127.0.0.1:${CDA_VALIDATOR_PORT:-17643}:17643"
+    environment:
+      VALIDATION_WORKERS: "2"
+      JAVA_TOOL_OPTIONS: "${VALIDATOR_JAVA_OPTIONS:-}"
+      MAX_XML_MIB: "${MAX_XML_MIB:-20}"
+      # For shared deployments, supply API_TOKEN through your secret manager.
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,noexec,nosuid
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: "${VALIDATOR_MEMORY_LIMIT:-1536m}"
+    cpus: 2
+    pids_limit: 128
+    healthcheck:
+      test: ["CMD", "java", "-cp", "/app/app.jar", "org.cdavalidator.HealthCheck"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+    restart: unless-stopped

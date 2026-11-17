@@ -1,0 +1,63 @@
+{
+  "verifiedAt": "2026-11-16T15:34:28.117143+00:00",
+  "javaMaxHeapBytes": 1073741824,
+  "containerMemoryBytes": 1610612736,
+  "limits": {
+    "maxConcurrentUploads": 1,
+    "maxXmlBytes": 20971520,
+    "requestCapacity": 6,
+    "uploadQueueWaitSeconds": 30,
+    "maxRequestBytes": 125894656,
+    "uploadMemoryBudgetBytes": 259489792
+  },
+  "rounds": [
+    {
+      "framing": "known-length",
+      "uploads": 6,
+      "decodedXmlBytesEach": 20971520,
+      "serializedJsonBytesEach": 125824640,
+      "httpStatuses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "uploadQueueWaitMs": [
+        4086,
+        0,
+        1716,
+        3303,
+        2515,
+        915
+      ]
+    },
+    {
+      "framing": "chunked",
+      "uploads": 6,
+      "decodedXmlBytesEach": 20971520,
+      "serializedJsonBytesEach": 125824640,
+      "httpStatuses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "uploadQueueWaitMs": [
+        0,
+        3097,
+        3857,
+        801,
+        1569,
+        2333
+      ]
+    }
+  ],
+  "healthSamples": 95,
+  "allHealthChecksPassed": true,
+  "postLoadValidationPassed": true,
+  "outOfMemory": false
+}

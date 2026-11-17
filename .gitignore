@@ -1,3 +1,6 @@
 .DS_Store
 debug.log
 node_modules*
+service/target/
+service/assets/
+.cache/
