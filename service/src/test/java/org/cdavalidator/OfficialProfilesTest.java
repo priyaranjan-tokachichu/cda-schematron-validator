@@ -54,7 +54,7 @@ class OfficialProfilesTest {
             }
         }
         var info = engine.profileInfo().stream().filter(p -> "ccda-5.0".equals(p.get("id").getAsString())).findFirst().orElseThrow();
-        assertEquals(3, info.getAsJsonArray("supplementalChecks").size());
+        assertEquals(5, info.getAsJsonArray("supplementalChecks").size());
         assertEquals(1, info.getAsJsonArray("terminologySnapshots").size());
     }
     @Test void personNamesMustMeetPatientNameConstraintsOrBePlainText() throws Exception {

@@ -2,6 +2,8 @@
 
 [← Project home](../README.md) · [API reference](api.md) · [Architecture](architecture.md)
 
+This unreleased checkout mounts operator terminology separately using `CDA_TERMINOLOGY_DIR` (Compose) or `TERMINOLOGY_DIR` (JVM). New public images omit the mixed-license C-CDA 2.1 vocabulary; install an authorized pinned copy using the [setup guide](terminology.md) before using that profile’s Schematron checks. Existing published preview.2 images are unchanged.
+
 ## Run locally
 
 ```sh

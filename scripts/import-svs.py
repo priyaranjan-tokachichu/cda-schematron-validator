@@ -8,6 +8,10 @@ import json
 from pathlib import Path
 import re
 import xml.etree.ElementTree as ET
+try:
+    from terminology_pack import update_pack
+except ModuleNotFoundError:
+    from scripts.terminology_pack import update_pack
 
 
 class NoDtdTreeBuilder(ET.TreeBuilder):
@@ -17,8 +21,11 @@ class NoDtdTreeBuilder(ET.TreeBuilder):
         raise ValueError('SVS exports must not contain DTDs or entities')
 
 
-def import_exports(inputs, expected, output):
-    expected = {item['oid']: item['expectedCount'] for item in expected if 'expectedCount' in item}
+def import_exports(inputs, expected, output, replace=False):
+    reviewed = [item for item in expected if 'expectedCount' in item]
+    expected = {item['oid']: item['expectedCount'] for item in reviewed}
+    if len(expected) != len(reviewed) or any(type(count) is not int or count <= 0 for count in expected.values()):
+        raise ValueError('Reviewed counts must be positive integers with unique OIDs')
     output = Path(output)
     snapshots = {}
     for filename in inputs:
@@ -36,9 +43,11 @@ def import_exports(inputs, expected, output):
             pairs, systems = set(), {}
             for concept in value_set.findall('.//{urn:ihe:iti:svs:2008}Concept'):
                 system, code = concept.get('codeSystem', ''), concept.get('code', '')
-                if not re.fullmatch(r'[0-9]+(?:\.[0-9]+)+', system) or not code or any(ord(c)<32 for c in code):
+                if not re.fullmatch(r'[0-9]+(?:\.[0-9]+)+', system) or not code or any(ord(c)<32 or 127<=ord(c)<=159 for c in code):
                     raise ValueError('Invalid SVS code/system')
                 key = system + '|' + code
+                if len(key.encode('utf-16-le')) // 2 > 1024:
+                    raise ValueError('SVS membership key exceeds supported length')
                 if key in pairs:
                     raise ValueError('Duplicate code/system in SVS expansion')
                 pairs.add(key)
@@ -63,18 +72,12 @@ def import_exports(inputs, expected, output):
     missing = set(expected) - set(snapshots)
     if missing:
         raise ValueError('Reviewed exports are missing: ' + ', '.join(sorted(missing)))
-    # Validate all inputs before replacing the pack manifest. Data filenames include
-    # their content hash so an old manifest never points to partially replaced data.
-    output.mkdir(parents=True, exist_ok=True)
+    prepared = {}
     for info, data in snapshots.values():
         info['file'] = info['file'][:-5] + '-' + info['sha256'] + '.json'
-        target = output / info['file']
-        target.write_bytes(data)
-    manifest = {'schemaVersion': 1, 'valueSets': [info for info, _ in sorted(snapshots.values(), key=lambda x: x[0]['canonical'])]}
-    temporary = output / 'manifest.json.tmp'
-    temporary.write_text(json.dumps(manifest, indent=2) + '\n')
-    temporary.replace(output / 'manifest.json')
-    return manifest
+        prepared[info['canonical']] = (info, data)
+    return update_pack(output, prepared, replace)
+
 
 
 if __name__ == '__main__':
@@ -82,6 +85,7 @@ if __name__ == '__main__':
     parser.add_argument('--input-glob', required=True, help='Quoted glob for local SVS XML exports')
     parser.add_argument('--expected', required=True, help='Reviewed JSON array of {oid, expectedCount}')
     parser.add_argument('--output', default='.cache/terminology')
+    parser.add_argument('--replace', action='store_true', help='Replace an installed expansion after reviewing its new edition')
     args = parser.parse_args()
-    manifest = import_exports(sorted(glob.glob(args.input_glob)), json.loads(Path(args.expected).read_text()), args.output)
+    manifest = import_exports(sorted(glob.glob(args.input_glob)), json.loads(Path(args.expected).read_text()), args.output, args.replace)
     print(json.dumps({'valueSets': len(manifest['valueSets']), 'concepts': sum(v['count'] for v in manifest['valueSets']), 'output': args.output}))

@@ -30,6 +30,8 @@
 </tr>
 </table>
 
+> **Unreleased terminology setup change:** New images built from this checkout exclude the mixed-license C-CDA 2.1 vocabulary. Install your authorized pinned copy before using that profile’s Schematron checks. C-CDA 5.0 uses operator-supplied expansions and grammar definitions; the doctor lists missing datasets. Published preview.2 is unchanged. See [terminology setup](docs/terminology.md).
+
 ## Quick start
 
 Install Docker with Compose, then:

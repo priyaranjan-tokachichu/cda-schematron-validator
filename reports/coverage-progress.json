@@ -1,42 +1,121 @@
 {
-  "state": "Development follow-up; not included in published preview.1",
-  "verifiedAt": "2026-11-17T01:31:38.116849+00:00",
-  "javascriptTests": 64,
-  "javaTests": 27,
-  "pythonTests": 3,
+  "state": "Unreleased coverage follow-up after published 2.0.0-preview.2",
+  "verifiedAt": "2026-11-17T03:34:15.036060+00:00",
+  "javascriptTests": 65,
+  "javaTests": 39,
+  "pythonTests": 13,
   "supplementalRules": [
     "81-9371",
+    "active-high-ts-after-document",
+    "ts-value-before-document",
     "1198-8487",
-    "1198-8511"
+    "1198-8511",
+    "shall-use-one-binding"
   ],
-  "procedureRulesRequireLocalSnapshot": true,
-  "localSvsExports": 20,
-  "localMembershipEntries": 383629,
-  "activeLocalIndexes": [
-    "Procedure"
-  ],
-  "phinvadsDefinitionConcepts": {
-    "7900": 19254,
-    "7901": 59583
+  "supplementalBindingChecks": 47,
+  "vocabularyAssertionsNormalized": 414,
+  "localSvsExports": 21,
+  "localSnapshots": 27,
+  "localMembershipEntries": 475729,
+  "activeLocalIndexes": 26,
+  "grammarDefinitions": {
+    "ucum": {
+      "sha256": "dfccea1b5dc284245ebae97edd1dc03c45864da4e87df55bc9851797b4fd0b61",
+      "version": "2.2",
+      "source": "https://raw.githubusercontent.com/FHIR/Ucum-java/10089515484cdfd291fa6d2b74b989f60d12fcb3/src/main/resources/ucum-essence.xml"
+    },
+    "language": {
+      "sha256": "755fad43283be7b41ebe3c89ad054b6eaf928f404f9c0edb74799e0eab74beb1",
+      "extensionsSha256": "fdf7764455c493c245a9b3b5b9cd3938391f0637302c3e943fde86aee652e376",
+      "version": "2026-09-17",
+      "source": "https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry",
+      "extensionsSource": "https://www.iana.org/assignments/language-tag-extensions-registry/language-tag-extensions-registry"
+    }
+  },
+  "terminologySetup": {
+    "ready": false,
+    "missingValueSets": [
+      "http://hl7.org/fhir/us/core/ValueSet/us-core-condition-code",
+      "http://hl7.org/fhir/us/core/ValueSet/us-core-procedure-code",
+      "http://terminology.hl7.org/ValueSet/v3-USEncounterDischargeDisposition"
+    ],
+    "installedValueSets": [
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1010.2",
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1010.4",
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1021.46",
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1021.47",
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1021.48",
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1095.65",
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1099.54",
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1166.22",
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1240.1",
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1267.13",
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1267.25",
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1267.26",
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1267.36",
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1267.43",
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.1.11.14914",
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.1.11.20275",
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.11.20.9.34",
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.11.20.9.46",
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.88.12.3221.8.9",
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.88.12.80.28",
+      "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591",
+      "http://hl7.org/cda/us/ccda/ValueSet/CMSPlaceOfServiceCodes",
+      "http://hl7.org/fhir/ValueSet/all-languages",
+      "http://hl7.org/fhir/us/core/ValueSet/us-core-documentreference-type",
+      "http://phinvads.cdc.gov/fhir/ValueSet/2.16.840.1.114222.4.11.7900",
+      "http://phinvads.cdc.gov/fhir/ValueSet/2.16.840.1.114222.4.11.7901",
+      "http://terminology.hl7.org/ValueSet/v3-ActPriority",
+      "http://terminology.hl7.org/ValueSet/v3-UnitsOfMeasureCaseSensitive"
+    ],
+    "setupGuide": "/terminology.html",
+    "distribution": "Terminology is operator-supplied. Dataset installation is separate from validation coverage verification."
+  },
+  "loinc": {
+    "version": "2.83",
+    "file": "Loinc_2.83.zip",
+    "sha256": "077a0718e87d8309ffe3a673f75b836a8e783dc36a646413ef97c71c12eab27e",
+    "md5": "057ddf203164705d5a4c3604257060a4",
+    "source": "https://loinc.org/downloads/",
+    "tableRows": 112405,
+    "documentCodes": 12569,
+    "valueSetVersion": "9.0.0",
+    "definitionSha256": "4c954d918e833aae8234af45853a779ec886e1932fddf4205532358dc8959620",
+    "canonical": "http://hl7.org/fhir/us/core/ValueSet/us-core-documentreference-type"
   },
   "sourceFiles": {
-    "service/src/main/java/org/cdavalidator/ValidationEngine.java": "0f144d4b03ca2ef79baa9f328ecdbb1487ee4aaa4b901ba6e7bce9f61eadbc78",
-    "service/src/main/java/org/cdavalidator/SupplementalRules.java": "2ab9729fc74e581663fec35b17d9ee74c1c8b06e67a54c3dc51efeb1852fcb33",
-    "service/src/main/java/org/cdavalidator/TerminologySnapshots.java": "22d1c3534bac101937c3108642e9602aa4625d967d6535e168ba1cc6d5f400c8",
-    "scripts/import-svs.py": "c420276c544a101e3cfbd3b1d96a538bbca247f9992341d981b6694b824af8c9",
-    "service/web/app.js": "4940ffc35329891e7ee8fbe3b06fd5ac60c30eca04632565a6004e7e821184c4"
+    "service/src/main/java/org/cdavalidator/SupplementalRules.java": "7284180d949253a318c28773b039ada95d5706a440a56a00592eda74ef270a41",
+    "service/src/main/java/org/cdavalidator/GrammarChecks.java": "e46cfd0e4e5463c54af65ad030c51bbffa3367cc7d2d4b7f9338905d6f305aed",
+    "service/src/main/java/org/cdavalidator/VocabularyAssertions.java": "84749faf5d7b4bfe3c1b07265fb0bea8febe8498d2ce65a36b1ef98de599e97f",
+    "service/src/main/java/org/cdavalidator/ValidationRequest.java": "7272f7b31e80fffbbf0f0eef45a2cf6340d4871c01206e4bfc23c9b35ee27e71",
+    "service/src/main/java/org/cdavalidator/TerminologySnapshots.java": "e65fd901402548a8d05c6e297cd9cec696b12445b2b1b729ed72b06d0a373f19",
+    "service/src/main/java/org/cdavalidator/ValidationEngine.java": "ce5be2b3f349a1f3284c04ad9d669909cc239bf7449aa6038a7a4b82e36528a5",
+    "service/src/main/java/org/cdavalidator/HealthCheck.java": "4d84c06d5b9f471cf1e6c383c219e382a19aedec046a8c980f11be54754870db",
+    "service/src/main/java/org/cdavalidator/TerminologyTool.java": "d84604504dd2b61c52a82503054d11e106770fcc0120e9ffbb53d47ecce866cb",
+    "service/src/main/java/org/cdavalidator/CdaTimestamp.java": "733a64ba507e6fd2e2c29acd70bbd74b9eeb84d177404d9b9b962859098b630c",
+    "service/src/main/java/org/cdavalidator/LanguageTags.java": "51bf9dc3488aad1cedff69b33855ef3e7def4569cdb07570cd057d21d0648f07",
+    "service/src/main/java/org/cdavalidator/Server.java": "5d958fce46366e014e8d57b683b5ef39a5be1dfa5bb9a7e5500be351bf832dbe",
+    "service/src/main/java/org/cdavalidator/CoverageCatalog.java": "9ad72b0aefad55bf69b7080a6f5aeebc3fdb2d566b7eff99e88798cab161440c",
+    "scripts/prepare-public-terminology.py": "c3ea6013684187a002da58a5701e1365ef4504655e775bd193af1322731db4ed",
+    "scripts/import-fhir-terminology.py": "801fc4c1ec7ad53edbaf004ad61d1f459550c98022e7d952dca5d01276bcae89",
+    "scripts/terminology_pack.py": "d909a41a633936ef348a4b1906a87232627c352e5671650bd08e4004299e75bf",
+    "scripts/import-loinc.py": "66884f5f3c769a9c01f36965de9d3d70218dacd093875d74d5bbab6ee5a5c278",
+    "scripts/package-public-assets.py": "26cad1eeec6cb46931ce396fb2ab573dea992e93490ad67f9ad39747fda76cba",
+    "scripts/import-svs.py": "f3f5aba549fbbb08a415eff698805814cda6d4ebabd68279895c894ff6affce8",
+    "Dockerfile": "b11bb89499811feb4f89c4bfc81fbeb6feb180a9804c5d03a664d1bdc86b8253"
   },
   "privateTerminologyUploadRegression": {
-    "verifiedAt": "2026-11-17T00:57:15.201907+00:00",
+    "verifiedAt": "2026-11-17T03:32:49.352481+00:00",
     "javaMaxHeapBytes": 1073741824,
     "containerMemoryBytes": 1610612736,
     "limits": {
-      "uploadMemoryBudgetBytes": 259489792,
-      "maxRequestBytes": 125894656,
-      "uploadQueueWaitSeconds": 30,
       "requestCapacity": 6,
       "maxXmlBytes": 20971520,
-      "maxConcurrentUploads": 1
+      "maxConcurrentUploads": 1,
+      "uploadMemoryBudgetBytes": 259489792,
+      "maxRequestBytes": 125894656,
+      "uploadQueueWaitSeconds": 30
     },
     "rounds": [
       {
@@ -53,12 +132,12 @@
           200
         ],
         "uploadQueueWaitMs": [
-          846,
-          3251,
-          4041,
-          2467,
-          1683,
-          0
+          0,
+          1315,
+          1914,
+          3128,
+          2519,
+          615
         ]
       },
       {
@@ -75,23 +154,101 @@
           200
         ],
         "uploadQueueWaitMs": [
-          1600,
-          3665,
-          3037,
-          2386,
-          766,
-          0
+          620,
+          3022,
+          0,
+          1809,
+          2423,
+          1225
         ]
       }
     ],
-    "healthSamples": 89,
+    "healthSamples": 73,
     "allHealthChecksPassed": true,
     "postLoadValidationPassed": true,
     "outOfMemory": false
   },
-  "remainingGaps": "Date invariants, location union, generation errors, full missing-binding integration and grammar/code-system requirements remain unresolved. Downloading a definition does not establish executed coverage.",
-  "reviewRegressions": [
-    "Name use and qualifier lists validate each complete whitespace-separated token; mixed invalid tokens and substrings fail.",
-    "Parser rejects internal, external, and bare DTDs in UTF-8 and UTF-16 (both byte orders); existing pack stays unchanged after rejection. Ordinary UTF-16 exports import successfully."
-  ]
+  "benchmark": {
+    "measuredAt": "2026-11-17T03:33:14.572811+00:00",
+    "hostPlatform": "Darwin",
+    "architecture": "arm64",
+    "method": "15 warmup requests per fixture, followed by independent HTTP POST requests; full XSD and Schematron; no document-result cache; loopback HTTP; limited examples, not an industry-wide ranking.",
+    "results": [
+      {
+        "fixture": "service/web/sample.xml",
+        "profile": "ccda-5.0",
+        "bytes": 913,
+        "requests": 100,
+        "concurrency": 1,
+        "requestsPerSecond": 158.68,
+        "httpP50Ms": 6.07,
+        "httpP95Ms": 8.0,
+        "engineP50Ms": 4.11,
+        "consistentErrorCounts": true
+      },
+      {
+        "fixture": "service/web/sample.xml",
+        "profile": "ccda-5.0",
+        "bytes": 913,
+        "requests": 100,
+        "concurrency": 2,
+        "requestsPerSecond": 184.34,
+        "httpP50Ms": 8.13,
+        "httpP95Ms": 33.83,
+        "engineP50Ms": 5.28,
+        "consistentErrorCounts": true
+      },
+      {
+        "fixture": "service/web/sample.xml",
+        "profile": "ccda-5.0",
+        "bytes": 913,
+        "requests": 100,
+        "concurrency": 4,
+        "requestsPerSecond": 253.9,
+        "httpP50Ms": 9.11,
+        "httpP95Ms": 51.36,
+        "engineP50Ms": 4.35,
+        "consistentErrorCounts": true
+      },
+      {
+        "fixture": "test/VitalSigns.xml",
+        "profile": "ccda-2.1",
+        "bytes": 37647,
+        "requests": 100,
+        "concurrency": 1,
+        "requestsPerSecond": 57.23,
+        "httpP50Ms": 17.2,
+        "httpP95Ms": 18.74,
+        "engineP50Ms": 14.29,
+        "consistentErrorCounts": true
+      },
+      {
+        "fixture": "test/VitalSigns.xml",
+        "profile": "ccda-2.1",
+        "bytes": 37647,
+        "requests": 100,
+        "concurrency": 2,
+        "requestsPerSecond": 111.56,
+        "httpP50Ms": 17.45,
+        "httpP95Ms": 23.36,
+        "engineP50Ms": 13.8,
+        "consistentErrorCounts": true
+      },
+      {
+        "fixture": "test/VitalSigns.xml",
+        "profile": "ccda-2.1",
+        "bytes": 37647,
+        "requests": 100,
+        "concurrency": 4,
+        "requestsPerSecond": 109.77,
+        "httpP50Ms": 29.26,
+        "httpP95Ms": 59.94,
+        "engineP50Ms": 14.07,
+        "consistentErrorCounts": true
+      }
+    ]
+  },
+  "referenceComparison": "reports/reference-comparison.json",
+  "remainingGaps": "Complete US Core condition/procedure expansions and NUBC discharge-status data remain missing. UMLS source inventory includes CDT and CPT but no NUBC; source presence alone does not prove complete expansions or grant product redistribution rights. CarePlanAct generation errors and broader model equivalence need review. Global C-CDA 5.0 validationComplete remains false.",
+  "packaging": "New image omits the mixed-license legacy vocabulary and UCUM essence. Operators supply authorized data separately. Published preview.2 artifacts remain unchanged."
 }

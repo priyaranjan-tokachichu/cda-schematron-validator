@@ -20,6 +20,18 @@ Tests exercise valid fielded names, plain strings, null flavors, missing/duplica
 
 The optional [offline terminology adapter](terminology.md) restores `1198-8487` and `1198-8511` when a reviewed Procedure snapshot is installed. It checks exact SNOMED CT code/system membership and preserves the original alternative code systems. Other recovered expansions are not counted as implemented binding checks simply because their data are now available.
 
+## Unreleased coverage and operator setup after preview.2
+
+The follow-up now executes both procedure timestamp invariants, preserves unknown comparisons as explicit coverage findings, and connects installed data to the exact locations in the pinned HL7 binding catalog. Required bindings are errors; preferred/extensible bindings retain warning severity. The three-set location invariant is enabled only when all three expansions are installed. UCUM uses a grammar engine with operator-pinned definitions; BCP 47 uses pinned IANA registries. Finite enumerations cannot stand in for either grammar.
+
+The new doctor reports exact missing datasets separately from installed checks. New public images omit the mixed-license C-CDA 2.1 vocabulary; installing the authorized pinned local copy restores that profile's Schematron execution. The legacy npm API remains compatible. See [operator setup](terminology.md).
+
+The verified local pack enables all six supplements and 47 additional catalog bindings. LOINC 2.83 document-type membership is derived from the complete table and independently cross-checked with its primary SCALE part links. The remaining missing sets are US Core condition codes, US Core procedure codes and encounter discharge disposition. Generated inline vocabulary membership now uses exact tokens rather than substring matching; ambiguous scalar codes containing whitespace generate an explicit coverage finding.
+
+[Targeted reference evidence](../reports/reference-comparison.json) and [synthetic inputs](../test/coverage-reference/) record agreement on six definite name/date probes. Terminology was disabled in the reference run and broader model equivalence is not established.
+
+These changes do not clear the original generation report or claim complete C-CDA 5.0 validation. CarePlanAct generation errors and independent model-validator comparisons remain to be adjudicated. Some source expansions remain unavailable locally; their canonicals are reported rather than guessed or substituted. Older published images are unchanged.
+
 ## Rule-conversion work
 
 | Invariant | Template | Why omitted | Required fix and verification |
@@ -121,4 +133,4 @@ Locate the canonical value-set definition in the pinned guide/dependencies and o
 
 ## Release policy
 
-Version 2 is a preview while this coverage work is unresolved. C-CDA 2.1 remains available with its bundled vocabulary snapshot. The stable npm default stays 1.1.12 until a separately authorized stable release. The preview is explicitly selected with `@next`.
+Version 2 is a preview while this coverage work is unresolved. Published preview.2 retains its bundled C-CDA 2.1 vocabulary snapshot; the unreleased image requires an authorized operator-supplied pinned vocabulary. The stable npm default stays 1.1.12 until a separately authorized stable release. The preview is explicitly selected with `@next`.

@@ -81,8 +81,10 @@ public final class Server implements AutoCloseable {
                     case "/", "/index.html" -> file(exchange, "index.html", "text/html; charset=utf-8");
                     case "/app.js" -> file(exchange, "app.js", "text/javascript; charset=utf-8");
                     case "/style.css" -> file(exchange, "style.css", "text/css; charset=utf-8");
+                    case "/setup.css" -> file(exchange, "setup.css", "text/css; charset=utf-8");
                     case "/openapi.json" -> file(exchange, "openapi.json", "application/json; charset=utf-8");
                     case "/architecture.html" -> file(exchange, "architecture.html", "text/html; charset=utf-8");
+                    case "/terminology.html" -> file(exchange, "terminology.html", "text/html; charset=utf-8");
                     case "/sample.xml" -> file(exchange, "sample.xml", "application/xml; charset=utf-8");
                     default -> json(exchange, 404, Map.of("error", "Route not found"));
                 }

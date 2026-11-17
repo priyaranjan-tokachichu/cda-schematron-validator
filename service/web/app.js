@@ -25,6 +25,11 @@ function profileChanged() {
     const active = p.terminologySnapshots.filter(snapshot => snapshot.activeForValidation === true);
     details.push(`Local terminology: ${active.length} active snapshot(s), ${p.terminologySnapshots.length} imported. Imported data alone does not establish complete validation coverage.`);
   }
+  if(p.terminologySetup && !p.terminologySetup.ready) {
+    const missing=[...(p.terminologySetup.missingValueSets||[]),...(p.terminologySetup.missingDatasets||[])];
+    details.push(`Terminology setup required: ${missing.length} dataset(s) missing. See the terminology setup guide. Installed data and implemented rule coverage are reported separately.`);
+  }
+  if(p.supplementalBindingChecks) details.push(`Additional terminology binding checks installed: ${p.supplementalBindingChecks}.`);
   $('limitations').replaceChildren(...details.map((text) => { const li = document.createElement('li'); li.textContent = text; return li; }));
 }
 async function connect() {
