@@ -17,7 +17,7 @@
 ---
 
 > [!NOTE]
-> **Version 2.0.0.** The container includes the validation API and browser UI. The npm package includes the preserved legacy APIs, a typed HTTP client, and the CLI. Node 22.12+ is required. See the [release notes](https://github.com/priyaranjan-tokachichu/cda-schematron-validator/releases/tag/v2.0.0) for artifacts and compatibility details.
+> **Version 2.0.0-preview.1.** The container includes the validation API and browser UI. The npm package includes the preserved legacy APIs, a typed HTTP client, and the CLI. Node 22.12+ is required. This is a preview while C-CDA 5.0 coverage gaps are addressed; npm’s stable default remains 1.1.12. See the [release notes](https://github.com/priyaranjan-tokachichu/cda-schematron-validator/releases/tag/v2.0.0-preview.1) for artifacts and compatibility details.
 
 <table>
 <tr>
@@ -93,7 +93,7 @@ The legacy API remains a partial Schematron interpreter. Use the service for CDA
 Sources are pinned by immutable release URL and SHA-256. The build verifies downloads; startup verifies extracted files. `GET /v1/profiles` exposes provenance, active limits, and known coverage gaps. [Inspect the source lock](profiles/sources.lock.json).
 
 > [!IMPORTANT]
-> **C-CDA 5.0 has known upstream conversion gaps:** 4 generation errors, 4 unhandled invariants, and 9 non-loaded value sets. Its embedded value-set expansions cover sets with fewer than 1,000 concepts. The service reports incomplete coverage even when execution succeeds. A supported document-level template is required for complete document validation; nested templates alone are insufficient.
+> **C-CDA 5.0 has known upstream conversion gaps:** 4 generation errors, 6 unhandled invariants across 4 categories, and 28 non-loaded value-set entries across 9 categories. Its embedded value-set expansions cover sets with fewer than 1,000 concepts. The service reports incomplete coverage even when execution succeeds. A supported document-level template is required for complete document validation; nested templates alone are insufficient.
 
 Neither profile certifies clinical accuracy or every terminology requirement. See [standards, provenance, and coverage](docs/architecture.md#standards-and-coverage).
 
@@ -130,7 +130,7 @@ curl http://localhost:17643/v1/validate \
 Install the package into your Node project:
 
 ```sh
-npm install cda-schematron-validator@^2.0.0
+npm install cda-schematron-validator@next
 ```
 
 ```javascript

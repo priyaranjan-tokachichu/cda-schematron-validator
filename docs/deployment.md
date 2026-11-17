@@ -15,7 +15,7 @@ docker compose logs validator
 docker compose down
 ```
 
-The owner-triggered release workflow publishes versioned AMD64/ARM64 images for `ghcr.io/priyaranjan-tokachichu/cda-schematron-validator`, with SBOM and provenance. A merge alone does not publish an image. The version 2 image is `ghcr.io/priyaranjan-tokachichu/cda-schematron-validator:v2.0.0`.
+The owner-triggered release workflow publishes versioned AMD64/ARM64 images for `ghcr.io/priyaranjan-tokachichu/cda-schematron-validator`, with SBOM and provenance. A merge alone does not publish an image. The version 2 image is `ghcr.io/priyaranjan-tokachichu/cda-schematron-validator:v2.0.0-preview.1`.
 
 Run the published image directly:
 
@@ -24,7 +24,7 @@ docker run -d --name cda-validator --memory=1536m --cpus=2 \
   --read-only --tmpfs /tmp:size=64m,noexec,nosuid \
   --cap-drop=ALL --security-opt=no-new-privileges --pids-limit=128 \
   -p 127.0.0.1:17643:17643 \
-  ghcr.io/priyaranjan-tokachichu/cda-schematron-validator:v2.0.0
+  ghcr.io/priyaranjan-tokachichu/cda-schematron-validator:v2.0.0-preview.1
 ```
 
 ## Configuration

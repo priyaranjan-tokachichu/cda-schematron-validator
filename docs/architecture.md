@@ -39,7 +39,7 @@ The pinned releases omit query binding and use XPath 1.0 coercions. Compilation 
 
 [The source lock](../profiles/sources.lock.json) records immutable archive URLs and SHA-256 hashes. [Asset preparation](../scripts/prepare-assets.py) verifies archives and writes per-file inventories. Startup verifies those files again. No mutable upstream rules are downloaded during validation.
 
-C-CDA 5.0's supplied generation report records **4 errors, 4 unhandled invariants, and 9 non-loaded value sets**. Embedded expansions are limited to value sets with fewer than 1,000 concepts. Consequently, `validationComplete` remains false for that package even when every configured stage executes. C-CDA 2.1 uses its bundled vocabulary snapshot.
+C-CDA 5.0's supplied generation report records **4 errors, 6 unhandled invariants across 4 categories, and 28 non-loaded value-set entries across 9 categories**. Embedded expansions are limited to value sets with fewer than 1,000 concepts. Consequently, `validationComplete` remains false for that package even when every configured stage executes. C-CDA 2.1 uses its bundled vocabulary snapshot.
 
 A supported document-level template must match the root ClinicalDocument for complete document coverage. Nested section or entry templates firing alone cannot establish a document-level pass. Template versions are derived from the selected pinned profile's rules.
 
@@ -98,3 +98,5 @@ Run the service and open [localhost:17643/architecture.html](http://localhost:17
 The JavaScript code descends from Eric Wadkins' validator and subsequent work by Priyaranjan (Raj) Tokachichu. John D'Amore's public sample repository is credited in test fixtures; that sample influence is distinct from verified code ancestry.
 
 Application code uses the [MIT license](../LICENSE.md). HL7 assets and runtime dependencies retain separate notices and licenses in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) and [licenses/](../licenses/). This product includes software developed by Health Level Seven.
+
+See the [coverage remediation inventory](coverage.md) for individual gaps, causes, and acceptance criteria.

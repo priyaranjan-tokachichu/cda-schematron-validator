@@ -46,6 +46,7 @@ export interface Profile {
   limitations: string[];
   artifactChecksums: Record<string, string>;
   generationCoverage?: Record<string, number>;
+  generationReport?: Record<string, unknown>;
 }
 export interface Finding {
   messageTruncated?: boolean;
