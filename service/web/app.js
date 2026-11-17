@@ -19,7 +19,13 @@ function profileChanged() {
   const p = profiles.find((p) => p.id === $('profile').value);
   if (!p) return;
   $('profile-release').textContent = `Pinned release ${p.release} · CDA schema 20260205_SDTC`;
-  $('limitations').replaceChildren(...p.limitations.map((text) => { const li = document.createElement('li'); li.textContent = text; return li; }));
+  const details = [...p.limitations];
+  if (p.supplementalChecks?.length) details.push(`Additional checks installed: ${p.supplementalChecks.map(check => check.ruleId).join(', ')}. Other profile limitations still apply.`);
+  if (p.terminologySnapshots?.length) {
+    const active = p.terminologySnapshots.filter(snapshot => snapshot.activeForValidation === true);
+    details.push(`Local terminology: ${active.length} active snapshot(s), ${p.terminologySnapshots.length} imported. Imported data alone does not establish complete validation coverage.`);
+  }
+  $('limitations').replaceChildren(...details.map((text) => { const li = document.createElement('li'); li.textContent = text; return li; }));
 }
 async function connect() {
   try {
