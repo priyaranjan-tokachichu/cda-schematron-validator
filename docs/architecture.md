@@ -15,7 +15,7 @@ flowchart LR
     G --> H[Findings and coverage report]
 ```
 
-Java 21+ hosts the HTTP adapter and validation engine. Saxon-HE 12.9 executes XSLT compiled from the pinned Schematron using SchXslt 1.10.1. The JDK XML Schema validator checks the pinned CDA schema; Gson serializes JSON reports. No database or application framework is required. Reviewed local supplements run inside the compiled Schematron. An optional offline membership index answers exact code-system/code lookups from a checksum-pinned local pack; it does not perform terminology network calls or load whole patient documents into a shared cache. See [local terminology snapshots](terminology.md).
+Patched Eclipse Temurin 25.0.5.1+2 LTS hosts the HTTP adapter and validation engine. Saxon-HE 12.9 executes XSLT compiled from the pinned Schematron using SchXslt 1.10.1. The JDK XML Schema validator checks the pinned CDA schema; Gson serializes JSON reports. No database or application framework is required. Reviewed local supplements run inside the compiled Schematron. An optional offline membership index answers exact code-system/code lookups from a checksum-pinned local pack; it does not perform terminology network calls or load whole patient documents into a shared cache. See [local terminology snapshots](terminology.md).
 
 The browser uses HTML, CSS, and JavaScript. The original JavaScript library remains independent of Java; the new Node client communicates with the service over HTTP/JSON. Python scripts prepare assets, check upstream releases, benchmark, verify, and generate the HTML report.
 
@@ -34,12 +34,14 @@ The pinned releases omit query binding and use XPath 1.0 coercions. Compilation 
 | Resource | Official release | Used for |
 | --- | --- | --- |
 | [HL7 CDA Core](https://github.com/HL7/CDA-core-2.0/releases/tag/20260205_SDTC) | `20260205_SDTC` | CDA R2 XSD and approved SDTC extensions |
-| [HL7 C-CDA 2.1](https://github.com/HL7/CDA-ccda-2.1/releases/tag/2025SEP) | `2025SEP` | Full supplied Schematron and vocabulary snapshot |
+| [HL7 C-CDA 2.1](https://github.com/HL7/CDA-ccda-2.1/releases/tag/2025SEP) | `2025SEP` | Full supplied Schematron; authorized operator vocabulary |
 | [HL7 C-CDA 5.0](https://github.com/HL7/CDA-ccda/releases/tag/2026JUL) | `2026JUL` | Full supplied Schematron, bindings, and generation report |
 
 [The source lock](../profiles/sources.lock.json) records immutable archive URLs and SHA-256 hashes. [Asset preparation](../scripts/prepare-assets.py) verifies archives and writes per-file inventories. Startup verifies those files again. No mutable upstream rules are downloaded during validation.
 
-C-CDA 5.0's supplied generation report records **4 errors, 6 unhandled invariants across 4 categories, and 28 non-loaded value-set entries across 9 categories**. Embedded expansions are limited to value sets with fewer than 1,000 concepts. Consequently, `validationComplete` remains false for that package even when every configured stage executes. C-CDA 2.1 uses its bundled vocabulary snapshot.
+The original C-CDA 5.0 generation report is preserved: 4 errors, 6 unhandled invariants and 28 non-loaded value-set entries. Reviewed supplements now account for those pinned omissions; new or changed reports require a new review. Completion is document-specific and still requires every applicable check to be determinate. Missing optional data that a document does not use does not force global incompleteness. See [coverage semantics and evidence](coverage.md).
+
+Public images omit the mixed-license C-CDA 2.1 vocabulary. An authorized operator-supplied pinned copy restores that profile's Schematron execution; schema checks remain available without it.
 
 A supported document-level template must match the root ClinicalDocument for complete document coverage. Nested section or entry templates firing alone cannot establish a document-level pass. Template versions are derived from the selected pinned profile's rules.
 
@@ -53,7 +55,7 @@ The container is the primary service distribution. The npm package preserves leg
 
 ## Verification
 
-Current evidence is recorded in [verification.json](../reports/verification.json), [upload-memory.json](../reports/upload-memory.json), [browser-verification.json](../reports/browser-verification.json), and [benchmark.json](../reports/benchmark.json).
+Current follow-up evidence is recorded in [coverage-progress.json](../reports/coverage-progress.json) and [reference-comparison.json](../reports/reference-comparison.json). Earlier preview evidence is retained in [verification.json](../reports/verification.json), [upload-memory.json](../reports/upload-memory.json), [browser-verification.json](../reports/browser-verification.json), and [benchmark.json](../reports/benchmark.json).
 
 | Check | Coverage |
 | --- | --- |

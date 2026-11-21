@@ -66,7 +66,15 @@ final class GrammarChecks {
                 }
                 return Boolean.toString(ucum.validate(code)==null);
             }
-            return Boolean.toString(languages.valid(code));
+            if(!languages.valid(code))return "false";
+            // IANA registers extension singletons, not their individual key/type values.
+            // Without each extension authority's data, do not assert semantic validity.
+            String[] parts=code.split("-");
+            for(int i=1;i<parts.length;i++) {
+                if(parts[i].equalsIgnoreCase("x"))break;
+                if(parts[i].length()==1)return "unknown";
+            }
+            return "true";
         } catch(RuntimeException|StackOverflowError e){return "unknown";}
     }
     void register(Processor processor) {

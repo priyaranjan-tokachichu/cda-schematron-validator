@@ -38,7 +38,8 @@ class CoverageCatalogTest {
         }
         String preferred="<act><templateId root='2.16.840.1.113883.10.20.22.4.130'/><code code='TEST' codeSystem='9.9'/></act>";
         assertTrue(findings(engine.validate(withEntry(preferred),"ccda-5.0",true)).stream().anyMatch(f->((String)f.getOrDefault("ruleId","")).startsWith("local-binding-")&&f.get("severity").equals("warning")));
-        assertFalse(findings(engine.validate(withEntry(preferred),"ccda-5.0",false)).stream().anyMatch(f->((String)f.getOrDefault("ruleId","")).startsWith("local-binding-")));
+        assertFalse(findings(engine.validate(withEntry(preferred),"ccda-5.0",false)).stream().anyMatch(f->((String)f.getOrDefault("ruleId","")).startsWith("local-binding-")&&f.get("stage").equals("schematron")));
+        assertTrue(findings(engine.validate(withEntry(preferred),"ccda-5.0",false)).stream().anyMatch(f->f.get("stage").equals("coverage")));
         var profile=engine.profileInfo().get(1);assertEquals(2,profile.get("supplementalBindingChecks").getAsInt());assertFalse(profile.getAsJsonObject("terminologySetup").get("ready").getAsBoolean());
     }
     @Test void locationUnionAcceptsEveryAllowedSetAndRejectsWrongSystem() throws Exception {

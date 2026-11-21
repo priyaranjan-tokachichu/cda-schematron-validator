@@ -49,5 +49,35 @@
   {
     "case": "careplan-activity-act",
     "review": "Base CDA profile in a type union does not require an invented templateId"
+  },
+  {
+    "case": "careplan-act-code-missing",
+    "serviceRuleSuffix": "Act-code-cardinality",
+    "expectedFailure": true,
+    "referenceTarget": "Base CDA child constraint"
+  },
+  {
+    "case": "careplan-observation-code-missing",
+    "serviceRuleSuffix": "Observation-code-cardinality",
+    "expectedFailure": true,
+    "referenceTarget": "Base CDA child constraint"
+  },
+  {
+    "case": "careplan-activity-code-missing",
+    "serviceRuleSuffix": "Act-code-cardinality",
+    "expectedFailure": true,
+    "referenceTarget": "Base CDA child constraint"
+  },
+  {
+    "case": "careplan-act-id-missing",
+    "serviceRuleSuffix": "Act-id-II-1",
+    "expectedFailure": true,
+    "referenceTarget": "Base CDA child constraint"
+  },
+  {
+    "case": "careplan-act-typeid-wrong",
+    "serviceRuleSuffix": "Act-typeId-root-fixed",
+    "expectedFailure": true,
+    "referenceTarget": "Base CDA child constraint"
   }
 ]

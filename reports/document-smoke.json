@@ -1,0 +1,139 @@
+{
+  "verifiedAt": "2026-11-21T22:08:26.928070+00:00",
+  "scope": "Selected XSD/Schematron pipeline; the derived positive fixture is not claimed as full-FHIR conformance. See reference-comparison.json.",
+  "positiveFixtureDerivation": "Local official CCD-full.xml with encounter participantRole wrapper repaired, medication manufacturedMaterial code set to nullFlavor UNK, and optional NUBC discharge disposition removed. No other patient document was used.",
+  "cases": [
+    {
+      "architecture": "linux/arm64",
+      "runtime": {
+        "version": "2.0.0",
+        "engine": "Saxon-HE 12.9 / SchXslt 1.10.1",
+        "javaRuntimeVersion": "25.0.5.1+2-LTS",
+        "javaVersion": "25.0.5.1",
+        "javaVendor": "Eclipse Adoptium"
+      },
+      "fixture": "service/web/sample.xml",
+      "inputSha256": "127760fb2fcd4361336d0a07a42b30787d0ce4e90fc900aedcc4367f4d645c86",
+      "profile": "ccda-5.0",
+      "status": "invalid",
+      "executionComplete": true,
+      "validationComplete": true,
+      "summary": {
+        "errors": 14,
+        "warnings": 7,
+        "firedRules": 18,
+        "findings": 21
+      }
+    },
+    {
+      "architecture": "linux/arm64",
+      "runtime": {
+        "version": "2.0.0",
+        "engine": "Saxon-HE 12.9 / SchXslt 1.10.1",
+        "javaRuntimeVersion": "25.0.5.1+2-LTS",
+        "javaVersion": "25.0.5.1",
+        "javaVendor": "Eclipse Adoptium"
+      },
+      "fixture": "test/VitalSigns.xml",
+      "inputSha256": "69e9702358c755011ae5e7a4b5a0472ec884cb95ce75f69f0ad5d959d5e0916a",
+      "profile": "ccda-2.1",
+      "status": "invalid",
+      "executionComplete": true,
+      "validationComplete": true,
+      "summary": {
+        "errors": 1,
+        "warnings": 38,
+        "firedRules": 110,
+        "findings": 39
+      }
+    },
+    {
+      "architecture": "linux/arm64",
+      "runtime": {
+        "version": "2.0.0",
+        "engine": "Saxon-HE 12.9 / SchXslt 1.10.1",
+        "javaRuntimeVersion": "25.0.5.1+2-LTS",
+        "javaVersion": "25.0.5.1",
+        "javaVendor": "Eclipse Adoptium"
+      },
+      "fixture": ".cache/stable-reference/ccd-supported-positive.xml",
+      "inputSha256": "3112428397aacc1307a6c6e38bb950d843797114495932f4cde01cff6a3e8ade",
+      "profile": "ccda-5.0",
+      "status": "valid",
+      "executionComplete": true,
+      "validationComplete": true,
+      "summary": {
+        "errors": 0,
+        "warnings": 28,
+        "firedRules": 670,
+        "findings": 28
+      }
+    },
+    {
+      "architecture": "linux/amd64 (emulated)",
+      "runtime": {
+        "javaRuntimeVersion": "25.0.5.1+2-LTS",
+        "engine": "Saxon-HE 12.9 / SchXslt 1.10.1",
+        "version": "2.0.0",
+        "javaVendor": "Eclipse Adoptium",
+        "javaVersion": "25.0.5.1"
+      },
+      "fixture": "service/web/sample.xml",
+      "inputSha256": "127760fb2fcd4361336d0a07a42b30787d0ce4e90fc900aedcc4367f4d645c86",
+      "profile": "ccda-5.0",
+      "status": "invalid",
+      "executionComplete": true,
+      "validationComplete": true,
+      "summary": {
+        "errors": 14,
+        "findings": 21,
+        "firedRules": 18,
+        "warnings": 7
+      }
+    },
+    {
+      "architecture": "linux/amd64 (emulated)",
+      "runtime": {
+        "javaRuntimeVersion": "25.0.5.1+2-LTS",
+        "engine": "Saxon-HE 12.9 / SchXslt 1.10.1",
+        "version": "2.0.0",
+        "javaVendor": "Eclipse Adoptium",
+        "javaVersion": "25.0.5.1"
+      },
+      "fixture": "test/VitalSigns.xml",
+      "inputSha256": "69e9702358c755011ae5e7a4b5a0472ec884cb95ce75f69f0ad5d959d5e0916a",
+      "profile": "ccda-2.1",
+      "status": "invalid",
+      "executionComplete": true,
+      "validationComplete": true,
+      "summary": {
+        "errors": 1,
+        "findings": 39,
+        "firedRules": 110,
+        "warnings": 38
+      }
+    },
+    {
+      "architecture": "linux/amd64 (emulated)",
+      "runtime": {
+        "javaRuntimeVersion": "25.0.5.1+2-LTS",
+        "engine": "Saxon-HE 12.9 / SchXslt 1.10.1",
+        "version": "2.0.0",
+        "javaVendor": "Eclipse Adoptium",
+        "javaVersion": "25.0.5.1"
+      },
+      "fixture": ".cache/stable-reference/ccd-supported-positive.xml",
+      "inputSha256": "3112428397aacc1307a6c6e38bb950d843797114495932f4cde01cff6a3e8ade",
+      "profile": "ccda-5.0",
+      "status": "valid",
+      "executionComplete": true,
+      "validationComplete": true,
+      "summary": {
+        "errors": 0,
+        "findings": 28,
+        "firedRules": 670,
+        "warnings": 28
+      }
+    }
+  ]
+}

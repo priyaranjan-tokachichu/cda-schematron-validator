@@ -46,4 +46,20 @@ class TerminologySnapshotsTest {
         Files.writeString(assets.resolve("outside.json"),"[]");Files.writeString(manifest,info.toString());
         assertThrows(Exception.class,()->TerminologySnapshots.load(assets));
     }
+    @Test void distinguishesMissingDataAndUnsupportedExpressionsFromDefiniteNonmembership() throws Exception {
+        snapshot(assets,List.of("2.16.840.1.113883.6.96|12345"));
+        var data=TerminologySnapshots.load(assets);
+        assertEquals("true",data.status(TerminologySnapshots.PROCEDURE,"2.16.840.1.113883.6.96","12345"));
+        assertEquals("false",data.status(TerminologySnapshots.PROCEDURE,"2.16.840.1.113883.6.96","123"));
+        assertEquals("false",data.status(TerminologySnapshots.PROCEDURE,"9.9","12345"));
+        assertEquals("unknown",data.status("https://example.test/missing","1.2","12345"));
+        assertEquals("unknown",data.status(TerminologySnapshots.PROCEDURE,"2.16.840.1.113883.6.96","12345:67890=12345"));
+        Path manifest=assets.resolve("terminology/manifest.json");var config=JsonParser.parseString(Files.readString(manifest)).getAsJsonObject();
+        var info=config.getAsJsonArray("valueSets").get(0).getAsJsonObject();
+        info.add("codeSystemEditions",new Gson().toJsonTree(Map.of("2.16.840.1.113883.6.96",List.of("test-edition"))));
+        Files.writeString(manifest,config.toString());data=TerminologySnapshots.load(assets);
+        assertEquals("true",data.status(TerminologySnapshots.PROCEDURE,"2.16.840.1.113883.6.96","12345","test-edition"));
+        assertEquals("unknown",data.status(TerminologySnapshots.PROCEDURE,"2.16.840.1.113883.6.96","12345","another-edition"));
+        assertEquals("false",data.status(TerminologySnapshots.PROCEDURE,"9.9","12345","another-edition"));
+    }
 }

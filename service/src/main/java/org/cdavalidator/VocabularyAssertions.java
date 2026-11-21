@@ -7,6 +7,9 @@ import java.util.regex.*;
 /** The pinned generator serializes vocabulary codes as space-delimited literal lets. */
 final class VocabularyAssertions {
     private static final Pattern MEMBERSHIP=Pattern.compile("contains\\(\\s*(\\$[A-Za-z_][A-Za-z0-9_.-]*)\\s*,\\s*(\\.|@[A-Za-z_][A-Za-z0-9_:.-]*)\\s*\\)");
+    // These pinned finite identifier domains cannot contain whitespace. The
+    // first two also occur inside predicates, where dot refers to an inner node.
+    private static final Set<String> WHITESPACE_FREE=Set.of("$UspsTwoLetterAlphabeticCodes","$INDRoleclassCodes","$ActStatus");
     static int normalize(Document doc) {
         var variables=new HashMap<String,String>();var lets=doc.getElementsByTagNameNS(ValidationEngine.SCH,"let");
         var tokenLets=new ArrayList<Element>();
@@ -32,7 +35,9 @@ final class VocabularyAssertions {
                 boolean list=value.equals("@use")||value.equals("@qualifier")||value.equals(".")&&(context.endsWith("/@use")||context.endsWith("/@qualifier"));
                 String exact;
                 if(list)exact="(normalize-space("+value+") != '' and (every $vocabularyToken in tokenize(normalize-space("+value+"), '\\s+') satisfies $vocabularyToken = "+variable+"))";
+                else if(WHITESPACE_FREE.contains(matcher.group(1)))exact="("+value+" = "+variable+")";
                 else {
+                    if(value.equals(".")&&!assertion.getAttribute("test").strip().equals(matcher.group().strip()))throw new IllegalArgumentException("Unreviewed predicate membership context; review coverage normalization");
                     String whitespace="matches(string("+value+"), '\\s')";
                     // An inline list cannot distinguish a code containing spaces
                     // from adjacent codes. Disclose that case, do not guess a failure.

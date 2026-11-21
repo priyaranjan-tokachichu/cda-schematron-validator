@@ -82,6 +82,7 @@ def import_expansions(inputs, expected, systems, output, replace=False):
                 'sourceSha256': hashlib.sha256(source.read_bytes()).hexdigest(),
                 'expansionIdentifier': expansion.get('identifier'), 'expansionTimestamp': expansion.get('timestamp'),
                 'codeSystems': {system: sorted(versions) for system, versions in editions.items()},
+                'codeSystemEditions': {systems[system]: sorted(v for v in versions if v != 'unspecified') for system, versions in editions.items()},
                 'retrievedAt': datetime.fromtimestamp(source.stat().st_mtime, timezone.utc).isoformat()}
         if canonical in prepared:
             raise ValueError('Duplicate ValueSet input')

@@ -78,6 +78,7 @@ def install(archive, output, replace=False):
     info = {'canonical': canonical, 'file': index_hash + '.json', 'sha256': index_hash,
             'count': len(pairs), 'source': canonical, 'sourceVersion': review['valueSetVersion'],
             'sourceSha256': digest, 'definitionSha256': review['definitionSha256'],
+            'codeSystemEditions': {'2.16.840.1.113883.6.1': [review['version']]},
             'derivation': 'LOINC SCALE_TYP=Doc, cross-checked with SCALE part LP32888-7; plus NullFlavor UNK',
             'codeSystems': {'http://loinc.org': [review['version']],
                             'http://terminology.hl7.org/CodeSystem/v3-NullFlavor': ['UNK explicit enumeration']}}

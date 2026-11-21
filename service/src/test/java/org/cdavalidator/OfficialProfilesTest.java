@@ -54,11 +54,11 @@ class OfficialProfilesTest {
             }
         }
         var info = engine.profileInfo().stream().filter(p -> "ccda-5.0".equals(p.get("id").getAsString())).findFirst().orElseThrow();
-        assertEquals(5, info.getAsJsonArray("supplementalChecks").size());
+        assertEquals(6, info.getAsJsonArray("supplementalChecks").size());
         assertEquals(1, info.getAsJsonArray("terminologySnapshots").size());
     }
     @Test void personNamesMustMeetPatientNameConstraintsOrBePlainText() throws Exception {
-        var engine = new ValidationEngine(Path.of("assets"));
+        var engine = new ValidationEngine(Path.of("assets"),Path.of("target/test-no-terminology"));
         String fixture = Files.readString(Path.of("web/sample.xml"));
         var cases = new LinkedHashMap<String, Boolean>();
         cases.put("<name><given>Alex</given><family>Example</family></name>", true);
@@ -117,7 +117,7 @@ class OfficialProfilesTest {
         assertEquals(9, report.getAsJsonObject("nonLoadedValueSets").size());
     }
     @Test void nestedTemplatesCannotEstablishDocumentCoverage() throws Exception {
-        var engine = new ValidationEngine(Path.of("assets"));
+        var engine = new ValidationEngine(Path.of("assets"),Path.of("target/test-no-terminology"));
         String original = Files.readString(Path.of("../test/VitalSigns.xml"));
         // Only strip immediate document template IDs; preserve all nested section/entry rules.
         int boundary = original.indexOf("<id ");

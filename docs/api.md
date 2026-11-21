@@ -53,9 +53,10 @@ This XML is intentionally minimal and will produce findings. Replace it with you
 
 | Field | Interpretation |
 | --- | --- |
+| `validationScope` | Pinned XSD/Schematron pipeline with reviewed supplements; not full FHIR or clinical certification |
 | `status` | `valid`, `invalid`, or `incomplete` |
 | `executionComplete` | Whether the configured engine stages finished without truncation |
-| `validationComplete` | Also requires supported document-level coverage and no recorded upstream generation gaps |
+| `validationComplete` | Also requires supported document-level coverage, reviewed generator replacements, determinate applicable checks and no truncation |
 | `truncated` | The finding limit was reached; the report is partial |
 | `summary` | Errors, warnings, total findings, and fired rules |
 | `findings` | Severity, stage, message, rule ID, assertion test, XPath/context, and available locations |
@@ -65,7 +66,7 @@ This XML is intentionally minimal and will produce findings. Replace it with you
 | `durationMs` | Engine validation duration, separate from upload queue wait |
 | `requestId`, `validatedAt` | Request identity and timestamp |
 
-`invalid` can coexist with `validationComplete: false`: errors were found, and some coverage is missing. `incomplete` is never a pass. C-CDA 5.0 currently always discloses its upstream conversion gaps. A missing or unsupported root document template cannot be rescued by nested section/entry rules firing.
+`invalid` can coexist with `validationComplete: false`: errors were found, and some coverage is missing. `incomplete` is never a pass. C-CDA 5.0 preserves its historical upstream conversion report and lists reviewed replacements in `effectiveCoverage`. Missing data affects document completion at applicable locations; the dataset inventory remains separate. A missing or unsupported root document template cannot be rescued by nested section/entry rules firing.
 
 See an [actual synthetic-example response](../reports/example-result.json). The service does not return XML snippets. Finding messages can contain document values, so callers must handle reports as sensitive.
 

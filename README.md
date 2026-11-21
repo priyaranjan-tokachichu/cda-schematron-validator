@@ -17,7 +17,7 @@
 ---
 
 > [!NOTE]
-> **Version 2 preview.** The container includes the validation API and browser UI. The npm package includes the preserved legacy APIs, a typed HTTP client, and the CLI. Node 22.12+ is required. This is a preview while C-CDA 5.0 coverage gaps are addressed; npm’s stable default remains 1.1.12. See the [release notes](https://github.com/priyaranjan-tokachichu/cda-schematron-validator/releases) for artifacts and compatibility details.
+> **Unreleased 2.0.0 stable candidate (PR #53).** The container provides the validation API and browser UI. npm retains legacy APIs plus a typed HTTP client and CLI (Node 22.12+). Published `@next` remains preview.2 and npm’s stable default remains 1.1.12 until this candidate is reviewed, merged and released. Its stated scope is pinned XSD/Schematron with reviewed supplements; full FHIR model validation and clinical certification are outside that scope. See [coverage](docs/coverage.md) and the [release notes](https://github.com/priyaranjan-tokachichu/cda-schematron-validator/releases).
 
 <table>
 <tr>
@@ -30,7 +30,7 @@
 </tr>
 </table>
 
-> **Unreleased terminology setup change:** New images built from this checkout exclude the mixed-license C-CDA 2.1 vocabulary. Install your authorized pinned copy before using that profile’s Schematron checks. C-CDA 5.0 uses operator-supplied expansions and grammar definitions; the doctor lists missing datasets. Published preview.2 is unchanged. See [terminology setup](docs/terminology.md).
+> **Unreleased PR #53 update:** Patched Temurin 25.0.5.1+2 LTS addresses the November Java vulnerability on AMD64 and ARM64. New images built from this checkout exclude the mixed-license C-CDA 2.1 vocabulary. Install your authorized pinned copy before using that profile’s Schematron checks. C-CDA 5.0 uses operator-supplied expansions and grammar definitions; the doctor lists missing datasets. Published preview.2 is unchanged. See [terminology setup](docs/terminology.md).
 
 ## Quick start
 
@@ -89,13 +89,13 @@ The legacy API remains a partial Schematron interpreter. Use the service for CDA
 
 | Profile | Official Schematron release | CDA schema |
 | --- | --- | --- |
-| **C-CDA 2.1** · `ccda-2.1` | `2025SEP`, with bundled vocabulary | CDA R2 + SDTC `20260205_SDTC` |
+| **C-CDA 2.1** · `ccda-2.1` | `2025SEP`, with authorized operator vocabulary | CDA R2 + SDTC `20260205_SDTC` |
 | **C-CDA 5.0** · `ccda-5.0` · default | `2026JUL` | CDA R2 + SDTC `20260205_SDTC` |
 
 Sources are pinned by immutable release URL and SHA-256. The build verifies downloads; startup verifies extracted files. `GET /v1/profiles` exposes provenance, active limits, and known coverage gaps. [Inspect the source lock](profiles/sources.lock.json). [Coverage remediation and local terminology work](docs/coverage.md).
 
 > [!IMPORTANT]
-> **C-CDA 5.0 has known upstream conversion gaps:** 4 generation errors, 6 unhandled invariants across 4 categories, and 28 non-loaded value-set entries across 9 categories. Its embedded value-set expansions cover sets with fewer than 1,000 concepts. The service reports incomplete coverage even when execution succeeds. A supported document-level template is required for complete document validation; nested templates alone are insufficient.
+> **Coverage is explicit.** The original C-CDA 5.0 generation report is preserved, with reviewed replacement checks reported separately. Completion requires a supported document-level template and every applicable check to be determinate. Missing operator data—including NUBC discharge status—produces coverage findings where needed. The scope is pinned CDA XSD and C-CDA Schematron with supplements, not full FHIR StructureDefinition or clinical certification. [See the checks and evidence](docs/coverage.md).
 
 Neither profile certifies clinical accuracy or every terminology requirement. See [standards, provenance, and coverage](docs/architecture.md#standards-and-coverage).
 
@@ -119,7 +119,7 @@ curl http://localhost:17643/v1/validate \
 
 | Report status | Meaning |
 | --- | --- |
-| `valid` | No errors; configured checks and document coverage completed without recorded generation gaps or truncation |
+| `valid` | No errors; configured checks and document coverage completed without unresolved effective coverage gaps or truncation |
 | `invalid` | Errors found; inspect completeness separately |
 | `incomplete` | No errors found, but execution or coverage is incomplete; this is not a pass |
 
@@ -204,7 +204,7 @@ For the complete HTML engineering report, start the service and open [localhost:
 
 ## Development
 
-Local service development requires Java 21+, Maven 3.9+, and Python 3.11+. Node is required for the JavaScript library and its tests.
+Local service development requires JDK 25, Maven 3.9+, and Python 3.11+. Node is required for the JavaScript library and its tests.
 
 ```sh
 npm ci --ignore-scripts

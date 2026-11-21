@@ -14,3 +14,4 @@ jobs:
         with:
           python-version: '3.13'
       - run: python3 scripts/check-upstream.py
+      - run: python3 scripts/check-java-runtime.py --upstream

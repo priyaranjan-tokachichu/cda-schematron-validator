@@ -47,6 +47,10 @@ export interface Profile {
   artifactChecksums: Record<string, string>;
   generationCoverage?: Record<string, number>;
   generationReport?: Record<string, unknown>;
+  effectiveCoverage?: {knownGeneratorGapsAddressed: boolean; unresolvedGeneratorEntries: string[]; scope: string; documentPolicy: string; carePlanReview: string; reviewedReplacements: string[]};
+  terminologySetup?: {ready: boolean; missingValueSets?: string[]; missingDatasets?: string[]; installedValueSets?: string[]; setupGuide: string; distribution?: string};
+  supplementalBindingChecks?: number;
+  carePlanBaseChecks?: {assertions: number; modelSha256: string; scope: string; sourceFiles: Record<string,string>};
   terminologySnapshots?: Array<Record<string, unknown>>;
   supplementalChecks?: Array<{ ruleId: string; method: string; scope: string }>;
 }
@@ -68,6 +72,7 @@ export interface ValidationReport {
   requestId: string;
   status: 'valid' | 'invalid' | 'incomplete';
   validationComplete: boolean;
+  validationScope?: string;
   executionComplete: boolean;
   truncated: boolean;
   options: {includeWarnings: boolean};
@@ -84,6 +89,6 @@ export interface ValidationReport {
 export interface Client {
   validate(xml: string, options?: {profile?: string; includeWarnings?: boolean}): Promise<ValidationReport>;
   profiles(): Promise<{profiles: Profile[]; sources: ValidationReport['sources']; limits?: {maxXmlBytes: number; maxRequestBytes: number; uploadMemoryBudgetBytes: number; maxConcurrentUploads: number; requestCapacity: number; uploadQueueWaitSeconds: number}}>;
-  version(): Promise<{version: string; engine: string}>;
+  version(): Promise<{version: string; engine: string; javaVersion?: string; javaRuntimeVersion?: string; javaVendor?: string}>;
 }
 export function createClient(options?: {baseUrl?: string; token?: string; timeoutMs?: number}): Client;

@@ -16,16 +16,16 @@ Use authorized VSAC exports, source-system distributions, or complete FHIR expan
 
 `GET /v1/profiles` exposes:
 
-- `supplementalChecks`: person-name, procedure timestamp, conditional procedure-membership and conditional location-union checks.
+- `supplementalChecks`: person-name, procedure timestamp, procedure-membership and location-union checks, with coverage guards for unavailable data.
 - `supplementalBindingChecks`: installed checks at the exact locations in the checksum-verified HL7 binding catalog. Required bindings produce errors; preferred and extensible bindings preserve the upstream warning severity.
 - `terminologySetup`: exact missing and installed value-set canonicals, a data-readiness flag and the setup guide URL. Readiness is separate from full validation coverage.
 - `terminologySnapshots` and `grammarDefinitions`: pinned editions, counts and hashes. Unknown or unimplemented canonicals remain inactive.
 
 Code/system pairs use exact membership. Bindings on primitive code attributes use exact code membership. Each supplemental binding has a stable ID derived from its canonical, context and strength, and runs in a separate pattern so overlapping contexts cannot suppress another binding. The original HL7 assets and generation report remain unchanged except for the explicitly marked **public-image derivative** of the legacy vocabulary inventory.
 
-The local Procedure expansion enables `1198-8487` and `1198-8511`. All three location expansions must be installed before `shall-use-one-binding` is enabled. Date checks compare calendar fields and offsets; insufficient precision or timezone information produces an explicit coverage finding even when advisory warnings are hidden. It is never silently treated as a pass.
+All six supplements are installed even when datasets are absent. A known member of any location set satisfies the union; an unresolved union produces an explicit coverage finding. Date checks compare calendar fields and offsets; insufficient precision or timezone information produces an explicit coverage finding even when advisory warnings are hidden. It is never silently treated as a pass.
 
-C-CDA 5.0 still reports incomplete coverage while generation issues and independent conformance verification remain unresolved. Installing data does not clear those issues.
+The historical generation report remains unchanged. Reviewed replacement checks are reported separately in `effectiveCoverage`; document completion also requires all applicable data and determinate checks. It does not assert full FHIR model conformance.
 
 ## Prepare SVS data
 
@@ -108,7 +108,7 @@ Finite lists cannot cover all UCUM expressions or BCP 47 language tags. Download
 }
 ```
 
-Preserve existing `valueSets` when editing the manifest. UCUM uses `org.fhir:ucum:1.0.10`; XML DTDs are prohibited before definition parsing. Language checks use strict BCP 47 syntax, the installed registered subtags, grandfathered/redundant tags, private-use ranges, extlang prefixes and registered extension singletons. Finite snapshots for these canonicals remain inactive and cannot satisfy grammar readiness.
+Preserve existing `valueSets` when editing the manifest. UCUM uses `org.fhir:ucum:1.0.10`; XML DTDs are prohibited before definition parsing. Language checks use strict BCP 47 syntax, the installed registered subtags, grandfathered/redundant tags, private-use ranges, extlang prefixes and registered extension singletons. Registered extension singletons do not prove the semantic validity of extension keys/types; tags containing such extensions produce indeterminate coverage. Private-use tags remain supported. Finite snapshots for these canonicals remain inactive and cannot satisfy grammar readiness.
 
 ## Install the authorized C-CDA 2.1 vocabulary
 
@@ -149,7 +149,7 @@ docker run -d --name cda-validator-coverage \
 
 Compose uses `${CDA_TERMINOLOGY_DIR:-./terminology}`. For a local JVM, set `TERMINOLOGY_DIR` to the operator directory. Restart to load changed data; the running engine uses immutable verified indexes. Existing applications on other ports remain untouched.
 
-Paths must stay inside the operator folder. Snapshot files are bounded to 64 MiB and 1,000,000 total entries; each grammar file is bounded to 5 MiB and the legacy vocabulary to 150 MiB. Startup verifies checksums and counts. Raw exports, normalized indexes and local vocabularies are excluded from Git and the public build context.
+Paths must stay inside the operator folder. Snapshot files are bounded to 64 MiB and 1,250,000 total entries; each grammar file is bounded to 5 MiB and the legacy vocabulary to 150 MiB. Startup verifies checksums and counts. Raw exports, normalized indexes and local vocabularies are excluded from Git and the public build context.
 
 For memory regression with an operator pack:
 
@@ -160,10 +160,29 @@ python3 scripts/check-upload-memory.py \
   --output .cache/coverage-upload-memory.json
 ```
 
-## Remaining prerequisites
+## Prepare US Core condition and procedure sets from UMLS
 
-The verified local pack contains 27 snapshots (475,729 membership entries), of which 26 are active, plus UCUM and language grammars. All six supplemental invariants are enabled with this pack; the binding catalog installs 47 additional checks. The three missing canonical datasets are US Core condition codes, US Core procedure codes and encounter discharge disposition. UMLS 2026AB lists CDT 2025, CPT 2026, HCPCS and diagnosis sources, but no NUBC source was found. Inventory presence is not proof of a complete value-set expansion or licensing entitlement.
+Download the licensed **UMLS 2026AB full archive** through your own UMLS access and **LOINC Complete 2.83** through LOINC. No credentials or license agreements are handled by the importer.
 
-The US Core procedure definition also includes ADA CDT, LOINC, SNOMED CT, HCPCS and ICD-10-PCS. Licensing requirements apply to each source. A free application and a license notice do not replace an AMA distribution agreement; operator-supplied CPT also does not automatically exempt a CPT-dependent product from AMA product licensing. See the [AMA licensing FAQ](https://www.ama-assn.org/practice-management/cpt/cpt-licensing-frequently-asked-questions-faqs).
+```sh
+python3 scripts/import-umls.py \
+  --input /private/path/umls-2026AB-full.zip \
+  --loinc /private/path/Loinc_2.83.zip \
+  --output terminology
+```
 
-Targeted offline comparisons with HL7 FHIR Validator 7.0.6 agree on six definite name/date probes. The service explicitly reports indeterminate coverage for a partial date that the reference does not reject. Terminology was disabled in the reference run, so this does not establish terminology equivalence. CarePlanAct generation-error review and broader model comparison remain release work. The historical generation report is preserved and C-CDA 5.0 `validationComplete` remains false.
+The archive, recipe and source-row counts are pinned in `profiles/umls-sources.lock.json`. Allow approximately 2.4 GB temporary disk space for the nested metadata archive; it is removed after import. The importer rejoins arbitrary gzip fragments before decoding complete RRF records. It derives SNOMED descendants from source-asserted MRHIER AUI paths and SCUI identifiers, never from shared UMLS CUIs. Before updating a pack it requires exact agreement with an installed independent Procedure snapshot, when present. No imported codes are distributed with the software.
+
+The recipe includes full LOINC table identifiers, appropriate CPT/CDT/HCPCS clinical identifiers, ICD-10-CM/PCS and ICD-9-CM diagnosis/procedure identifiers with the authoritative CDA system OIDs. It excludes source headings, ranges and partial axes. Standalone CPT/HCPCS modifiers and unsupported SNOMED expressions are explicitly indeterminate. The recipe records exact source editions: SNOMED US September 2026, CPT 2026, **CDT 2025**, HCPCS 2026, ICD-10-CM/PCS 2027, ICD-9-CM 2014 and LOINC 2.83. These are the reviewed archive's editions; a new edition requires review rather than relabeling old data.
+
+The two US Core 9.0.0 definitions yield **262,583 condition** and **274,743 procedure** membership pairs. The SNOMED Procedure subset has 62,110 pairs and exactly matches the independently obtained VSAC expansion. These counts are for this pinned recipe, not promises about future editions.
+
+## Remaining dataset and coverage boundaries
+
+The verified local pack contains **29 snapshots / 1,013,055 membership entries**, with 28 active indexes and two grammars. The one absent canonical is NUBC patient discharge disposition. No NUBC source was present in UMLS. Operators who need this check must supply an authorized, complete versioned expansion using the FHIR importer; no scraped discharge-status list is bundled. Until installed, any applicable binding yields incomplete coverage even when warnings are hidden.
+
+`codeSystemEditions` records supported aliases. An explicit document `codeSystemVersion` that does not match the installed reviewed edition produces coverage findings rather than silently using a different edition. Absent version attributes use the disclosed installed edition. This does not guarantee that every other historical edition or code expression is supported.
+
+CPT/ADA CDT and other source permissions still apply. Operator-supplied data is not a blanket exemption from product licensing; see the linked licensing guidance above. The codebase, npm archive and image omit raw and normalized operator data.
+
+Targeted offline reference checks are described in [coverage evidence](coverage.md#independent-checks). Full FHIR StructureDefinition and clinical conformance are outside this service's stated validation scope.

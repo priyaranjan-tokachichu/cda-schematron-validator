@@ -39,24 +39,21 @@ final class CoverageCatalog {
         Element ns=doc.createElementNS(ValidationEngine.SCH,"ns");ns.setAttribute("prefix","local-term");ns.setAttribute("uri",TerminologySnapshots.NAMESPACE);doc.getDocumentElement().appendChild(ns);
         int count=0;
         for(var b:bindings){
-            if(!data.members.containsKey(b.canonical)&&!grammar.supports(b.canonical))continue;
-            count++;
+            if(data.members.containsKey(b.canonical)||grammar.supports(b.canonical))count++;
             String id="local-binding-"+UUID.nameUUIDFromBytes((b.canonical+"\n"+b.xpath+"\n"+b.strength).getBytes(java.nio.charset.StandardCharsets.UTF_8));
             Element pattern=doc.createElementNS(ValidationEngine.SCH,"pattern");pattern.setAttribute("id",id);
             Element rule=doc.createElementNS(ValidationEngine.SCH,"rule");rule.setAttribute("context",b.xpath);
             Element assertion=doc.createElementNS(ValidationEngine.SCH,"assert");assertion.setAttribute("id",id);assertion.setAttribute("role",b.strength.equals("required")?"error":"warning");
             boolean attribute=b.xpath.matches("(?s).*/@[^/]+$");
-            String membership=attribute?"local-term:code-member-of('"+b.canonical+"',string(.))":"local-term:member-of('"+b.canonical+"',string(@codeSystem),string(@code))";
-            String grammarTest=grammar.supports(b.canonical)?"local-term:grammar-status('"+b.canonical+"',string("+(attribute?".":"@code")+"))":null;
-            if(grammarTest!=null)membership=grammarTest+" != 'false'";
-            assertion.setAttribute("test",attribute?membership:"@nullFlavor or "+membership);
-            assertion.setTextContent((b.strength.equals("required")?"SHALL":"SHOULD")+" be selected from the installed, pinned expansion of "+b.canonical+" ("+b.strength+" binding).");
+            String status=attribute?"local-term:code-membership-status('"+b.canonical+"',string(.))":"local-term:versioned-membership-status('"+b.canonical+"',string(@codeSystem),string(@code),string(@codeSystemVersion))";
+            if(grammar.supports(b.canonical))status="local-term:grammar-status('"+b.canonical+"',string("+(attribute?".":"@code")+"))";
+            String bypass=attribute?"":"@nullFlavor or not(@code) or ";
+            assertion.setAttribute("test",bypass+status+" != 'false'");
+            assertion.setTextContent((b.strength.equals("required")?"SHALL":"SHOULD")+" be selected from the installed, pinned terminology of "+b.canonical+" ("+b.strength+" binding).");
             rule.appendChild(assertion);
-            if(grammarTest!=null){
-                Element coverage=doc.createElementNS(ValidationEngine.SCH,"assert");coverage.setAttribute("id",id+"-coverage");coverage.setAttribute("role","coverage");
-                coverage.setAttribute("test",(attribute?"":"@nullFlavor or ")+grammarTest+" != 'unknown'");
-                coverage.setTextContent("Grammar validation exceeded supported complexity or could not be determined. This binding has incomplete coverage: "+b.canonical);rule.appendChild(coverage);
-            }
+            Element coverage=doc.createElementNS(ValidationEngine.SCH,"assert");coverage.setAttribute("id",id+"-coverage");coverage.setAttribute("role","coverage");
+            coverage.setAttribute("test",bypass+status+" != 'unknown'");
+            coverage.setTextContent("This binding could not be checked: its dataset is missing, the declared edition is unavailable, or the value needs unsupported expression/grammar evaluation. Install the named dataset or review this coverage gap: "+b.canonical);rule.appendChild(coverage);
             pattern.appendChild(rule);doc.getDocumentElement().appendChild(pattern);
         }
         return count;

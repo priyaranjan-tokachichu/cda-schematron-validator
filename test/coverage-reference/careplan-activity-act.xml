@@ -12,5 +12,5 @@
   <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25"/>
   <languageCode code="en-US"/>
   <!-- Missing recordTarget, author, custodian, and required sections. -->
-  <component><structuredBody><component><section><entry><act classCode='ACT' moodCode='INT'><templateId root='2.16.840.1.113883.10.20.22.4.518' extension='2026-05-01'/><code nullFlavor='UNK'/><statusCode code='active'/><entryRelationship typeCode='COMP'><act classCode='ACT' moodCode='EVN'><id root='1.2.3'/><code nullFlavor='UNK'/><statusCode code='completed'/></act></entryRelationship></act></entry></section></component></structuredBody></component>
+  <component><structuredBody><component><section><entry><act classCode='ACT' moodCode='INT'><templateId root='2.16.840.1.113883.10.20.22.4.518' extension='2026-05-01'/><code code='18776-5' codeSystem='2.16.840.1.113883.6.1'/><statusCode code='active'/><entryRelationship typeCode='COMP'><act classCode='ACT' moodCode='EVN'><id root='1.2.3'/><code nullFlavor='UNK'/><statusCode code='completed'/></act></entryRelationship></act></entry></section></component></structuredBody></component>
 </ClinicalDocument>

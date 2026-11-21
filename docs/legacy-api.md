@@ -67,4 +67,4 @@ The modern service accepts installed profile IDs and XML text; it does not accep
 
 ## Release boundary
 
-Preview `2.0.0-preview.1` preserves the seven legacy exports and adds the HTTP client and CLI. It requires Node 22.12+. Version `1.1.12` remains available for older integrations; the stable default remains `1.1.12`, and the preview is selected explicitly with `@next`. The Java service is distributed separately as a container. Merging alone does not publish either artifact.
+Published preview.2 and the unreleased `2.0.0` candidate preserve the seven legacy exports and adds the HTTP client and CLI. It requires Node 22.12+. Version `1.1.12` remains available for older integrations; the stable default remains `1.1.12`, and the preview is selected explicitly with `@next`. The Java service is distributed separately as a container. Merging alone does not publish either artifact.

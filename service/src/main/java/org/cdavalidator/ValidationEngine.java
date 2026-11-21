@@ -144,7 +144,8 @@ public final class ValidationEngine {
                 info.add("terminologySetup",coverageCatalog.readiness(terminology,grammar));
                 info.add("grammarDefinitions",grammar.metadata.deepCopy());
                 info.addProperty("supplementalBindingChecks",coverageCatalog.addBindings(doc,terminology,grammar));
-                if (terminology.members.containsKey(TerminologySnapshots.PROCEDURE)) {
+                info.add("carePlanBaseChecks",CarePlanRules.add(doc));
+                {
                     SupplementalRules.addProcedureInvariants(doc);
                     for (String id : List.of("1198-8487", "1198-8511")) {
                         var check = new JsonObject(); check.addProperty("ruleId", id);
@@ -152,12 +153,13 @@ public final class ValidationEngine {
                         check.addProperty("scope", "Pinned invariant and local terminology edition"); supplements.add(check);
                     }
                 }
-                if(terminology.members.keySet().containsAll(CoverageCatalog.LOCATION)) {
+                {
                     SupplementalRules.addLocationInvariant(doc);
                     var check=new JsonObject();check.addProperty("ruleId","shall-use-one-binding");check.addProperty("method","Exact code/system membership in the union of three installed location value sets");check.addProperty("scope","ServiceDeliveryLocation code");supplements.add(check);
                 }
                 if (!terminology.metadata.isEmpty()) info.add("terminologySnapshots", terminology.metadata.deepCopy());
                 info.addProperty("vocabularyAssertionsNormalized",VocabularyAssertions.normalize(doc));
+                info.add("effectiveCoverage",CoverageRemediation.review(assets,info.getAsJsonObject("generationReport"),coverageCatalog));
             }
             var destination = new XdmDestination();
             var transform = pipeline.load();
@@ -404,12 +406,14 @@ public final class ValidationEngine {
         long errors = findings.stream().filter(f -> f.get("severity").equals("error")).count();
         long warnings = findings.stream().filter(f -> f.get("severity").equals("warning")).count();
         boolean coverageComplete = !profile.info.has("generationCoverage") || profile.info.getAsJsonObject("generationCoverage").entrySet().stream().allMatch(e -> e.getValue().getAsInt() == 0);
+        if(profile.info.has("effectiveCoverage"))coverageComplete=profile.info.getAsJsonObject("effectiveCoverage").get("knownGeneratorGapsAddressed").getAsBoolean();
         boolean complete = executed && coverageComplete && !truncated && findings.stream().noneMatch(f -> "coverage".equals(f.get("stage")));
         var result = new LinkedHashMap<String, Object>();
         result.put("requestId", UUID.randomUUID().toString());
-        result.put("applicationVersion", "2.0.0-preview.2");
+        result.put("applicationVersion", "2.0.0");
         result.put("status", errors > 0 ? "invalid" : complete ? "valid" : "incomplete");
         result.put("validationComplete", complete);
+        result.put("validationScope", "Selected pinned XSD/Schematron profile and reviewed supplements; not full FHIR StructureDefinition validation or clinical certification");
         result.put("executionComplete", executed && !truncated);
         result.put("truncated", truncated);
         result.put("options", Map.of("includeWarnings",includeWarnings));

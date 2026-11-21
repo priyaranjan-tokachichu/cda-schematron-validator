@@ -76,11 +76,11 @@ class GrammarChecksTest {
         var extension=definition("extensions.txt",EXTENSIONS);language.addProperty("extensionsFile","extensions.txt");language.addProperty("extensionsSha256",extension.get("sha256").getAsString());
         Files.writeString(directory.resolve("manifest.json"),new Gson().toJson(Map.of("schemaVersion",1,"valueSets",List.of(),"grammars",Map.of("language",language))));
         var engine=new ValidationEngine(assets,directory);String sample=Files.readString(Path.of("web/sample.xml"));
-        for(String code:List.of("en-Latn-US","zz-XX","en-x-"+String.join("-",Collections.nCopies(40,"abcdefgh")))) {
+        for(String code:List.of("en-Latn-US","zz-XX","en-u-ca-gregory","en-u-ca-notreal","en-x-"+String.join("-",Collections.nCopies(40,"abcdefgh")))) {
             var report=engine.validate(sample.replace("en-US",code),"ccda-5.0",false);
             var findings=CoverageCatalogTest.findings(report);
             assertEquals(code.equals("zz-XX"),findings.stream().anyMatch(f->((String)f.getOrDefault("ruleId","")).startsWith("local-binding-")&&f.get("severity").equals("error")));
-            assertEquals(code.length()>255,findings.stream().anyMatch(f->((String)f.getOrDefault("ruleId","")).startsWith("local-binding-")&&f.get("stage").equals("coverage")));
+            assertEquals(code.length()>255||code.contains("-u-"),findings.stream().anyMatch(f->((String)f.getOrDefault("ruleId","")).startsWith("local-binding-")&&f.get("stage").equals("coverage")));
         }
     }
 }

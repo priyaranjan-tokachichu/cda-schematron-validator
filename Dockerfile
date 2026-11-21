@@ -9,7 +9,7 @@ FROM assets AS public-assets
 COPY scripts/package-public-assets.py scripts/package-public-assets.py
 RUN python3 scripts/package-public-assets.py service/assets
 
-FROM maven:3.9-eclipse-temurin-21@sha256:99e61abcff91a9b1333463bd8451fb18495d6eba9250ac66a338b518f8278320 AS build
+FROM maven:3.9.16-eclipse-temurin-25-noble@sha256:93b8a14ea2f412782e4e842651273b4d903e35cc496284f178fbbe2d67d00976 AS build
 WORKDIR /build/service
 COPY service/pom.xml pom.xml
 RUN mvn -B -q dependency:go-offline
@@ -19,7 +19,7 @@ COPY --from=assets /build/service/assets assets
 COPY test/VitalSigns.xml /build/test/VitalSigns.xml
 RUN mvn -B -q package
 
-FROM eclipse-temurin:21-jre-jammy@sha256:dff6eb46527bd293a3c06bbbe9e64e8c9f91f01905b5abbdad31761c03059d2c AS runtime
+FROM eclipse-temurin:25.0.5.1_2-jre-noble@sha256:f3dd0838e69b881cc382237d5901e74ae3705b1056ad964b2e0e523b174fef99 AS runtime
 WORKDIR /app
 RUN groupadd --gid 10001 validator && useradd --uid 10001 --gid validator --no-create-home validator
 COPY --from=build /build/service/target/cda-validator-service.jar app.jar

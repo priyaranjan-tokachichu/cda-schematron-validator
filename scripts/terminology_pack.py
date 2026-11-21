@@ -43,7 +43,7 @@ def update_pack(output, prepared, replace=False):
         if type(info['count']) is not int or info['count'] <= 0:
             raise ValueError('Invalid existing concept count')
         total_concepts += info['count']
-        if total_bytes > 64 * 1024 * 1024 or total_concepts > 1_000_000:
+        if total_bytes > 64 * 1024 * 1024 or total_concepts > 1_250_000:
             raise ValueError('Existing pack exceeds supported bounds')
         existing[canonical], paths[canonical] = info, path
     for canonical, info in existing.items():
@@ -59,7 +59,7 @@ def update_pack(output, prepared, replace=False):
         if canonical in existing and existing[canonical]['sha256'] != info['sha256'] and not replace:
             raise ValueError('Conflicting installed expansion; use --replace after reviewing the new edition')
         existing[canonical] = info
-    if sum(info['count'] for info in existing.values()) > 1_000_000:
+    if sum(info['count'] for info in existing.values()) > 1_250_000:
         raise ValueError('Pack exceeds concept budget')
     if sum(len(prepared[c][1]) if c in prepared else paths[c].stat().st_size for c in existing) > 64 * 1024 * 1024:
         raise ValueError('Pack exceeds byte budget')

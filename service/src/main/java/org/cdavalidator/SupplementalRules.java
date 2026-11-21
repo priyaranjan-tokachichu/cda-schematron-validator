@@ -96,7 +96,11 @@ final class SupplementalRules {
             assertion.setAttribute("role", "error");
             String alternatives = "@codeSystem = '2.16.840.1.113883.6.104' or @codeSystem = '2.16.840.1.113883.6.4' or @codeSystem = '2.16.840.1.113883.6.12'";
             if (template.equals("ProcedureNote")) alternatives += " or @codeSystem = '2.16.840.1.113883.6.285'";
-            assertion.setAttribute("test", alternatives + " or (@codeSystem = '2.16.840.1.113883.6.96' and local-term:member-of('" + TerminologySnapshots.PROCEDURE + "', string(@codeSystem), string(@code)))");
+            String membership="local-term:versioned-membership-status('"+TerminologySnapshots.PROCEDURE+"',string(@codeSystem),string(@code),string(@codeSystemVersion))";
+            assertion.setAttribute("test", alternatives + " or (@codeSystem = '2.16.840.1.113883.6.96' and "+membership+" != 'false')");
+            Element coverage=doc.createElementNS(ValidationEngine.SCH,"assert");coverage.setAttribute("id",assertion.getAttribute("id")+"-coverage");coverage.setAttribute("role","coverage");
+            coverage.setAttribute("test",alternatives+" or not(@codeSystem = '2.16.840.1.113883.6.96') or "+membership+" != 'unknown'");
+            coverage.setTextContent("Procedure membership could not be determined: install the Procedure dataset or use a supported pre-coordinated code. This check has incomplete coverage.");rule.appendChild(coverage);
             assertion.setTextContent("Service-event code SHALL use an allowed procedure code system; SNOMED CT codes SHALL belong to the pinned Procedure value-set expansion (CONF:" + assertion.getAttribute("id") + "). Local supplemental terminology check.");
             rule.appendChild(assertion); pattern.appendChild(rule);
         }
@@ -110,8 +114,11 @@ final class SupplementalRules {
         rule.setAttribute("id","local-service-location-code");rule.setAttribute("context",root.getAttribute("context")+"/cda:code");
         Element assertion=doc.createElementNS(ValidationEngine.SCH,"assert");assertion.setAttribute("id","shall-use-one-binding");assertion.setAttribute("role","error");
         var alternatives=new ArrayList<String>();
-        for(String canonical:CoverageCatalog.LOCATION)alternatives.add("local-term:member-of('"+canonical+"',string(@codeSystem),string(@code))");
-        assertion.setAttribute("test","not(@code) or "+String.join(" or ",alternatives));assertion.setTextContent("The location code SHALL belong to one of the three specified value sets.");
+        for(String canonical:CoverageCatalog.LOCATION)alternatives.add("local-term:versioned-membership-status('"+canonical+"',string(@codeSystem),string(@code),string(@codeSystemVersion))");
+        String statuses="("+String.join(",",alternatives)+")";
+        assertion.setAttribute("test","not(@code) or (some $membership in "+statuses+" satisfies $membership != 'false')");assertion.setTextContent("The location code SHALL belong to one of the three specified value sets.");
+        Element coverage=doc.createElementNS(ValidationEngine.SCH,"assert");coverage.setAttribute("id","shall-use-one-binding-coverage");coverage.setAttribute("role","coverage");
+        coverage.setAttribute("test","not(@code) or ("+statuses+" = 'true') or not("+statuses+" = 'unknown')");coverage.setTextContent("Location membership could not be determined because a required union dataset is missing. This check has incomplete coverage.");rule.appendChild(coverage);
         rule.appendChild(assertion);parent.appendChild(rule);
     }
 

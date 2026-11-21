@@ -1,0 +1,65 @@
+{
+  "release": "2026AB",
+  "archiveSha256": "03e41860c71e7303a53f7ee15fa868a28440552a20d19d4ce85bebbfe2d672cc",
+  "source": "https://www.nlm.nih.gov/research/umls/licensedcontent/umlsknowledgesources.html",
+  "sources": {
+    "SNOMEDCT_US": {
+      "version": "2026_09_01",
+      "rows": 1747857
+    },
+    "CPT": {
+      "version": "2026",
+      "rows": 80337
+    },
+    "CDT": {
+      "version": "CDT2025",
+      "rows": 920
+    },
+    "HCPCS": {
+      "version": "2026",
+      "rows": 18012
+    },
+    "ICD10CM": {
+      "version": "2027",
+      "rows": 210777
+    },
+    "ICD10PCS": {
+      "version": "2027",
+      "rows": 353207
+    },
+    "ICD9CM": {
+      "version": "2014",
+      "rows": 40855
+    }
+  },
+  "snomedDescendants": {
+    "404684003": 132939,
+    "243796009": 5657,
+    "272379006": 3409,
+    "71388002": 62110
+  },
+  "valueSetCounts": {
+    "http://hl7.org/fhir/us/core/ValueSet/us-core-condition-code": 262583,
+    "http://hl7.org/fhir/us/core/ValueSet/us-core-procedure-code": 274743
+  },
+  "sourceIdentifiers": {
+    "CPT": 11525,
+    "CDT": 824,
+    "HCPCS": 8623,
+    "ICD10PCS": 79256,
+    "ICD10CM": 98375,
+    "ICD9CM": 22203
+  },
+  "definitions": {
+    "http://hl7.org/fhir/us/core/ValueSet/us-core-condition-code": {
+      "version": "9.0.0",
+      "sha256": "f472d1bfa8282f0ba3411d12eed29e314f91224d2c23739b54b0a9f466b5ee12",
+      "package": "hl7.fhir.us.core#9.0.0"
+    },
+    "http://hl7.org/fhir/us/core/ValueSet/us-core-procedure-code": {
+      "version": "9.0.0",
+      "sha256": "5693368e0eaf8a10029a5364e6d2938f68cd5a0ca70bad892021dc9cf0e608f3",
+      "package": "hl7.fhir.us.core#9.0.0"
+    }
+  }
+}

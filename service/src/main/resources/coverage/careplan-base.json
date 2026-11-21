@@ -1,0 +1,1385 @@
+{
+  "scope": "Base Act/Observation root constraints for the three CarePlan type unions; complements the pinned XSD and Schematron, not a general StructureDefinition validator.",
+  "packageSources": {
+    "hl7.cda.uv.core#2.0.3-sd/package/StructureDefinition-Act.json": "8e4891e5b92c046bc12b04d727b5015137d1e9f1e429f2e0ff660a1251fc165c",
+    "hl7.cda.uv.core#2.0.3-sd/package/ValueSet-CDANullFlavor.json": "e0625327683cf707d21b28282c354a987253647aaebf0794cd02f6e7e71f6348",
+    "hl7.terminology.r5#7.1.0/package/CodeSystem-v3-NullFlavor.json": "544e601c74dfaf53a41ae4fefb37b5dc318563983244a1dc27b04b3b84812367",
+    "hl7.terminology.r5#7.1.0/package/ValueSet-v3-xActClassDocumentEntryAct.json": "1d8ca26a8ebc96297bd449ee615f1361545e3f5681c362a8e433117a9b3a4f3e",
+    "hl7.terminology.r5#7.1.0/package/CodeSystem-v3-ActClass.json": "fbdd7b649fd3d3a01c707cf27b490a20e3dff0767becc4b86166c5fc2d3498d1",
+    "hl7.terminology.r5#7.1.0/package/ValueSet-v3-xDocumentActMood.json": "2d8318c2cbf20ffb171c6740cb241a4f46e69d764f8c789a590f4b22ef63e589",
+    "hl7.terminology.r5#7.1.0/package/CodeSystem-v3-ActMood.json": "c9a302c9fea48a59956dcfa053451579d1e1513ebdd1f077aaae58cee2898dbc",
+    "hl7.terminology.r5#7.1.0/package/ValueSet-v3-ActStatus.json": "ce837000c13ed25b2b3a77186019a16995a1cc06657a9006fdffaa80880121d9",
+    "hl7.terminology.r5#7.1.0/package/CodeSystem-v3-ActStatus.json": "e63ebc36b336c4a33afd1c713bcd1b982a68e1d7b2de7f70c72492d791d45292",
+    "hl7.cda.uv.core#2.0.3-sd/package/StructureDefinition-Observation.json": "1c47f24ebaba2092c5e32066b6776d1a1e10c06eae2aa5d458cd8a49e47f966f",
+    "hl7.cda.uv.core#2.0.3-sd/package/ValueSet-CDAActClassObservation.json": "3daa9f109dee471cb897f69ba4a4b12dc34b3bc4a3f7a2c80136779e4ea4c882",
+    "hl7.terminology.r5#7.1.0/package/ValueSet-v3-xActMoodDocumentObservation.json": "3da06776056d15931d4e910683155b0b25881fafa798e0ade05ae9e22477b602",
+    "hl7.cda.uv.core#2.0.3-sd/package/ValueSet-CDAObservationInterpretation.json": "1a49f8f6a8a0f6827b427911727332a354bbc6a9d180551e2b58198377a3554a",
+    "hl7.terminology.r5#7.1.0/package/CodeSystem-v3-ObservationInterpretation.json": "47017d0a932e0fb4cee476dae2e8ad80b7a88041f7ecfa237f5969123b6c72bc",
+    "hl7.cda.us.ccda#5.0.0/package/StructureDefinition-CarePlanAct.json": "dc612771b2b518b2b8369f23db6dcb79ca63df01c1240b1c9d2ed74cea1ab047"
+  },
+  "profiles": {
+    "Act": [
+      {
+        "id": "Act.nullFlavor",
+        "path": "@nullFlavor",
+        "parent": ".",
+        "attribute": true,
+        "min": 0,
+        "max": "1",
+        "binding": "http://hl7.org/cda/stds/core/ValueSet/CDANullFlavor",
+        "members": [
+          {
+            "code": "NP",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NI",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "MSK",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NA",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "OTH",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NINF",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "PINF",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "UNK",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NASK",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "TRC",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "ASKU",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NAV",
+            "system": "2.16.840.1.113883.5.1008"
+          }
+        ],
+        "primitive": true
+      },
+      {
+        "id": "Act.realmCode",
+        "path": "cda:realmCode",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Act.typeId",
+        "path": "cda:typeId",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "1",
+        "iiRootOrNullFlavor": true
+      },
+      {
+        "id": "Act.typeId.nullFlavor",
+        "path": "cda:typeId/@nullFlavor",
+        "parent": "cda:typeId",
+        "attribute": true,
+        "min": 0,
+        "max": "1",
+        "binding": "http://hl7.org/cda/stds/core/ValueSet/CDANullFlavor",
+        "members": [
+          {
+            "code": "NP",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NI",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "MSK",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NA",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "OTH",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NINF",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "PINF",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "UNK",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NASK",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "TRC",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "ASKU",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NAV",
+            "system": "2.16.840.1.113883.5.1008"
+          }
+        ],
+        "primitive": true
+      },
+      {
+        "id": "Act.typeId.assigningAuthorityName",
+        "path": "cda:typeId/@assigningAuthorityName",
+        "parent": "cda:typeId",
+        "attribute": true,
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Act.typeId.displayable",
+        "path": "cda:typeId/@displayable",
+        "parent": "cda:typeId",
+        "attribute": true,
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Act.typeId.root",
+        "path": "cda:typeId/@root",
+        "parent": "cda:typeId",
+        "attribute": true,
+        "min": 1,
+        "max": "1",
+        "fixed": "2.16.840.1.113883.1.3"
+      },
+      {
+        "id": "Act.typeId.extension",
+        "path": "cda:typeId/@extension",
+        "parent": "cda:typeId",
+        "attribute": true,
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Act.templateId",
+        "path": "cda:templateId",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*",
+        "iiRootOrNullFlavor": true
+      },
+      {
+        "id": "Act.classCode",
+        "path": "@classCode",
+        "parent": ".",
+        "attribute": true,
+        "min": 1,
+        "max": "1",
+        "binding": "http://terminology.hl7.org/ValueSet/v3-xActClassDocumentEntryAct|2.0.0",
+        "members": [
+          {
+            "code": "ACCM",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "ACSN",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "ACT",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "AEXPOS",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "CONS",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "CONTREG",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "CTTEVENT",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "DISPACT",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "EXPOS",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "INC",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "INFRM",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "LIST",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "MPROT",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "PCPR",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "REG",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "REV",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "SPCTRT",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "STORE",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "TEXPOS",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "TRFR",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "TRNS",
+            "system": "2.16.840.1.113883.5.6"
+          }
+        ],
+        "primitive": true
+      },
+      {
+        "id": "Act.moodCode",
+        "path": "@moodCode",
+        "parent": ".",
+        "attribute": true,
+        "min": 1,
+        "max": "1",
+        "binding": "http://terminology.hl7.org/ValueSet/v3-xDocumentActMood|2.0.0",
+        "members": [
+          {
+            "code": "APT",
+            "system": "2.16.840.1.113883.5.1001"
+          },
+          {
+            "code": "ARQ",
+            "system": "2.16.840.1.113883.5.1001"
+          },
+          {
+            "code": "DEF",
+            "system": "2.16.840.1.113883.5.1001"
+          },
+          {
+            "code": "EVN",
+            "system": "2.16.840.1.113883.5.1001"
+          },
+          {
+            "code": "INT",
+            "system": "2.16.840.1.113883.5.1001"
+          },
+          {
+            "code": "PRMS",
+            "system": "2.16.840.1.113883.5.1001"
+          },
+          {
+            "code": "PRP",
+            "system": "2.16.840.1.113883.5.1001"
+          },
+          {
+            "code": "RQO",
+            "system": "2.16.840.1.113883.5.1001"
+          },
+          {
+            "code": "RSK",
+            "system": "2.16.840.1.113883.5.1001"
+          }
+        ],
+        "primitive": true
+      },
+      {
+        "id": "Act.negationInd",
+        "path": "@negationInd",
+        "parent": ".",
+        "attribute": true,
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Act.id",
+        "path": "cda:id",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*",
+        "iiRootOrNullFlavor": true
+      },
+      {
+        "id": "Act.code",
+        "path": "cda:code",
+        "parent": ".",
+        "attribute": false,
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Act.text",
+        "path": "cda:text",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Act.statusCode",
+        "path": "cda:statusCode",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "1",
+        "binding": "http://terminology.hl7.org/ValueSet/v3-ActStatus",
+        "members": [
+          {
+            "code": "normal",
+            "system": "2.16.840.1.113883.5.14"
+          },
+          {
+            "code": "aborted",
+            "system": "2.16.840.1.113883.5.14"
+          },
+          {
+            "code": "active",
+            "system": "2.16.840.1.113883.5.14"
+          },
+          {
+            "code": "cancelled",
+            "system": "2.16.840.1.113883.5.14"
+          },
+          {
+            "code": "completed",
+            "system": "2.16.840.1.113883.5.14"
+          },
+          {
+            "code": "held",
+            "system": "2.16.840.1.113883.5.14"
+          },
+          {
+            "code": "new",
+            "system": "2.16.840.1.113883.5.14"
+          },
+          {
+            "code": "suspended",
+            "system": "2.16.840.1.113883.5.14"
+          },
+          {
+            "code": "nullified",
+            "system": "2.16.840.1.113883.5.14"
+          },
+          {
+            "code": "obsolete",
+            "system": "2.16.840.1.113883.5.14"
+          }
+        ],
+        "primitive": true
+      },
+      {
+        "id": "Act.effectiveTime",
+        "path": "cda:effectiveTime",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Act.priorityCode",
+        "path": "cda:priorityCode",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Act.languageCode",
+        "path": "cda:languageCode",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "1",
+        "binding": "http://hl7.org/fhir/ValueSet/all-languages",
+        "grammar": true,
+        "primitive": true
+      },
+      {
+        "id": "Act.subject",
+        "path": "cda:subject",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Act.specimen",
+        "path": "cda:specimen",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Act.performer",
+        "path": "cda:performer",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Act.author",
+        "path": "cda:author",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Act.informant",
+        "path": "cda:informant",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Act.participant",
+        "path": "cda:participant",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Act.entryRelationship",
+        "path": "cda:entryRelationship",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Act.reference",
+        "path": "cda:reference",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Act.precondition",
+        "path": "cda:precondition",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Act.sdtcPrecondition2",
+        "path": "sdtc:precondition2",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Act.sdtcInFulfillmentOf1",
+        "path": "sdtc:inFulfillmentOf1",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      }
+    ],
+    "Observation": [
+      {
+        "id": "Observation.nullFlavor",
+        "path": "@nullFlavor",
+        "parent": ".",
+        "attribute": true,
+        "min": 0,
+        "max": "1",
+        "binding": "http://hl7.org/cda/stds/core/ValueSet/CDANullFlavor",
+        "members": [
+          {
+            "code": "NP",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NI",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "MSK",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NA",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "OTH",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NINF",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "PINF",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "UNK",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NASK",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "TRC",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "ASKU",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NAV",
+            "system": "2.16.840.1.113883.5.1008"
+          }
+        ],
+        "primitive": true
+      },
+      {
+        "id": "Observation.realmCode",
+        "path": "cda:realmCode",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Observation.typeId",
+        "path": "cda:typeId",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "1",
+        "iiRootOrNullFlavor": true
+      },
+      {
+        "id": "Observation.typeId.nullFlavor",
+        "path": "cda:typeId/@nullFlavor",
+        "parent": "cda:typeId",
+        "attribute": true,
+        "min": 0,
+        "max": "1",
+        "binding": "http://hl7.org/cda/stds/core/ValueSet/CDANullFlavor",
+        "members": [
+          {
+            "code": "NP",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NI",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "MSK",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NA",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "OTH",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NINF",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "PINF",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "UNK",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NASK",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "TRC",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "ASKU",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NAV",
+            "system": "2.16.840.1.113883.5.1008"
+          }
+        ],
+        "primitive": true
+      },
+      {
+        "id": "Observation.typeId.assigningAuthorityName",
+        "path": "cda:typeId/@assigningAuthorityName",
+        "parent": "cda:typeId",
+        "attribute": true,
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Observation.typeId.displayable",
+        "path": "cda:typeId/@displayable",
+        "parent": "cda:typeId",
+        "attribute": true,
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Observation.typeId.root",
+        "path": "cda:typeId/@root",
+        "parent": "cda:typeId",
+        "attribute": true,
+        "min": 1,
+        "max": "1",
+        "fixed": "2.16.840.1.113883.1.3"
+      },
+      {
+        "id": "Observation.typeId.extension",
+        "path": "cda:typeId/@extension",
+        "parent": "cda:typeId",
+        "attribute": true,
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Observation.templateId",
+        "path": "cda:templateId",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*",
+        "iiRootOrNullFlavor": true
+      },
+      {
+        "id": "Observation.classCode",
+        "path": "@classCode",
+        "parent": ".",
+        "attribute": true,
+        "min": 1,
+        "max": "1",
+        "binding": "http://hl7.org/cda/stds/core/ValueSet/CDAActClassObservation",
+        "members": [
+          {
+            "code": "CASE",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "OUTB",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "COND",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "OBSSER",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "OBSCOR",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "ROIBND",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "ROIOVL",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "OBS",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "ALRT",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "CLNTRL",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "CNOD",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "DGIMG",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "INVSTG",
+            "system": "2.16.840.1.113883.5.6"
+          },
+          {
+            "code": "SPCOBS",
+            "system": "2.16.840.1.113883.5.6"
+          }
+        ],
+        "primitive": true
+      },
+      {
+        "id": "Observation.moodCode",
+        "path": "@moodCode",
+        "parent": ".",
+        "attribute": true,
+        "min": 1,
+        "max": "1",
+        "binding": "http://terminology.hl7.org/ValueSet/v3-xActMoodDocumentObservation|2.0.0",
+        "members": [
+          {
+            "code": "APT",
+            "system": "2.16.840.1.113883.5.1001"
+          },
+          {
+            "code": "ARQ",
+            "system": "2.16.840.1.113883.5.1001"
+          },
+          {
+            "code": "DEF",
+            "system": "2.16.840.1.113883.5.1001"
+          },
+          {
+            "code": "EVN",
+            "system": "2.16.840.1.113883.5.1001"
+          },
+          {
+            "code": "GOL",
+            "system": "2.16.840.1.113883.5.1001"
+          },
+          {
+            "code": "INT",
+            "system": "2.16.840.1.113883.5.1001"
+          },
+          {
+            "code": "PRMS",
+            "system": "2.16.840.1.113883.5.1001"
+          },
+          {
+            "code": "PRP",
+            "system": "2.16.840.1.113883.5.1001"
+          },
+          {
+            "code": "RQO",
+            "system": "2.16.840.1.113883.5.1001"
+          },
+          {
+            "code": "RSK",
+            "system": "2.16.840.1.113883.5.1001"
+          }
+        ],
+        "primitive": true
+      },
+      {
+        "id": "Observation.negationInd",
+        "path": "@negationInd",
+        "parent": ".",
+        "attribute": true,
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Observation.id",
+        "path": "cda:id",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*",
+        "iiRootOrNullFlavor": true
+      },
+      {
+        "id": "Observation.sdtcCategory",
+        "path": "sdtc:category",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Observation.code",
+        "path": "cda:code",
+        "parent": ".",
+        "attribute": false,
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Observation.derivationExpr",
+        "path": "cda:derivationExpr",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Observation.text",
+        "path": "cda:text",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Observation.statusCode",
+        "path": "cda:statusCode",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "1",
+        "binding": "http://terminology.hl7.org/ValueSet/v3-ActStatus",
+        "members": [
+          {
+            "code": "normal",
+            "system": "2.16.840.1.113883.5.14"
+          },
+          {
+            "code": "aborted",
+            "system": "2.16.840.1.113883.5.14"
+          },
+          {
+            "code": "active",
+            "system": "2.16.840.1.113883.5.14"
+          },
+          {
+            "code": "cancelled",
+            "system": "2.16.840.1.113883.5.14"
+          },
+          {
+            "code": "completed",
+            "system": "2.16.840.1.113883.5.14"
+          },
+          {
+            "code": "held",
+            "system": "2.16.840.1.113883.5.14"
+          },
+          {
+            "code": "new",
+            "system": "2.16.840.1.113883.5.14"
+          },
+          {
+            "code": "suspended",
+            "system": "2.16.840.1.113883.5.14"
+          },
+          {
+            "code": "nullified",
+            "system": "2.16.840.1.113883.5.14"
+          },
+          {
+            "code": "obsolete",
+            "system": "2.16.840.1.113883.5.14"
+          }
+        ],
+        "primitive": true
+      },
+      {
+        "id": "Observation.effectiveTime",
+        "path": "cda:effectiveTime",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Observation.priorityCode",
+        "path": "cda:priorityCode",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Observation.repeatNumber",
+        "path": "cda:repeatNumber",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Observation.languageCode",
+        "path": "cda:languageCode",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "1",
+        "binding": "http://hl7.org/fhir/ValueSet/all-languages",
+        "grammar": true,
+        "primitive": true
+      },
+      {
+        "id": "Observation.value",
+        "path": "cda:value",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*",
+        "iiRootOrNullFlavor": true
+      },
+      {
+        "id": "Observation.interpretationCode",
+        "path": "cda:interpretationCode",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*",
+        "binding": "http://hl7.org/cda/stds/core/ValueSet/CDAObservationInterpretation",
+        "members": [
+          {
+            "code": "B",
+            "system": "2.16.840.1.113883.5.83"
+          },
+          {
+            "code": "D",
+            "system": "2.16.840.1.113883.5.83"
+          },
+          {
+            "code": "U",
+            "system": "2.16.840.1.113883.5.83"
+          },
+          {
+            "code": "W",
+            "system": "2.16.840.1.113883.5.83"
+          },
+          {
+            "code": "<",
+            "system": "2.16.840.1.113883.5.83"
+          },
+          {
+            "code": ">",
+            "system": "2.16.840.1.113883.5.83"
+          },
+          {
+            "code": "A",
+            "system": "2.16.840.1.113883.5.83"
+          },
+          {
+            "code": "AA",
+            "system": "2.16.840.1.113883.5.83"
+          },
+          {
+            "code": "HH",
+            "system": "2.16.840.1.113883.5.83"
+          },
+          {
+            "code": "LL",
+            "system": "2.16.840.1.113883.5.83"
+          },
+          {
+            "code": "H",
+            "system": "2.16.840.1.113883.5.83"
+          },
+          {
+            "code": "L",
+            "system": "2.16.840.1.113883.5.83"
+          },
+          {
+            "code": "N",
+            "system": "2.16.840.1.113883.5.83"
+          },
+          {
+            "code": "I",
+            "system": "2.16.840.1.113883.5.83"
+          },
+          {
+            "code": "MS",
+            "system": "2.16.840.1.113883.5.83"
+          },
+          {
+            "code": "R",
+            "system": "2.16.840.1.113883.5.83"
+          },
+          {
+            "code": "S",
+            "system": "2.16.840.1.113883.5.83"
+          },
+          {
+            "code": "VS",
+            "system": "2.16.840.1.113883.5.83"
+          }
+        ],
+        "primitive": false
+      },
+      {
+        "id": "Observation.methodCode",
+        "path": "cda:methodCode",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Observation.targetSiteCode",
+        "path": "cda:targetSiteCode",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Observation.subject",
+        "path": "cda:subject",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Observation.specimen",
+        "path": "cda:specimen",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Observation.performer",
+        "path": "cda:performer",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Observation.author",
+        "path": "cda:author",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Observation.informant",
+        "path": "cda:informant",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Observation.participant",
+        "path": "cda:participant",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Observation.entryRelationship",
+        "path": "cda:entryRelationship",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Observation.reference",
+        "path": "cda:reference",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Observation.precondition",
+        "path": "cda:precondition",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Observation.sdtcPrecondition2",
+        "path": "sdtc:precondition2",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Observation.referenceRange",
+        "path": "cda:referenceRange",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Observation.referenceRange.nullFlavor",
+        "path": "cda:referenceRange/@nullFlavor",
+        "parent": "cda:referenceRange",
+        "attribute": true,
+        "min": 0,
+        "max": "1",
+        "binding": "http://hl7.org/cda/stds/core/ValueSet/CDANullFlavor",
+        "members": [
+          {
+            "code": "NP",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NI",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "MSK",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NA",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "OTH",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NINF",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "PINF",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "UNK",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NASK",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "TRC",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "ASKU",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NAV",
+            "system": "2.16.840.1.113883.5.1008"
+          }
+        ],
+        "primitive": true
+      },
+      {
+        "id": "Observation.referenceRange.realmCode",
+        "path": "cda:referenceRange/cda:realmCode",
+        "parent": "cda:referenceRange",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Observation.referenceRange.typeId",
+        "path": "cda:referenceRange/cda:typeId",
+        "parent": "cda:referenceRange",
+        "attribute": false,
+        "min": 0,
+        "max": "1",
+        "iiRootOrNullFlavor": true
+      },
+      {
+        "id": "Observation.referenceRange.typeId.nullFlavor",
+        "path": "cda:referenceRange/cda:typeId/@nullFlavor",
+        "parent": "cda:referenceRange/cda:typeId",
+        "attribute": true,
+        "min": 0,
+        "max": "1",
+        "binding": "http://hl7.org/cda/stds/core/ValueSet/CDANullFlavor",
+        "members": [
+          {
+            "code": "NP",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NI",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "MSK",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NA",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "OTH",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NINF",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "PINF",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "UNK",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NASK",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "TRC",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "ASKU",
+            "system": "2.16.840.1.113883.5.1008"
+          },
+          {
+            "code": "NAV",
+            "system": "2.16.840.1.113883.5.1008"
+          }
+        ],
+        "primitive": true
+      },
+      {
+        "id": "Observation.referenceRange.typeId.assigningAuthorityName",
+        "path": "cda:referenceRange/cda:typeId/@assigningAuthorityName",
+        "parent": "cda:referenceRange/cda:typeId",
+        "attribute": true,
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Observation.referenceRange.typeId.displayable",
+        "path": "cda:referenceRange/cda:typeId/@displayable",
+        "parent": "cda:referenceRange/cda:typeId",
+        "attribute": true,
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Observation.referenceRange.typeId.root",
+        "path": "cda:referenceRange/cda:typeId/@root",
+        "parent": "cda:referenceRange/cda:typeId",
+        "attribute": true,
+        "min": 1,
+        "max": "1",
+        "fixed": "2.16.840.1.113883.1.3"
+      },
+      {
+        "id": "Observation.referenceRange.typeId.extension",
+        "path": "cda:referenceRange/cda:typeId/@extension",
+        "parent": "cda:referenceRange/cda:typeId",
+        "attribute": true,
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Observation.referenceRange.templateId",
+        "path": "cda:referenceRange/cda:templateId",
+        "parent": "cda:referenceRange",
+        "attribute": false,
+        "min": 0,
+        "max": "*",
+        "iiRootOrNullFlavor": true
+      },
+      {
+        "id": "Observation.referenceRange.typeCode",
+        "path": "cda:referenceRange/@typeCode",
+        "parent": "cda:referenceRange",
+        "attribute": true,
+        "min": 0,
+        "max": "1",
+        "fixed": "REFV"
+      },
+      {
+        "id": "Observation.referenceRange.observationRange",
+        "path": "cda:referenceRange/cda:observationRange",
+        "parent": "cda:referenceRange",
+        "attribute": false,
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Observation.sdtcInFulfillmentOf1",
+        "path": "sdtc:inFulfillmentOf1",
+        "parent": ".",
+        "attribute": false,
+        "min": 0,
+        "max": "*"
+      }
+    ]
+  }
+}

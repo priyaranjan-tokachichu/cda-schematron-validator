@@ -24,10 +24,10 @@
     },
     "language": {
       "file": "language-subtag-registry.txt",
-      "sha256": "755fad43283be7b41ebe3c89ad054b6eaf928f404f9c0edb74799e0eab74beb1",
+      "sha256": "8ac4e58567593c96e9e6d66e2017dbb8d3953dbcb42fe32ecd3b3fccdfdaba7b",
       "extensionsFile": "language-tag-extensions-registry.txt",
       "extensionsSha256": "fdf7764455c493c245a9b3b5b9cd3938391f0637302c3e943fde86aee652e376",
-      "version": "2026-09-17",
+      "version": "2026-11-18",
       "source": "https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry",
       "extensionsSource": "https://www.iana.org/assignments/language-tag-extensions-registry/language-tag-extensions-registry"
     }
