@@ -1,6 +1,6 @@
 {
   "openapi": "3.1.0",
-  "info": {"title": "CDA Validator API", "version": "2.0.0-preview.2", "description": "Stateless local CDA XML validation. Documents are not persisted or logged. Results apply to the selected, pinned profile and its disclosed coverage. A 200 response does not mean that a document is valid."},
+  "info": {"title": "CDA Validator API", "version": "2.0.0", "description": "Stateless local CDA XML validation. Documents are not persisted or logged. Results apply to the selected, pinned profile and its disclosed coverage. A 200 response does not mean that a document is valid."},
   "servers": [{"url": "/"}],
   "paths": {
     "/v1/validate": {"post": {
@@ -27,7 +27,7 @@
       }
     }},
     "/v1/profiles": {"get": {"operationId": "listProfiles", "summary": "List pinned profiles, source checksums, and coverage limitations", "security": [{"bearerAuth": []}, {}], "responses": {"200": {"description": "Profile and source manifest"}, "401": {"description": "Authentication required"}}}},
-    "/v1/version": {"get": {"operationId": "getVersion", "summary": "Application and engine versions", "security": [{"bearerAuth": []}, {}], "responses": {"200": {"description": "Version metadata"}}}},
+    "/v1/version": {"get": {"operationId": "getVersion", "summary": "Application, engine and actual Java runtime versions", "security": [{"bearerAuth": []}, {}], "responses": {"200": {"description": "Version metadata"}}}},
     "/health/live": {"get": {"operationId": "liveness", "summary": "Process liveness", "responses": {"200": {"description": "Live"}}}},
     "/health/ready": {"get": {"operationId": "readiness", "summary": "Profiles compiled and ready", "responses": {"200": {"description": "Ready; includes loaded profile count"}}}}
   },
@@ -42,10 +42,11 @@
         "line": {"type": "integer", "minimum": 1}, "column": {"type": "integer", "minimum": 1},
         "xpath": {"type": "string"}, "context": {"type": ["string", "null"]}, "test": {"type": "string"}
       }},
-      "Report": {"type": "object", "required": ["requestId", "status", "validationComplete", "executionComplete", "truncated", "summary", "findings", "stages", "profile", "engine", "durationMs", "validatedAt"], "properties": {
+      "Report": {"type": "object", "required": ["requestId", "status", "validationComplete", "validationScope", "executionComplete", "truncated", "summary", "findings", "stages", "profile", "engine", "durationMs", "validatedAt"], "properties": {
         "requestId": {"type": "string", "format": "uuid"},
         "status": {"type": "string", "enum": ["valid", "invalid", "incomplete"]},
-        "validationComplete": {"type": "boolean", "description": "All configured stages completed, no truncation, and no recorded upstream conversion gaps. Not a claim of clinical correctness or universal terminology conformance."},
+        "validationComplete": {"type": "boolean", "description": "Configured stages completed, a supported document template matched, no truncation, reviewed generator replacements, and determinate applicable checks. Not a claim of clinical correctness or universal terminology conformance."},
+        "validationScope": {"type": "string", "description": "Pinned XSD/Schematron pipeline and reviewed supplements; not full FHIR or clinical certification"},
         "executionComplete": {"type": "boolean", "description": "Configured engine stages completed and findings were not truncated"},
         "truncated": {"type": "boolean"}, "summary": {"type": "object"},
         "findings": {"type": "array", "items": {"$ref": "#/components/schemas/Finding"}},

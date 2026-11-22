@@ -4,6 +4,8 @@ services:
     image: cda-validator:local
     ports:
       - "127.0.0.1:${CDA_VALIDATOR_PORT:-17643}:17643"
+    volumes:
+      - "${CDA_TERMINOLOGY_DIR:-./terminology}:/app/terminology:ro"
     environment:
       VALIDATION_WORKERS: "2"
       JAVA_TOOL_OPTIONS: "${VALIDATOR_JAVA_OPTIONS:-}"

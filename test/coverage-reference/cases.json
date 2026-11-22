@@ -1,0 +1,83 @@
+[
+  {
+    "case": "name-valid",
+    "rule": "81-9371",
+    "expectedFailure": false
+  },
+  {
+    "case": "name-missing-family",
+    "rule": "81-9371",
+    "expectedFailure": true
+  },
+  {
+    "case": "name-invalid-token",
+    "rule": "81-9371",
+    "expectedFailure": true
+  },
+  {
+    "case": "date-future",
+    "rule": "ts-value-before-document",
+    "expectedFailure": true,
+    "highExpectedFailure": true
+  },
+  {
+    "case": "date-offset-before",
+    "rule": "ts-value-before-document",
+    "expectedFailure": true,
+    "highExpectedFailure": false
+  },
+  {
+    "case": "date-offset-after",
+    "rule": "ts-value-before-document",
+    "expectedFailure": true,
+    "highExpectedFailure": false
+  },
+  {
+    "case": "date-unknown",
+    "rule": "ts-value-before-document",
+    "expectedFailure": null,
+    "highExpectedFailure": false
+  },
+  {
+    "case": "careplan-addresses-act",
+    "review": "Base CDA profile in a type union does not require an invented templateId"
+  },
+  {
+    "case": "careplan-addresses-observation",
+    "review": "Base CDA profile in a type union does not require an invented templateId"
+  },
+  {
+    "case": "careplan-activity-act",
+    "review": "Base CDA profile in a type union does not require an invented templateId"
+  },
+  {
+    "case": "careplan-act-code-missing",
+    "serviceRuleSuffix": "Act-code-cardinality",
+    "expectedFailure": true,
+    "referenceTarget": "Base CDA child constraint"
+  },
+  {
+    "case": "careplan-observation-code-missing",
+    "serviceRuleSuffix": "Observation-code-cardinality",
+    "expectedFailure": true,
+    "referenceTarget": "Base CDA child constraint"
+  },
+  {
+    "case": "careplan-activity-code-missing",
+    "serviceRuleSuffix": "Act-code-cardinality",
+    "expectedFailure": true,
+    "referenceTarget": "Base CDA child constraint"
+  },
+  {
+    "case": "careplan-act-id-missing",
+    "serviceRuleSuffix": "Act-id-II-1",
+    "expectedFailure": true,
+    "referenceTarget": "Base CDA child constraint"
+  },
+  {
+    "case": "careplan-act-typeid-wrong",
+    "serviceRuleSuffix": "Act-typeId-root-fixed",
+    "expectedFailure": true,
+    "referenceTarget": "Base CDA child constraint"
+  }
+]

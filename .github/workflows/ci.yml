@@ -48,13 +48,14 @@ jobs:
       - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: '25.0.5.1+2'
           cache: maven
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.13'
-      - run: python3 -m unittest discover -s test -p 'test_svs_import.py'
+      - run: python3 -m unittest discover -s test -p 'test_*.py'
       - run: python3 scripts/prepare-assets.py
       - run: mvn -B -f service/pom.xml verify
       - run: docker build --tag cda-validator:test .
+      - run: python3 scripts/check-java-runtime.py --image cda-validator:test
       - run: python3 scripts/check-upload-memory.py --image cda-validator:test

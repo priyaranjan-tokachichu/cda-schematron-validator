@@ -1,26 +1,50 @@
-# C-CDA 5.0 coverage remediation
+# C-CDA 5.0 validation coverage
 
-[← Architecture](architecture.md) · [Official HL7 validation guidance](https://hl7.org/cda/us/ccda/5.0.0/validation.html)
+[← Architecture](architecture.md) · [Operator setup](terminology.md) · [HL7 validation guidance](https://hl7.org/cda/us/ccda/5.0.0/validation.html)
 
-This inventory is derived from the checksum-pinned `2026JUL/CCDA-5.0-Results.json`. It records unresolved upstream omissions, not completed fixes. The full report is also exposed as `generationReport` in profile metadata. `generationCoverage` counts individual entries rather than reason categories.
+The service validates the **pinned CDA XSD and C-CDA Schematron, with reviewed local supplements**. It does not implement general FHIR StructureDefinition validation or clinical certification. Every report states its `validationScope`.
 
-**Current totals:** 4 generation errors, 6 unhandled invariants in 4 categories, and 28 non-loaded value-set entries in 9 categories. Counts overlap: an expansion failure can also cause an invariant omission. Do not add these counts together as independent missing rules.
+## Completion has a precise meaning
 
-The earlier summary of 4 invariants and 9 value sets counted categories and understated the omissions. This preview corrects the accounting; it does not turn missing checks into passes.
+- `executionComplete`: the configured engine stages finished without a failure.
+- `validationComplete`: execution finished, a supported document-level template matched, findings were not truncated, the pinned generator omissions have reviewed replacements, and no applicable check was indeterminate.
+- `status`: `valid` requires complete validation and no errors. An error makes the document `invalid`, even if coverage is also incomplete. No errors with incomplete coverage gives `incomplete`.
 
-## Local person-name check (follow-up to preview.1)
+A completed invalid report is possible: all applicable checks ran and found errors. Completion describes the selected pipeline, not every possible CDA/FHIR or clinical constraint.
 
-The local `81-9371` supplement reuses all 11 assertions in the pinned patient-name Schematron profile at the person-name locations, with the permitted plain-text alternative. List-valued use and qualifier attributes are checked token by token against complete vocabulary codes. This adds the missing given/family cardinality, suffix, use, qualifier, and mixed-content checks at those locations. The existing `81-9372` prohibition on mixing text and name parts still runs.
+Missing data produces a coverage finding **where a document needs that data**, including preferred bindings when warnings are hidden. Unrelated absent optional bindings do not make every document incomplete. The dataset inventory remains separate: an installation without NUBC is not data-ready even if a document that never uses that binding completes.
 
-The check is layered onto the in-memory compilation input. Original downloaded files and the upstream generation report remain unchanged. Profile metadata lists the added rule in `supplementalChecks`; the application still reports incomplete C-CDA 5.0 coverage. This is reuse of the pinned Schematron constraints, not a general FHIR `conformsTo()` implementation.
+## Reviewed replacements for the pinned generation report
 
-Tests exercise valid fielded names, plain strings, null flavors, missing/duplicate name parts, multiple suffixes, invalid use/qualifier values, mixed content, and rejection of an unexpected upstream profile layout. This change is separate from the published preview.1 artifact and requires review before inclusion in a later release.
+The unchanged upstream report lists **4 generation errors, 6 unhandled invariants and 28 non-loaded value-set entries**. Entries overlap. `generationReport` and `generationCoverage` preserve this historical evidence. `effectiveCoverage` accounts for the replacements; the report SHA-256 must match the reviewed release. A new upstream report requires review and cannot automatically inherit completion.
 
-## Local procedure checks and recovered data
+| Original omission | Implemented replacement |
+| --- | --- |
+| Person name `81-9371` | Reuse all 11 pinned patient-name assertions at the relevant name locations, including the permitted plain-text alternative. List-valued use/qualifier attributes are checked token by token. |
+| Procedure `1198-8487`, `1198-8511` | Exact SNOMED CT Procedure membership and the original alternative code systems. Missing or indeterminate membership produces coverage findings. |
+| Two procedure timestamps | Calendar and timezone comparisons with conservative handling of insufficient precision. Unknown comparisons remain coverage findings. |
+| Location `shall-use-one-binding` | Three-set union: one known member establishes membership; all known nonmembers fail; an unresolved union is incomplete. |
+| ActPriority expansion | Reviewed callback hierarchy and admission-urgency union from pinned HL7 terminology definitions. |
+| Three CarePlanAct unions | Authoritative alternatives include the unprofiled base CDA Act or Observation, so no templateId is invented. 103 scoped assertions restore base-root cardinalities, fixed values, required bindings and II constraints, alongside XSD and narrower template rules. |
+| Catalog binding omissions | Runtime checks at every recorded binding location. Required bindings are errors; preferred/extensible bindings retain warning severity. Missing data is always disclosed. |
 
-The optional [offline terminology adapter](terminology.md) restores `1198-8487` and `1198-8511` when a reviewed Procedure snapshot is installed. It checks exact SNOMED CT code/system membership and preserves the original alternative code systems. Other recovered expansions are not counted as implemented binding checks simply because their data are now available.
+CarePlan base checks are generated reproducibly from checksum-recorded CDA Core 2.0.3-sd, C-CDA 5.0.0 and HL7 Terminology 7.1.0 definitions. This is a scoped supplement, not a general `conformsTo()` implementation. See the embedded [model receipts](../service/src/main/resources/coverage/careplan-base.json).
 
-## Rule-conversion work
+## Terminology and conservative boundaries
+
+The verified local operator pack contains **29 snapshots, 1,013,055 membership entries, 28 active indexes and two grammars**. It enables all six supplements and the catalog checks listed in current [verification evidence](../reports/coverage-progress.json). Data stays outside Git, npm and public images.
+
+US Core condition and procedure sets are derived from the authorized UMLS 2026AB archive and LOINC Complete 2.83. SNOMED ancestry uses source-asserted AUI hierarchy paths, not UMLS concept similarity. The 62,110-member Procedure hierarchy exactly matches the independently acquired VSAC snapshot. US Core condition has 262,583 pairs; procedure has 274,743. Source editions are exposed, including **CDT 2025**, not an invented newer edition.
+
+The only remaining absent canonical in that local inventory is **NUBC patient discharge status**. Operators must provide an authorized complete expansion; no scraped substitute is distributed. Missing applicable data prevents completion. See [setup](terminology.md).
+
+Other explicit boundaries prevent false passes: unsupported SNOMED expressions, standalone CPT/HCPCS modifiers, mismatched declared code-system editions, ambiguous scalar vocabulary values, excessive grammar complexity, and unvalidated BCP 47 extension semantics are indeterminate. UCUM expressions use a pinned grammar; language tags use the November 18, 2026 IANA registry. Whole finite-code strings use exact membership, not substring matching.
+
+## Independent checks
+
+[Reference evidence](../reports/reference-comparison.json) records targeted comparisons against HL7 FHIR Validator 7.0.6, including negative CarePlan base constraints. Both validators run locally. Reference terminology is disabled, so this establishes neither terminology equivalence nor full-model equivalence. Broad FHIR slicing comparisons remain inconclusive without matching terminology and are recorded as such; they are not counted as passing comparisons.
+
+## Historical conversion inventory
 
 | Invariant | Template | Why omitted | Required fix and verification |
 | --- | --- | --- | --- |
@@ -38,7 +62,7 @@ The optional [offline terminology adapter](terminology.md) restores `1198-8487` 
 - CarePlanAct: Profile http://hl7.org/cda/stds/core/StructureDefinition/Act does not have an identifier
 - Failed to expand value set v3-ActPriority: Unable to expand dependent value set http://terminology.hl7.org/ValueSet/v3-ActPriorityCallback
 
-CarePlanAct profile-reference errors need comparison against the authoritative StructureDefinitions before adding any rule. A base CDA class without a template identifier cannot safely be assigned an invented templateId. ActPriority requires its dependent callback value-set definition and a complete expansion.
+The reviewed replacements above address this pinned report. Its original entries remain here for audit; they are not a claim that the omissions remain unimplemented.
 
 ## Terminology work
 
@@ -111,14 +135,8 @@ Locate the canonical value-set definition in the pinned guide/dependencies and o
 
 - `http://hl7.org/cda/us/ccda/ValueSet/CMSPlaceOfServiceCodes`
 
-## Acceptance criteria for closing a gap
+## Update and release policy
 
-1. Trace the fix to a pinned official definition, terminology edition, or precisely identified invariant. Preserve the original upstream report and record local additions separately.
-2. Add positive and negative examples that exercise the missing constraint, including nullFlavor, absent data, and relevant boundary cases. Compare against an independent reference where feasible.
-3. Verify vocabulary completeness, provenance, permissions, and checksum. An unavailable external source remains an explicit unresolved gap.
-4. Run both profiles, legacy compatibility, memory/concurrency tests, and compile/startup benchmarks.
-5. Only remove an omission from the effective coverage summary after its replacement check and evidence exist. Do not clear the upstream report or force `validationComplete` to true.
+Preserve source identities, editions, checksums and the historical generator report when updating. Re-run positive/negative rules, legacy compatibility, encoded/decoded limits, constrained-heap concurrency and startup/performance checks. New omission categories must be reviewed before effective coverage can be complete.
 
-## Release policy
-
-Version 2 is a preview while this coverage work is unresolved. C-CDA 2.1 remains available with its bundled vocabulary snapshot. The stable npm default stays 1.1.12 until a separately authorized stable release. The preview is explicitly selected with `@next`.
+Version 2.0.0 is the stable line for this bounded validation pipeline. It does not claim full FHIR or clinical certification. Older integrations can explicitly select 1.1.12; immutable preview artifacts remain available under their versioned identifiers.

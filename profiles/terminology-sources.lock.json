@@ -1,0 +1,47 @@
+{
+  "sources": [
+    {
+      "id": "hl7.terminology.r5",
+      "version": "7.1.0",
+      "url": "https://packages2.fhir.org/packages/hl7.terminology.r5/7.1.0",
+      "file": "hl7.terminology.r5-7.1.0.tgz",
+      "sha256": "473303108b5607aad7b910581739e8bbf3e61a625ed9e739c66e0ca597d4aefe"
+    },
+    {
+      "id": "us.cdc.phinvads",
+      "version": "0.12.0",
+      "url": "https://packages2.fhir.org/packages/us.cdc.phinvads/0.12.0",
+      "file": "us.cdc.phinvads-0.12.0.tgz",
+      "sha256": "cf565971a6bcca3193de4d7ff71f5c443fc4e00adaeef8c88416d21c778e3a3f"
+    }
+  ],
+  "grammars": {
+    "ucum": {
+      "file": "ucum-essence.xml",
+      "sha256": "dfccea1b5dc284245ebae97edd1dc03c45864da4e87df55bc9851797b4fd0b61",
+      "version": "2.2",
+      "source": "https://raw.githubusercontent.com/FHIR/Ucum-java/10089515484cdfd291fa6d2b74b989f60d12fcb3/src/main/resources/ucum-essence.xml"
+    },
+    "language": {
+      "file": "language-subtag-registry.txt",
+      "sha256": "8ac4e58567593c96e9e6d66e2017dbb8d3953dbcb42fe32ecd3b3fccdfdaba7b",
+      "extensionsFile": "language-tag-extensions-registry.txt",
+      "extensionsSha256": "fdf7764455c493c245a9b3b5b9cd3938391f0637302c3e943fde86aee652e376",
+      "version": "2026-11-18",
+      "source": "https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry",
+      "extensionsSource": "https://www.iana.org/assignments/language-tag-extensions-registry/language-tag-extensions-registry"
+    }
+  },
+  "loincDocumentTypes": {
+    "version": "2.83",
+    "file": "Loinc_2.83.zip",
+    "sha256": "077a0718e87d8309ffe3a673f75b836a8e783dc36a646413ef97c71c12eab27e",
+    "md5": "057ddf203164705d5a4c3604257060a4",
+    "source": "https://loinc.org/downloads/",
+    "tableRows": 112405,
+    "documentCodes": 12569,
+    "valueSetVersion": "9.0.0",
+    "definitionSha256": "4c954d918e833aae8234af45853a779ec886e1932fddf4205532358dc8959620",
+    "canonical": "http://hl7.org/fhir/us/core/ValueSet/us-core-documentreference-type"
+  }
+}

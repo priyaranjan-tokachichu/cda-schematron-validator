@@ -77,12 +77,14 @@ public final class Server implements AutoCloseable {
                     case "/health/live" -> json(exchange, 200, Map.of("status", "live"));
                     case "/health/ready" -> json(exchange, 200, Map.of("status", "ready", "profiles", engine.profiles.size()));
                     case "/v1/profiles" -> json(exchange, 200, Map.of("profiles", engine.profileInfo(), "sources", engine.manifest.get("sources"), "limits", Map.of("maxXmlBytes", ValidationEngine.MAX_BYTES, "maxRequestBytes", MAX_REQUEST_BYTES, "uploadMemoryBudgetBytes", 1024L * uploadBudgetKiB, "maxConcurrentUploads", Math.min(workers.getMaximumPoolSize() * 3, uploadBudgetKiB / uploadReservationKiB), "requestCapacity", workers.getMaximumPoolSize() * 3, "uploadQueueWaitSeconds", UPLOAD_QUEUE_SECONDS)));
-                    case "/v1/version" -> json(exchange, 200, Map.of("version", "2.0.0-preview.2", "engine", "Saxon-HE 12.9 / SchXslt 1.10.1"));
+                    case "/v1/version" -> json(exchange, 200, Map.of("version", "2.0.0", "engine", "Saxon-HE 12.9 / SchXslt 1.10.1", "javaVersion", System.getProperty("java.version"), "javaRuntimeVersion", System.getProperty("java.runtime.version"), "javaVendor", System.getProperty("java.vendor")));
                     case "/", "/index.html" -> file(exchange, "index.html", "text/html; charset=utf-8");
                     case "/app.js" -> file(exchange, "app.js", "text/javascript; charset=utf-8");
                     case "/style.css" -> file(exchange, "style.css", "text/css; charset=utf-8");
+                    case "/setup.css" -> file(exchange, "setup.css", "text/css; charset=utf-8");
                     case "/openapi.json" -> file(exchange, "openapi.json", "application/json; charset=utf-8");
                     case "/architecture.html" -> file(exchange, "architecture.html", "text/html; charset=utf-8");
+                    case "/terminology.html" -> file(exchange, "terminology.html", "text/html; charset=utf-8");
                     case "/sample.xml" -> file(exchange, "sample.xml", "application/xml; charset=utf-8");
                     default -> json(exchange, 404, Map.of("error", "Route not found"));
                 }

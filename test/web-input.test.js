@@ -87,3 +87,13 @@ test('profile details distinguish active checks from imported terminology data',
   text = w.get('limitations').children.map(node => node.textContent).join('\n');
   assert.match(text, /0 active snapshot\(s\), 2 imported/);
 });
+
+test('profile details distinguish missing terminology from installed rule coverage', async () => {
+  const w = await workspace();
+  w.get('profile').value = 'ccda-5.0';
+  w.run("profiles = [{id:'ccda-5.0',release:'2026JUL',limitations:[],terminologySetup:{ready:false,missingValueSets:['https://example.test/vs']},supplementalBindingChecks:12}]; profileChanged();");
+  const text = w.get('limitations').children.map(node => node.textContent).join('\n');
+  assert.match(text, /Terminology setup required: 1 dataset/);
+  assert.match(text, /Installed data and implemented rule coverage are reported separately/);
+  assert.match(text, /Additional terminology binding checks installed: 12/);
+});

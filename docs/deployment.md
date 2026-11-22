@@ -2,6 +2,8 @@
 
 [← Project home](../README.md) · [API reference](api.md) · [Architecture](architecture.md)
 
+Version 2.0.0 mounts operator terminology separately using `CDA_TERMINOLOGY_DIR` (Compose) or `TERMINOLOGY_DIR` (JVM). New public images omit the mixed-license C-CDA 2.1 vocabulary; install an authorized pinned copy using the [setup guide](terminology.md) before using that profile’s Schematron checks. Existing published preview.2 images are unchanged.
+
 ## Run locally
 
 ```sh
@@ -15,16 +17,27 @@ docker compose logs validator
 docker compose down
 ```
 
-The owner-triggered release workflow publishes versioned AMD64/ARM64 images for `ghcr.io/priyaranjan-tokachichu/cda-schematron-validator`, with SBOM and provenance. A merge alone does not publish an image. The version 2 image is `ghcr.io/priyaranjan-tokachichu/cda-schematron-validator:v2.0.0-preview.1`.
+The owner-triggered release workflow publishes versioned AMD64/ARM64 images for `ghcr.io/priyaranjan-tokachichu/cda-schematron-validator`, with SBOM and provenance. A merge alone does not publish an image. The versioned stable image is `ghcr.io/priyaranjan-tokachichu/cda-schematron-validator:v2.0.0`. Existing preview images do not acquire the new runtime pins automatically.
 
-Run the published image directly:
+Run the versioned image directly:
 
 ```sh
 docker run -d --name cda-validator --memory=1536m --cpus=2 \
   --read-only --tmpfs /tmp:size=64m,noexec,nosuid \
   --cap-drop=ALL --security-opt=no-new-privileges --pids-limit=128 \
   -p 127.0.0.1:17643:17643 \
-  ghcr.io/priyaranjan-tokachichu/cda-schematron-validator:v2.0.0-preview.1
+  ghcr.io/priyaranjan-tokachichu/cda-schematron-validator:v2.0.0
+```
+
+## Patched Java runtime
+
+Build and runtime images are digest-pinned to **Eclipse Temurin 25.0.5.1+2 LTS** on AMD64 and ARM64. This includes the November fix for [CVE-2026-114938](https://adoptium.net/es/news/2026/11/temurin-november-2026-cspu-java4shell). Java 27 is the newer feature line; its official image had mixed patch levels across architectures when reviewed. The selected LTS is the latest patched LTS for both supported targets, not a claim that 25 is the latest feature release.
+
+`profiles/runtime.lock.json` records the exact versions and digests. CI checks the built runtime; the upstream watch flags a newer LTS release for review. `GET /v1/version` exposes the actual running JVM version and vendor. Published older previews do not acquire the fix automatically; rebuilding and releasing the pinned image is required. A local source build requires JDK 25.
+
+```sh
+python3 scripts/check-java-runtime.py --image cda-validator:coverage-followup
+python3 scripts/check-java-runtime.py --upstream
 ```
 
 ## Configuration
@@ -80,6 +93,8 @@ VALIDATOR_MEMORY_LIMIT=3g VALIDATOR_JAVA_OPTIONS=-Xmx2g docker compose up -d
 The image otherwise uses `-XX:MaxRAMPercentage=70`, so heap sizing follows the container memory limit. Leave room outside the heap for native memory, threads, and the JVM. More heap permits more concurrent large uploads; it does not independently guarantee faster rule execution. CPU, worker count, and document complexity also matter.
 
 To change the worker count, use a Compose override or your deployment manifest; the checked-in Compose file sets it explicitly. Scale stateless replicas behind a gateway when appropriate.
+
+The full local pack contains over one million membership entries. Startup estimates index memory before loading and fails clearly when the selected heap is too small. Keep at least the tested 1 GiB heap / 1.5 GiB container budget for that pack; raise both for larger packs or more concurrency.
 
 ## Other operational limits
 

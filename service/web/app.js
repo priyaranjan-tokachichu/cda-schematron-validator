@@ -19,12 +19,19 @@ function profileChanged() {
   const p = profiles.find((p) => p.id === $('profile').value);
   if (!p) return;
   $('profile-release').textContent = `Pinned release ${p.release} · CDA schema 20260205_SDTC`;
-  const details = [...p.limitations];
+  const details = p.limitations.map(text => p.effectiveCoverage ? text.replace(/^Upstream generation report:/, 'Historical upstream generation report:') : text);
+  if(p.effectiveCoverage) details.push(p.effectiveCoverage.knownGeneratorGapsAddressed ? 'Reviewed replacement checks address the pinned generator omissions. Completion is evaluated for the checks applicable to this document.' : 'Unreviewed generator omissions remain; this profile cannot report complete validation.');
+  if(p.carePlanBaseChecks) details.push(`CarePlan base-profile constraints installed: ${p.carePlanBaseChecks.assertions}.`);
   if (p.supplementalChecks?.length) details.push(`Additional checks installed: ${p.supplementalChecks.map(check => check.ruleId).join(', ')}. Other profile limitations still apply.`);
   if (p.terminologySnapshots?.length) {
     const active = p.terminologySnapshots.filter(snapshot => snapshot.activeForValidation === true);
     details.push(`Local terminology: ${active.length} active snapshot(s), ${p.terminologySnapshots.length} imported. Imported data alone does not establish complete validation coverage.`);
   }
+  if(p.terminologySetup && !p.terminologySetup.ready) {
+    const missing=[...(p.terminologySetup.missingValueSets||[]),...(p.terminologySetup.missingDatasets||[])];
+    details.push(`Terminology setup required: ${missing.length} dataset(s) missing. Installed data and implemented rule coverage are reported separately. A document is incomplete only when an applicable check needs unavailable data or cannot be determined. See the setup guide for the missing dataset names.`);
+  }
+  if(p.supplementalBindingChecks) details.push(`Additional terminology binding checks installed: ${p.supplementalBindingChecks}.`);
   $('limitations').replaceChildren(...details.map((text) => { const li = document.createElement('li'); li.textContent = text; return li; }));
 }
 async function connect() {
@@ -80,6 +87,7 @@ function renderReport(report) {
   banner.append(intro, stats); $('report').append(banner);
   const stages = element('div', 'stage-list'); for (const stage of report.stages) stages.append(element('span', '', `${stage.status === 'completed' ? '✓' : '○'} ${stage.name.toUpperCase()} · ${stage.status}`)); $('report').append(stages);
   if (!report.validationComplete) { const alert = element('div', 'coverage-alert', report.truncated ? 'The finding limit was reached. This report is partial.' : 'Validation is incomplete. Review stage results and the selected profile’s coverage limitations; this report does not establish full conformance.'); $('report').append(alert); }
+  if(report.validationScope) $('report').append(element('p', 'report-scope', report.validationScope));
   const actions = element('div', 'report-actions'), list = element('div', 'findings');
   for (const [id, title] of [['all', 'All findings'], ['error', 'Errors'], ['warning', 'Warnings']]) { const button = element('button', `filter ${id === 'all' ? 'selected' : ''}`, title); button.setAttribute('aria-pressed', id === 'all'); button.onclick = () => { selectedFilter = id; for (const b of actions.querySelectorAll('.filter')) { b.classList.toggle('selected', b === button); b.setAttribute('aria-pressed', b === button); } renderFindings(list); }; actions.append(button); }
   const download = element('button', 'text-button', 'Download JSON ↓'); download.onclick = () => { const url = URL.createObjectURL(new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' })); const a = element('a'); a.href = url; a.download = 'validation-report.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); }; actions.append(download); $('report').append(actions, list); renderFindings(list);

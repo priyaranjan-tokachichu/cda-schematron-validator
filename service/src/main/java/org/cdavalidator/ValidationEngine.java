@@ -44,6 +44,9 @@ public final class ValidationEngine {
     record Profile(JsonObject info, Schema schema, XsltExecutable stylesheet, XPathExecutable documentTemplate) {}
 
     public ValidationEngine(Path directory) throws Exception {
+        this(directory,Path.of(System.getenv().getOrDefault("TERMINOLOGY_DIR",directory.resolve("terminology").toString())));
+    }
+    ValidationEngine(Path directory,Path terminologyDirectory) throws Exception {
         assets = directory.toRealPath();
         processor.getUnderlyingConfiguration().setErrorReporterFactory(configuration -> error -> { });
         processor.getUnderlyingConfiguration().setLogger(new net.sf.saxon.lib.StandardLogger(new PrintStream(OutputStream.nullOutputStream())));
@@ -83,8 +86,14 @@ public final class ValidationEngine {
             } catch (Exception ignored) { }
             throw new net.sf.saxon.trans.XPathException("External resource access denied");
         });
-        var terminology = TerminologySnapshots.load(assets);
+        boolean ccda5=false;
+        for(var profile:manifest.getAsJsonArray("profiles"))if("ccda-5.0".equals(profile.getAsJsonObject().get("id").getAsString()))ccda5=true;
+        var coverageCatalog=ccda5?CoverageCatalog.load(assets):CoverageCatalog.empty();
+        var snapshotCanonicals=new HashSet<>(coverageCatalog.required);snapshotCanonicals.removeAll(GrammarChecks.CANONICALS);
+        var terminology = TerminologySnapshots.loadDirectory(terminologyDirectory,snapshotCanonicals);
+        var grammar=GrammarChecks.load(terminologyDirectory);grammar.register(processor);
         terminology.register(processor);
+        CdaTimestamp.register(processor);
         var compiler = processor.newXsltCompiler();
         var pipeline = compiler.compile(new StreamSource(compilerURL.toString()));
         var schemaFactory = SchemaFactory.newDefaultInstance();
@@ -95,6 +104,21 @@ public final class ValidationEngine {
         Map<Path, Schema> schemas = new HashMap<>();
         for (var item : manifest.getAsJsonArray("profiles")) {
             var info = item.getAsJsonObject();
+            if(info.has("operatorVocabulary")) {
+                var expected=info.getAsJsonObject("operatorVocabulary");
+                Path local=terminologyDirectory.resolve(expected.get("file").getAsString());
+                boolean ready=Files.isRegularFile(local);
+                if(ready) {
+                    Path file=local.toRealPath();
+                    if(!file.startsWith(terminologyDirectory.toRealPath()) || Files.size(file)>150L*1024*1024)throw new IOException("Invalid operator vocabulary path or size");
+                    var digest=java.security.MessageDigest.getInstance("SHA-256");
+                    try(var input=new java.security.DigestInputStream(Files.newInputStream(file),digest)){input.transferTo(OutputStream.nullOutputStream());}
+                    if(!HexFormat.of().formatHex(digest.digest()).equals(expected.get("sha256").getAsString()))throw new IOException("Operator vocabulary does not match the pinned release");
+                    vocabularyCache.put(asset("ccda-2.1/voc.xml"),processor.newDocumentBuilder().build(new StreamSource(file.toFile())));
+                }
+                var setup=new JsonObject();setup.addProperty("ready",ready);setup.addProperty("setupGuide","/terminology.html");
+                var missing=new JsonArray();if(!ready)missing.add("Authorized pinned C-CDA 2.1 vocabulary (contains CPT)");setup.add("missingDatasets",missing);info.add("terminologySetup",setup);
+            }
             Path sch = asset(info.get("schematron").getAsString());
             Path xsd = asset(info.get("schema").getAsString());
             Schema schema = schemas.get(xsd);
@@ -105,13 +129,23 @@ public final class ValidationEngine {
             var doc = trustedSchematron(sch);
             if (info.get("id").getAsString().equals("ccda-5.0")) {
                 SupplementalRules.addPersonNameInvariant(doc);
+                SupplementalRules.addTimestampInvariants(doc);
                 var supplement = new JsonObject();
                 supplement.addProperty("ruleId", SupplementalRules.NAME_INVARIANT);
                 supplement.addProperty("method", "Reapply all pinned patient-name Schematron constraints at person-name locations, with the permitted plain-text alternative");
                 supplement.addProperty("scope", "Pinned Schematron profile; not a general FHIR conformsTo implementation");
                 var supplements = new JsonArray(); supplements.add(supplement);
+                for(String id:List.of("active-high-ts-after-document","ts-value-before-document")) {
+                    var check=new JsonObject();check.addProperty("ruleId",id);
+                    check.addProperty("method","Precision-aware CDA timestamp comparison with explicit incomplete coverage for indeterminate comparisons");
+                    check.addProperty("scope","ProcedureActivityProcedure; document time, effectiveTime value/low and active high");supplements.add(check);
+                }
                 info.add("supplementalChecks", supplements);
-                if (terminology.members.containsKey(TerminologySnapshots.PROCEDURE)) {
+                info.add("terminologySetup",coverageCatalog.readiness(terminology,grammar));
+                info.add("grammarDefinitions",grammar.metadata.deepCopy());
+                info.addProperty("supplementalBindingChecks",coverageCatalog.addBindings(doc,terminology,grammar));
+                info.add("carePlanBaseChecks",CarePlanRules.add(doc));
+                {
                     SupplementalRules.addProcedureInvariants(doc);
                     for (String id : List.of("1198-8487", "1198-8511")) {
                         var check = new JsonObject(); check.addProperty("ruleId", id);
@@ -119,7 +153,13 @@ public final class ValidationEngine {
                         check.addProperty("scope", "Pinned invariant and local terminology edition"); supplements.add(check);
                     }
                 }
+                {
+                    SupplementalRules.addLocationInvariant(doc);
+                    var check=new JsonObject();check.addProperty("ruleId","shall-use-one-binding");check.addProperty("method","Exact code/system membership in the union of three installed location value sets");check.addProperty("scope","ServiceDeliveryLocation code");supplements.add(check);
+                }
                 if (!terminology.metadata.isEmpty()) info.add("terminologySnapshots", terminology.metadata.deepCopy());
+                info.addProperty("vocabularyAssertionsNormalized",VocabularyAssertions.normalize(doc));
+                info.add("effectiveCoverage",CoverageRemediation.review(assets,info.getAsJsonObject("generationReport"),coverageCatalog));
             }
             var destination = new XdmDestination();
             var transform = pipeline.load();
@@ -278,6 +318,11 @@ public final class ValidationEngine {
             stages.add(Map.of("name", "xsd", "status", "incomplete"));
         }
         var collector = new SvrlCollector(document, findings, includeWarnings);
+        if(profile.info.has("operatorVocabulary") && !profile.info.getAsJsonObject("terminologySetup").get("ready").getAsBoolean()) {
+            findings.add(finding("warning","coverage","Install the authorized pinned C-CDA 2.1 vocabulary before running its Schematron checks. See /terminology.html.","terminology-setup-required",null,null));
+            stages.add(Map.of("name","schematron","status","not-run","reason","terminology-setup-required"));
+            return report(profile,findings,stages,false,false,start,0,includeWarnings);
+        }
         try {
             var transformer = profile.stylesheet.load();
             // Don't allow Saxon diagnostics to log submitted XML or document values.
@@ -320,11 +365,12 @@ public final class ValidationEngine {
             if(local.equals("text")) inText=true;
             if(!local.equals("failed-assert")&&!local.equals("successful-report"))return;
             String role=a.getValue("role");
-            String severity=role!=null&&(role.contains("warn")||role.equals("info"))?"warning":"error";
-            if(!warnings&&severity.equals("warning")){current=null;return;}
+            boolean coverage="coverage".equals(role);
+            String severity=coverage||role!=null&&(role.contains("warn")||role.equals("info"))?"warning":"error";
+            if(!warnings&&severity.equals("warning")&&!coverage){current=null;return;}
             if(findings.size()>=MAX_FINDINGS){truncated=true;throw new SAXException("Finding limit reached");}
             String location=a.getValue("location");
-            current=finding(severity,"schematron","",a.getValue("id"),location,a.getValue("test"));
+            current=finding(severity,coverage?"coverage":"schematron","",a.getValue("id"),location,a.getValue("test"));
             current.put("patternId",pattern);current.put("context",context);
             if(location!=null){int line=lines.computeIfAbsent(location,path->findLine(document,path));if(line>0)current.put("line",line);}
             message=new StringBuilder();
@@ -360,12 +406,14 @@ public final class ValidationEngine {
         long errors = findings.stream().filter(f -> f.get("severity").equals("error")).count();
         long warnings = findings.stream().filter(f -> f.get("severity").equals("warning")).count();
         boolean coverageComplete = !profile.info.has("generationCoverage") || profile.info.getAsJsonObject("generationCoverage").entrySet().stream().allMatch(e -> e.getValue().getAsInt() == 0);
+        if(profile.info.has("effectiveCoverage"))coverageComplete=profile.info.getAsJsonObject("effectiveCoverage").get("knownGeneratorGapsAddressed").getAsBoolean();
         boolean complete = executed && coverageComplete && !truncated && findings.stream().noneMatch(f -> "coverage".equals(f.get("stage")));
         var result = new LinkedHashMap<String, Object>();
         result.put("requestId", UUID.randomUUID().toString());
-        result.put("applicationVersion", "2.0.0-preview.2");
+        result.put("applicationVersion", "2.0.0");
         result.put("status", errors > 0 ? "invalid" : complete ? "valid" : "incomplete");
         result.put("validationComplete", complete);
+        result.put("validationScope", "Selected pinned XSD/Schematron profile and reviewed supplements; not full FHIR StructureDefinition validation or clinical certification");
         result.put("executionComplete", executed && !truncated);
         result.put("truncated", truncated);
         result.put("options", Map.of("includeWarnings",includeWarnings));

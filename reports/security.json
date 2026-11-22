@@ -1,0 +1,86 @@
+{
+  "verifiedAt": "2026-11-21T22:17:16.048497+00:00",
+  "tool": "Trivy 0.76.2",
+  "scannerImage": "ghcr.io/aquasecurity/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb",
+  "scope": "OS packages and Java dependencies, HIGH/CRITICAL only. Runtime patch verified separately against the official Adoptium advisory. Point-in-time evidence, not complete vulnerability certification.",
+  "vulnerabilityDatabase": {
+    "db": {
+      "Version": 2,
+      "NextUpdate": "2026-11-22T18:38:32.889609211Z",
+      "UpdatedAt": "2026-11-21T18:38:32.889609542Z",
+      "DownloadedAt": "2026-11-21T21:47:42.05964201Z"
+    },
+    "java-db": {
+      "Version": 1,
+      "NextUpdate": "2026-11-24T00:58:42.067416193Z",
+      "UpdatedAt": "2026-11-21T00:58:42.067416724Z",
+      "DownloadedAt": "2026-11-21T21:48:07.018788591Z"
+    }
+  },
+  "images": [
+    {
+      "architecture": "linux/arm64",
+      "imageIndexDigest": "sha256:51b17c19a3d75d363f24cb734e5fe8c3e9c6bcf7b298fd86281f4bc99d509210",
+      "scannedImageConfigDigest": "sha256:9bdf1e000bc3f6e98cf3cfe108e7c918c34ee3c3cf6ea280eb3b721705651fbb",
+      "archiveSha256": "c16329c114162a08e68760444fce92d6b34d43104336b419001b5ce5d01d24f6",
+      "scanSha256": "2fb0802cfc55e6abbb15f5038f47103ecbc61bf813fb6b9a36f70f336e98baa7",
+      "runtime": {
+        "image": "cda-validator:coverage-followup",
+        "platform": "linux/arm64",
+        "javaVersion": "25.0.5.1",
+        "runtimeVersion": "25.0.5.1+2-LTS",
+        "vendor": "Eclipse Adoptium"
+      },
+      "highCriticalFindings": 0,
+      "targets": [
+        {
+          "target": "/scan/final-arm64-image.tar (ubuntu 24.04)",
+          "type": "ubuntu",
+          "highCriticalFindings": 0
+        },
+        {
+          "target": "Java",
+          "type": "jar",
+          "highCriticalFindings": 0
+        }
+      ]
+    },
+    {
+      "architecture": "linux/amd64",
+      "imageIndexDigest": "sha256:03739d83bf899b450264113c3b3be1a9994acbaaef595952cf8965ec4027fabe",
+      "scannedImageConfigDigest": "sha256:4b035832441d1b6a7ad40733cad4bca3a204bfea9389ce6a47117e9370f8d821",
+      "archiveSha256": "1525a7902d704bee518fb3cba78158076c4f994f0e3907a14df8df19228d94f9",
+      "scanSha256": "0f4e0db983a37705daa5c367fd21566c15c8bb94ed264ea09a53498d9ccb9836",
+      "runtime": {
+        "image": "cda-validator:coverage-amd64",
+        "platform": "linux/amd64",
+        "javaVersion": "25.0.5.1",
+        "runtimeVersion": "25.0.5.1+2-LTS",
+        "vendor": "Eclipse Adoptium"
+      },
+      "highCriticalFindings": 0,
+      "targets": [
+        {
+          "target": "/scan/final-amd64-image.tar (ubuntu 24.04)",
+          "type": "ubuntu",
+          "highCriticalFindings": 0
+        },
+        {
+          "target": "Java",
+          "type": "jar",
+          "highCriticalFindings": 0
+        }
+      ]
+    }
+  ],
+  "publicImageOperatorDataExcluded": true,
+  "npmAuditProductionVulnerabilities": 0,
+  "npmDryRun": {
+    "version": "2.0.0",
+    "files": 34,
+    "bytes": 41315,
+    "operatorDataExcluded": true
+  },
+  "runtimeLock": "profiles/runtime.lock.json",
+  "advisory": "https://adoptium.net/es/news/2026/11/temurin-november-2026-cspu-java4shell"
+}

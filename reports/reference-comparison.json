@@ -1,0 +1,145 @@
+{
+  "verifiedAt": "2026-11-21T22:07:39.149562+00:00",
+  "reference": "HL7 FHIR Validator 7.0.6",
+  "referenceSha256": "2686590539f0b3ba7683149b25d78249f6886c04e2c326e884c5049d8947df89",
+  "referenceResultsSha256": "42820ef213255240365b630b90b3a6149c33f795f14abe4a42d120ed6ff277eb",
+  "profile": "hl7.cda.us.ccda#5.0.0",
+  "terminology": "Reference uses -tx n/a. No terminology or complete model-equivalence claim.",
+  "scope": "Targeted constraint comparisons on intentionally incomplete synthetic documents; unrelated whole-document findings are excluded.",
+  "broadComparison": "A separate full-CCD FHIR comparison with terminology disabled produced memberOf and slicing errors. It is inconclusive without equivalent terminology and is not counted as a pass or full-model equivalence.",
+  "cases": [
+    {
+      "case": "name-valid",
+      "rule": "81-9371",
+      "expectedFailure": false,
+      "inputSha256": "247ca3db090dcb93342f93de0008151be7fc986d5f0f2f7ec8e4619c757f102e",
+      "referenceFailure": false,
+      "serviceFailure": false,
+      "serviceReportsIndeterminateCoverage": false
+    },
+    {
+      "case": "name-missing-family",
+      "rule": "81-9371",
+      "expectedFailure": true,
+      "inputSha256": "7ee8935e381bb6ad41acc4906d515af6f7c67470225a0b782c3a61a0e1382f2c",
+      "referenceFailure": true,
+      "serviceFailure": true,
+      "serviceReportsIndeterminateCoverage": false
+    },
+    {
+      "case": "name-invalid-token",
+      "rule": "81-9371",
+      "expectedFailure": true,
+      "inputSha256": "c9f9328ba25bc2ca095197ad1ea7b574fb057ef45db7fa153d2978ac6a2e4da5",
+      "referenceFailure": true,
+      "serviceFailure": true,
+      "serviceReportsIndeterminateCoverage": false
+    },
+    {
+      "case": "date-future",
+      "rule": "ts-value-before-document",
+      "expectedFailure": true,
+      "highExpectedFailure": true,
+      "inputSha256": "2dcab0c54d019030466cfc2dc1b9df5ec3029477d167ad5ae4739c2fef022460",
+      "referenceFailure": true,
+      "serviceFailure": true,
+      "serviceReportsIndeterminateCoverage": false
+    },
+    {
+      "case": "date-offset-before",
+      "rule": "ts-value-before-document",
+      "expectedFailure": true,
+      "highExpectedFailure": false,
+      "inputSha256": "62dcffde92611b3aec0623228e69710a13f2c1b4a257617754b346ddb69b5f6b",
+      "referenceFailure": true,
+      "serviceFailure": true,
+      "serviceReportsIndeterminateCoverage": false
+    },
+    {
+      "case": "date-offset-after",
+      "rule": "ts-value-before-document",
+      "expectedFailure": true,
+      "highExpectedFailure": false,
+      "inputSha256": "6a3a6d6d14cd16a9d0aab31b4eb7cef25e89d72e359c8285278040446f851028",
+      "referenceFailure": true,
+      "serviceFailure": true,
+      "serviceReportsIndeterminateCoverage": false
+    },
+    {
+      "case": "date-unknown",
+      "rule": "ts-value-before-document",
+      "expectedFailure": null,
+      "highExpectedFailure": false,
+      "inputSha256": "c56968542d0ab2e51341ed48727882bc29655c3efc9a4992a4fbfcd88687abf0",
+      "referenceFailure": false,
+      "serviceFailure": false,
+      "serviceReportsIndeterminateCoverage": true
+    },
+    {
+      "case": "careplan-addresses-act",
+      "review": "Base CDA profile in a type union does not require an invented templateId",
+      "inputSha256": "35d6750398495ec8cf0a31694715082a3f8d81fbaeeed877a1c832530636f08e",
+      "serviceBaseChildFailure": false,
+      "referenceBaseChildFailure": false
+    },
+    {
+      "case": "careplan-addresses-observation",
+      "review": "Base CDA profile in a type union does not require an invented templateId",
+      "inputSha256": "d3acdb948e40de72e0b979fab4f52cb644feb49daa3caaa8ecea3e7fda3ad2a4",
+      "serviceBaseChildFailure": false,
+      "referenceBaseChildFailure": false
+    },
+    {
+      "case": "careplan-activity-act",
+      "review": "Base CDA profile in a type union does not require an invented templateId",
+      "inputSha256": "9acd5436f746f2950be4edbddf656b0fc02c7a3aefb7321491c667f989e0fc75",
+      "serviceBaseChildFailure": false,
+      "referenceBaseChildFailure": false
+    },
+    {
+      "case": "careplan-act-code-missing",
+      "serviceRuleSuffix": "Act-code-cardinality",
+      "expectedFailure": true,
+      "referenceTarget": "Base CDA child constraint",
+      "inputSha256": "90894d67ae764c36ebb28619f83ab0a54453b378770aecf656ae2204e5fa1344",
+      "referenceFailure": true,
+      "serviceFailure": true
+    },
+    {
+      "case": "careplan-observation-code-missing",
+      "serviceRuleSuffix": "Observation-code-cardinality",
+      "expectedFailure": true,
+      "referenceTarget": "Base CDA child constraint",
+      "inputSha256": "b608dee1f563eacdffae861095a3754e2cae7262134e1d343590ea499ef9b75e",
+      "referenceFailure": true,
+      "serviceFailure": true
+    },
+    {
+      "case": "careplan-activity-code-missing",
+      "serviceRuleSuffix": "Act-code-cardinality",
+      "expectedFailure": true,
+      "referenceTarget": "Base CDA child constraint",
+      "inputSha256": "505cbd4f06dfa5fa059afa1e3862e4de24ea16128493abe7054a47c58263ccf7",
+      "referenceFailure": true,
+      "serviceFailure": true
+    },
+    {
+      "case": "careplan-act-id-missing",
+      "serviceRuleSuffix": "Act-id-II-1",
+      "expectedFailure": true,
+      "referenceTarget": "Base CDA child constraint",
+      "inputSha256": "bd6c388c4e0f6f4dceb8e6de82616cb5801d42ea0f542aa373d40e45f24b5c08",
+      "referenceFailure": true,
+      "serviceFailure": true
+    },
+    {
+      "case": "careplan-act-typeid-wrong",
+      "serviceRuleSuffix": "Act-typeId-root-fixed",
+      "expectedFailure": true,
+      "referenceTarget": "Base CDA child constraint",
+      "inputSha256": "e3f53c52e66cb71b3280ad945b37ab068c0432b60fdab6da0d84f39ffe660fd7",
+      "referenceFailure": true,
+      "serviceFailure": true
+    }
+  ]
+}

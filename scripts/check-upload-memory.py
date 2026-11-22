@@ -15,6 +15,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--image', default='cda-validator:local')
 parser.add_argument('--output', default='reports/upload-memory.json')
 parser.add_argument('--assets-dir', help='Optional local asset bundle including private terminology; mounted read-only')
+parser.add_argument('--terminology-dir', help='Optional operator terminology folder; mounted read-only separately from application assets')
 args = parser.parse_args()
 root = Path(__file__).resolve().parent.parent
 name = 'validator-upload-regression-' + uuid.uuid4().hex[:8]
@@ -27,6 +28,8 @@ try:
         '-e', 'JAVA_TOOL_OPTIONS=-Xmx1g', '-e', 'MAX_XML_MIB=20',
         '-p', '127.0.0.1::17643',
         *(['--mount', 'type=bind,source=' + str(Path(args.assets_dir).resolve()) + ',target=/app/assets,readonly'] if args.assets_dir else []),
+        *(['-e', 'TERMINOLOGY_DIR=/app/assets/terminology'] if args.assets_dir and not args.terminology_dir else []),
+        *(['--mount', 'type=bind,source=' + str(Path(args.terminology_dir).resolve()) + ',target=/app/terminology,readonly'] if args.terminology_dir else []),
         args.image], text=True).strip()
     inspection = json.loads(subprocess.check_output(['docker', 'inspect', container], text=True))[0]
     port = inspection['NetworkSettings']['Ports']['17643/tcp'][0]['HostPort']

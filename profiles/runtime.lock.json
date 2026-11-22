@@ -1,0 +1,15 @@
+{
+  "javaFeature": 25,
+  "javaVersion": "25.0.5.1",
+  "javaBuild": 2,
+  "release": "jdk-25.0.5.1+2",
+  "vendor": "Eclipse Adoptium",
+  "runtimeImage": "eclipse-temurin:25.0.5.1_2-jre-noble@sha256:f3dd0838e69b881cc382237d5901e74ae3705b1056ad964b2e0e523b174fef99",
+  "buildImage": "maven:3.9.16-eclipse-temurin-25-noble@sha256:93b8a14ea2f412782e4e842651273b4d903e35cc496284f178fbbe2d67d00976",
+  "addresses": [
+    "CVE-2026-114938"
+  ],
+  "advisory": "https://adoptium.net/es/news/2026/11/temurin-november-2026-cspu-java4shell",
+  "latestFeatureRelease": "27.0.1.1+4",
+  "selectionReason": "Latest patched LTS for both linux/amd64 and linux/arm64; the Java 27 container index still includes an older ARM64 binary as of 2026-11-21."
+}
