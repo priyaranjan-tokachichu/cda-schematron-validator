@@ -1,6 +1,6 @@
-# 2.0.0 stable release candidate — unreleased
+# 2.0.0 stable release
 
-This candidate is proposed in PR #53. It has not been published. npm `latest` remains 1.1.12 and `next` remains 2.0.0-preview.2 until the owner authorizes release.
+Version 2.0.0 is the stable release line prepared in PR #53. The npm package is published under `latest`; container images use the immutable version tag `v2.0.0`. Earlier preview artifacts remain unchanged.
 
 ## What version 2 provides
 
@@ -32,6 +32,6 @@ The verified local pack has 29 snapshots / 1,013,055 membership entries, 28 acti
 
 Six concurrent maximum-size uploads complete in both framing modes with the full local pack on a 1 GiB heap. Health remains available and no retries are needed for admitted uploads. Current [evidence](../reports/coverage-progress.json), [image scan](../reports/security.json) and [HTML report](../reports/architecture.html) record the exact scope and results.
 
-## Publication sequence after approval
+## Release publication
 
-Merge the reviewed PR through GitHub, publish versioned AMD64/ARM64 container artifacts from that commit, publish npm 2.0.0 with the `latest` tag, then verify public install, image startup and runtime metadata. Keep immutable preview artifacts intact. npm may require its separate per-publication authentication.
+Release publication merges the owner-authorized PR through GitHub, publishes versioned AMD64/ARM64 container artifacts from that commit, publishes npm 2.0.0 with the `latest` tag, then verifies public install, image startup and runtime metadata. Keep immutable preview artifacts intact. npm may require its separate per-publication authentication.

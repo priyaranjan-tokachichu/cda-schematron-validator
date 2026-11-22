@@ -139,4 +139,4 @@ Locate the canonical value-set definition in the pinned guide/dependencies and o
 
 Preserve source identities, editions, checksums and the historical generator report when updating. Re-run positive/negative rules, legacy compatibility, encoded/decoded limits, constrained-heap concurrency and startup/performance checks. New omission categories must be reviewed before effective coverage can be complete.
 
-Published preview.2 is unchanged. The current work is reviewed through PR #53; the stable npm default stays 1.1.12 until an owner-authorized stable release. A stable version may describe this bounded validation pipeline without claiming full FHIR or clinical certification.
+Version 2.0.0 is the stable line for this bounded validation pipeline. It does not claim full FHIR or clinical certification. Older integrations can explicitly select 1.1.12; immutable preview artifacts remain available under their versioned identifiers.

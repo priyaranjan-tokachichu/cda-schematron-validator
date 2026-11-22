@@ -98,10 +98,10 @@ Admitted uploads queue fairly for up to 30 seconds while waiting for memory. Val
 
 ## Node client and CLI
 
-Requires Node 22.12+. Install the version 2 preview:
+Requires Node 22.12+. Install the stable version 2 package:
 
 ```sh
-npm install cda-schematron-validator@next
+npm install cda-schematron-validator
 ```
 
 ```javascript

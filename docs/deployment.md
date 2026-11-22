@@ -2,7 +2,7 @@
 
 [← Project home](../README.md) · [API reference](api.md) · [Architecture](architecture.md)
 
-This unreleased checkout mounts operator terminology separately using `CDA_TERMINOLOGY_DIR` (Compose) or `TERMINOLOGY_DIR` (JVM). New public images omit the mixed-license C-CDA 2.1 vocabulary; install an authorized pinned copy using the [setup guide](terminology.md) before using that profile’s Schematron checks. Existing published preview.2 images are unchanged.
+Version 2.0.0 mounts operator terminology separately using `CDA_TERMINOLOGY_DIR` (Compose) or `TERMINOLOGY_DIR` (JVM). New public images omit the mixed-license C-CDA 2.1 vocabulary; install an authorized pinned copy using the [setup guide](terminology.md) before using that profile’s Schematron checks. Existing published preview.2 images are unchanged.
 
 ## Run locally
 
@@ -17,17 +17,16 @@ docker compose logs validator
 docker compose down
 ```
 
-The owner-triggered release workflow publishes versioned AMD64/ARM64 images for `ghcr.io/priyaranjan-tokachichu/cda-schematron-validator`, with SBOM and provenance. A merge alone does not publish an image. The patched `v2.0.0` image is a release candidate and is not published yet. Existing preview images do not contain these new runtime pins. Build this checkout to use the patched candidate now.
+The owner-triggered release workflow publishes versioned AMD64/ARM64 images for `ghcr.io/priyaranjan-tokachichu/cda-schematron-validator`, with SBOM and provenance. A merge alone does not publish an image. The versioned stable image is `ghcr.io/priyaranjan-tokachichu/cda-schematron-validator:v2.0.0`. Existing preview images do not acquire the new runtime pins automatically.
 
-Build and run the candidate directly:
+Run the versioned image directly:
 
 ```sh
-docker build -t cda-validator:local .
 docker run -d --name cda-validator --memory=1536m --cpus=2 \
   --read-only --tmpfs /tmp:size=64m,noexec,nosuid \
   --cap-drop=ALL --security-opt=no-new-privileges --pids-limit=128 \
   -p 127.0.0.1:17643:17643 \
-  cda-validator:local
+  ghcr.io/priyaranjan-tokachichu/cda-schematron-validator:v2.0.0
 ```
 
 ## Patched Java runtime

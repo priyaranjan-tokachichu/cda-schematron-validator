@@ -17,7 +17,7 @@
 ---
 
 > [!NOTE]
-> **Unreleased 2.0.0 stable candidate (PR #53).** The container provides the validation API and browser UI. npm retains legacy APIs plus a typed HTTP client and CLI (Node 22.12+). Published `@next` remains preview.2 and npm’s stable default remains 1.1.12 until this candidate is reviewed, merged and released. Its stated scope is pinned XSD/Schematron with reviewed supplements; full FHIR model validation and clinical certification are outside that scope. See [coverage](docs/coverage.md) and the [release notes](https://github.com/priyaranjan-tokachichu/cda-schematron-validator/releases).
+> **Version 2.0.0.** The container provides the validation API and browser UI. npm retains legacy APIs plus a typed HTTP client and CLI (Node 22.12+). Install the stable package without a preview tag. The validation scope is pinned XSD/Schematron with reviewed supplements; full FHIR model validation and clinical certification are outside that scope. See [coverage](docs/coverage.md) and the [release notes](https://github.com/priyaranjan-tokachichu/cda-schematron-validator/releases/tag/v2.0.0).
 
 <table>
 <tr>
@@ -30,7 +30,7 @@
 </tr>
 </table>
 
-> **Unreleased PR #53 update:** Patched Temurin 25.0.5.1+2 LTS addresses the November Java vulnerability on AMD64 and ARM64. New images built from this checkout exclude the mixed-license C-CDA 2.1 vocabulary. Install your authorized pinned copy before using that profile’s Schematron checks. C-CDA 5.0 uses operator-supplied expansions and grammar definitions; the doctor lists missing datasets. Published preview.2 is unchanged. See [terminology setup](docs/terminology.md).
+> **Runtime and terminology setup:** Patched Temurin 25.0.5.1+2 LTS addresses the November Java vulnerability on AMD64 and ARM64. New images built from this checkout exclude the mixed-license C-CDA 2.1 vocabulary. Install your authorized pinned copy before using that profile’s Schematron checks. C-CDA 5.0 uses operator-supplied expansions and grammar definitions; the doctor lists missing datasets. See [terminology setup](docs/terminology.md).
 
 ## Quick start
 
@@ -132,7 +132,7 @@ curl http://localhost:17643/v1/validate \
 Install the package into your Node project:
 
 ```sh
-npm install cda-schematron-validator@next
+npm install cda-schematron-validator
 ```
 
 ```javascript

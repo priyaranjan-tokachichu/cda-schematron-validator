@@ -1,5 +1,5 @@
 {
-  "state": "Unreleased PR #53 candidate; published preview.2 and npm tags unchanged",
+  "state": "Verification evidence for version 2.0.0; artifact availability is recorded on the GitHub release page.",
   "verifiedAt": "2026-11-21T22:08:26.928662+00:00",
   "javascriptTests": 65,
   "javaTests": 45,
@@ -104,7 +104,7 @@
     "scripts/prepare-public-terminology.py": "c3ea6013684187a002da58a5701e1365ef4504655e775bd193af1322731db4ed",
     "scripts/prepare-assets.py": "6a1bdc5337ec99b196a8c5f68fcb4f9e528cea4a651e4757299dc02e9c0b6520",
     "scripts/import-svs.py": "f3f5aba549fbbb08a415eff698805814cda6d4ebabd68279895c894ff6affce8",
-    "scripts/build-report.py": "47e4119d3b809b272a7539e0235f39783a8872158a590a02b7fd501788da69c5",
+    "scripts/build-report.py": "c163f488afe82ff0a7de47610b631f31edb568e00d8c9f39e17d71a211eb6026",
     "scripts/check-reference.py": "7969250387710b62fd36d5a0aaefe92d8a2efb026aa993fb2f3894c1fe11f4e6",
     "scripts/import-loinc.py": "38d5363da2e73596e2b8da82c07d8131fcef414b06c814d94b3fd74d57c754a8",
     "scripts/check-upload-memory.py": "12db57d779424c64ee2eec615262ed48abb996b53636a4f2643a8ed863ca705f",

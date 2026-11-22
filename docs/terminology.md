@@ -2,7 +2,7 @@
 
 [← Coverage inventory](coverage.md) · [Deployment](deployment.md)
 
-This checkout adds **unreleased** coverage and packaging changes after `2.0.0-preview.2`. Existing published images are unchanged. New public images omit the entire mixed-license C-CDA 2.1 `voc.xml`, which contains CPT entries. The service can start and show the UI without it; C-CDA 2.1 schema checks run, and its Schematron stage explicitly reports setup required until an authorized pinned vocabulary is installed. The legacy npm API remains compatible and accepts caller-supplied validation resources.
+Version 2.0.0 adds coverage and packaging changes after `2.0.0-preview.2`. Older published images are unchanged. New public images omit the entire mixed-license C-CDA 2.1 `voc.xml`, which contains CPT entries. The service can start and show the UI without it; C-CDA 2.1 schema checks run, and its Schematron stage explicitly reports setup required until an authorized pinned vocabulary is installed. The legacy npm API remains compatible and accepts caller-supplied validation resources.
 
 ## Licensing and source selection
 
