@@ -1,5 +1,5 @@
 # Pinned runtime lines; update intentionally and run the conformance tests before release.
-FROM python:3.13-slim-bookworm@sha256:a5a7017efc5969e00ae2b91c8eb0631049a569652aa4ffc4501769049ae45c72 AS assets
+FROM --platform=$BUILDPLATFORM python:3.13-slim-bookworm@sha256:a5a7017efc5969e00ae2b91c8eb0631049a569652aa4ffc4501769049ae45c72 AS assets
 WORKDIR /build
 COPY profiles profiles
 COPY scripts/prepare-assets.py scripts/prepare-assets.py
@@ -9,7 +9,9 @@ FROM assets AS public-assets
 COPY scripts/package-public-assets.py scripts/package-public-assets.py
 RUN python3 scripts/package-public-assets.py service/assets
 
-FROM maven:3.9.16-eclipse-temurin-25-noble@sha256:93b8a14ea2f412782e4e842651273b4d903e35cc496284f178fbbe2d67d00976 AS build
+# The application and its dependencies are portable Java. Compile and test once
+# on the builder CPU; only the final JRE layers vary by target architecture.
+FROM --platform=$BUILDPLATFORM maven:3.9.16-eclipse-temurin-25-noble@sha256:93b8a14ea2f412782e4e842651273b4d903e35cc496284f178fbbe2d67d00976 AS build
 WORKDIR /build/service
 COPY service/pom.xml pom.xml
 RUN mvn -B -q dependency:go-offline
@@ -17,7 +19,7 @@ COPY service/src src
 COPY service/web web
 COPY --from=assets /build/service/assets assets
 COPY test/VitalSigns.xml /build/test/VitalSigns.xml
-RUN mvn -B -q package
+RUN mvn -B -ntp package
 
 FROM eclipse-temurin:25.0.5.1_2-jre-noble@sha256:f3dd0838e69b881cc382237d5901e74ae3705b1056ad964b2e0e523b174fef99 AS runtime
 WORKDIR /app
