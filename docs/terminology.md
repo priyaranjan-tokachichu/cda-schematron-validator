@@ -1,8 +1,136 @@
-# Operator-supplied terminology
+# Administrator-supplied terminology
 
 [← Coverage inventory](coverage.md) · [Deployment](deployment.md)
 
 Version 2.0.0 adds coverage and packaging changes after `2.0.0-preview.2`. Older published images are unchanged. New public images omit the entire mixed-license C-CDA 2.1 `voc.xml`, which contains CPT entries. The service can start and show the UI without it; C-CDA 2.1 schema checks run, and its Schematron stage explicitly reports setup required until an authorized pinned vocabulary is installed. The legacy npm API remains compatible and accepts caller-supplied validation resources.
+
+## Who is the operator?
+
+**Operator** means the person or organization that runs this validator: you on a personal computer, or the administrator/IT team responsible for a hosted installation. **Operator-supplied terminology** means terminology files that the administrator obtains from the source publisher and installs in the local `terminology` folder. It does not mean patient data, a clinician entering codes, or a separate commercial operator service.
+
+The application includes its validation rules and import/install tools. Public npm packages and final container images do not include the separately installed terminology pack. Download access and checksums do not establish permission to use or redistribute the underlying terminology; consult the applicable publisher terms for your deployment.
+
+## What was installed and validated locally?
+
+The recorded 2.0.0 verification used the pinned C-CDA 2.1 `voc.xml`, plus a local C-CDA 5.0 pack containing **29 snapshots / 1,013,055 membership entries**, **28 active indexes**, and **two grammars** (UCUM and language tags). The pack was assembled from 21 reviewed VSAC exports, four reviewed public HL7/CDC expansions, a HealthcareServiceLocation expansion, and three LOINC/UMLS-derived sets. Source editions include UMLS 2026AB, LOINC 2.83 and the editions listed [below](#prepare-us-core-condition-and-procedure-sets-from-umls).
+
+This was **not every terminology set**: NUBC patient discharge status was not installed. The pinned XSD/Schematron stages and reviewed supplements were exercised with local data, including concurrent maximum-size uploads. Individual documents can complete when they do not need missing data; an applicable missing NUBC check, unsupported expression or other indeterminate check prevents completion. Successful engine execution or an HTTP 200 response is not evidence that a document is valid.
+
+The recorded automated suite comprised 65 JavaScript, 45 Java and 17 Python tests. Fifteen targeted comparisons against HL7 FHIR Validator used **reference terminology disabled**; they do not prove complete terminology or StructureDefinition equivalence. See the dated [verification evidence](../reports/coverage-progress.json) and [reference comparison](../reports/reference-comparison.json). The local pack is not a downloadable project artifact.
+
+A [November 28, 2026 smoke check](../reports/terminology-setup-verification.json) of the published image confirmed that C-CDA 2.1 Schematron is skipped without the vocabulary and completes after installation (110 rules fired on `test/VitalSigns.xml`). Both stages also completed for the C-CDA 5.0 fixture with the local pack. The fixtures reported `invalid` with `validationComplete: true`: all applicable checks completed and found document errors. These are execution checks, not passing-document or clinical certification claims.
+
+## Choose your setup
+
+| Goal | Data to install | Result |
+| --- | --- | --- |
+| C-CDA 2.1 schema checks | No separate terminology | XSD runs; Schematron reports setup required until its vocabulary is installed. |
+| C-CDA 2.1 XSD and Schematron | The exact pinned HL7 2025SEP `voc.xml` | Both stages can run; terminology coverage remains limited to that upstream snapshot. |
+| Broader C-CDA 5.0 supplements and binding checks | The separate VSAC, HL7/CDC, LOINC/UMLS and grammar pack | Applicable installed checks run; missing NUBC or other required data still prevents completion. |
+
+The 29-snapshot C-CDA 5.0 pack is **not a prerequisite** for enabling C-CDA 2.1 Schematron. Start with the next section for that profile.
+
+## Get and install the C-CDA 2.1 vocabulary
+
+Prerequisites: Git, Python 3 and Docker. No host Java or Node is needed for these commands. After reviewing the source terms applicable to your use, obtain the **2025SEP** archive from the [official HL7 release](https://github.com/HL7/CDA-ccda-2.1/releases/tag/2025SEP). It is named `CDAR2_IG_CCDA_CLINNOTES_R1_DSTU2.1_2025SEP.zip` and contains `voc.xml`. A direct publisher download is available from that release; do not substitute a newer or edited vocabulary for the pinned file.
+
+The existing asset preparation command downloads the official pinned archives, checks their SHA-256 values against [the source lock](../profiles/sources.lock.json), and extracts the vocabulary locally:
+
+```sh
+git clone https://github.com/priyaranjan-tokachichu/cda-schematron-validator.git
+cd cda-schematron-validator
+python3 scripts/prepare-assets.py
+```
+
+The required file is now `service/assets/ccda-2.1/voc.xml`. This command prepares all three pinned validation-asset archives; it does **not** download the separate VSAC/UMLS/LOINC pack. The C-CDA 2.1 archive SHA-256 is `9c9a73294fbc4bea2c31e3650184609fa2d8894a848da6240c0916cd1e1c0d23`. If you download the ZIP manually, verify that checksum and extract its `voc.xml`, then use its absolute path in the input mount below.
+
+Install into your own terminology folder using the published application image:
+
+```sh
+IMAGE=ghcr.io/priyaranjan-tokachichu/cda-schematron-validator:v2.0.0
+docker pull "$IMAGE"
+mkdir -p terminology
+docker run --rm --network none --entrypoint java \
+  --user "$(id -u):$(id -g)" \
+  -v "$PWD/terminology:/app/terminology" \
+  -v "$PWD/service/assets/ccda-2.1/voc.xml:/input/voc.xml:ro" \
+  "$IMAGE" -cp /app/app.jar org.cdavalidator.TerminologyTool \
+  install-legacy /input/voc.xml
+```
+
+The installer checks the vocabulary checksum required by the image and writes `terminology/ccda-2.1-voc.xml`. An incorrect edition is rejected. The installation stays local; do not commit or publish the vocabulary or terminology folder.
+
+Start the service with that folder mounted read-only:
+
+```sh
+docker run --rm --read-only --tmpfs /tmp:size=64m,noexec,nosuid \
+  --memory=1536m -e JAVA_TOOL_OPTIONS=-Xmx1g \
+  -p 127.0.0.1:17643:17643 \
+  -v "$PWD/terminology:/app/terminology:ro" \
+  "$IMAGE"
+```
+
+Use an unused host port if 17643 is occupied, and use that same port in the following commands. In another terminal:
+
+```sh
+curl --fail --silent --show-error http://127.0.0.1:17643/v1/profiles
+```
+
+For profile `ccda-2.1`, check `terminologySetup.ready: true`. The `ccda-5.0` inventory can still report missing datasets; installing the legacy vocabulary alone does not make the other profile data-ready. The existing `doctor` command [below](#mount-diagnose-and-run) checks both profiles and can therefore still exit with code 2.
+
+Submit a local document with the C-CDA 2.1 profile (run from the repository folder):
+
+```sh
+python3 - <<'PYDOC' > /tmp/ccda-21-request.json
+import json
+from pathlib import Path
+print(json.dumps({"xml": Path("test/VitalSigns.xml").read_text(),
+                  "profile": "ccda-2.1", "includeWarnings": True}))
+PYDOC
+curl --fail --silent --show-error http://127.0.0.1:17643/v1/validate \
+  -H 'Content-Type: application/json' \
+  --data-binary @/tmp/ccda-21-request.json
+```
+
+`test/VitalSigns.xml` is a test fixture, not a guaranteed valid clinical document. Inspect `stages`, `executionComplete`, `validationComplete` and `status`; findings may be expected. Restart the service after changing terminology files.
+
+## Recreate the broader local terminology setup
+
+Use a checkout containing this guide and its checklists. Obtain restricted source downloads through your own publisher accounts; the project does not distribute the local pack or accept source terms for you.
+
+| Component | Where to obtain it | Local preparation |
+| --- | --- | --- |
+| 21 VSAC snapshots | [NLM VSAC](https://vsac.nlm.nih.gov/); search each OID in the [reviewed checklist](../profiles/terminology-svs-checklist.json), select the reviewed expansion and export complete SVS XML | Use `import-svs.py` with that checklist as shown below. Include retired sets referenced by the pinned guide after review. |
+| Four public HL7/CDC expansions and two grammars | Publisher URLs and hashes in [the terminology lock](../profiles/terminology-sources.lock.json) | `python3 scripts/prepare-public-terminology.py --download --grammars --output terminology` |
+| HealthcareServiceLocation union | Obtain a complete FHIR expansion of `http://terminology.hl7.org/ValueSet/v3-HealthcareServiceLocation`, definition version `4.0.0`, from your configured terminology service | Import with the [location checklist](../profiles/terminology-location-checklist.json) and [explicit system mappings](../profiles/terminology-location-systems.json), as shown below. |
+| LOINC document types | [LOINC Complete 2.83](https://loinc.org/downloads/) through your LOINC account | `python3 scripts/import-loinc.py --input /private/path/Loinc_2.83.zip --output terminology` |
+| US Core condition and procedure sets | [NLM UMLS downloads](https://www.nlm.nih.gov/research/umls/licensedcontent/umlsknowledgesources.html): the full **2026AB distribution archive**, plus LOINC Complete 2.83 | Use `import-umls.py` [below](#prepare-us-core-condition-and-procedure-sets-from-umls). Do not substitute a precomputed subset or individual RRF download; archive hashes must match the lock. |
+| NUBC discharge disposition | An authorized source providing the applicable complete, versioned expansion | Use the FHIR importer with your reviewed version, count and OID mappings. This dataset was **not** in the recorded local pack. |
+
+For the VSAC export collection:
+
+```sh
+python3 scripts/import-svs.py \
+  --input-glob '/private/path/RetrieveMultipleValueSets*.xml' \
+  --expected profiles/terminology-svs-checklist.json \
+  --output terminology
+```
+
+The checklist records the actual local counts, source hashes, normalized snapshot hashes and status. Its source-version label was `Latest` in those exports; it is **not an immutable release identifier**. A later export can differ. Counts alone do not establish identical membership: compare the imported snapshot hashes with the checklist for exact reproduction. Review changed editions/counts explicitly instead of editing the checklist merely to force an import to pass. No terminology codes or descriptions are included in these checklists.
+
+For the 274-member HealthcareServiceLocation expansion:
+
+```sh
+python3 scripts/import-fhir-terminology.py \
+  --input /private/path/healthcare-location.json \
+  --expected profiles/terminology-location-checklist.json \
+  --systems profiles/terminology-location-systems.json \
+  --output terminology
+```
+
+The two import commands preserve other installed expansions. The public-source preparation command uses the pinned source hashes; if a live grammar registry has changed and the pinned edition is unavailable, it stops rather than silently accepting newer bytes. Use a verified copy of that pinned edition or review and update the lock. After assembling the pack, mount it read-only, run `doctor`, and inspect each profile's missing-data inventory. A 29-snapshot count does not by itself prove matching membership or complete validation coverage.
+
+
 
 ## Licensing and source selection
 

@@ -1,0 +1,191 @@
+[
+  {
+    "oid": "2.16.840.1.113762.1.4.1010.2",
+    "expectedCount": 102714,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1010.2",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Active",
+    "sourceSha256": "4e9b74ba7f1f39563737e61bcb6277ecf7720819f6d3469c1f89a44b8f670fa4",
+    "snapshotSha256": "d3bd7bfa52c014b0b1b5ea1142b4a7d1bbdaac19d366f4c19f7378aa79aabe39"
+  },
+  {
+    "oid": "2.16.840.1.113762.1.4.1010.4",
+    "expectedCount": 79905,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1010.4",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Active",
+    "sourceSha256": "a9d98419b8cb0c37750796604acd537726004fc8e7c37294815d251bf234ba6a",
+    "snapshotSha256": "d43ea473c286260fb33186d434f256d8df53dd85ee4f6a6027365fb39058df3d"
+  },
+  {
+    "oid": "2.16.840.1.113762.1.4.1021.46",
+    "expectedCount": 4,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1021.46",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Retired",
+    "sourceSha256": "3931a10f0ce3cb7a2c8c2157b25cf29f12c9c9b0b593a79b61cd13c52d4fca8b",
+    "snapshotSha256": "c497a886ca574002f511427ba1c969b05f3cb93ec5f1ab898ae397d976cf7afc"
+  },
+  {
+    "oid": "2.16.840.1.113762.1.4.1021.47",
+    "expectedCount": 3,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1021.47",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Retired",
+    "sourceSha256": "cb727e8352e997f9eedf6e001ca9025533170a4ff55845d7a8140dd5879b2435",
+    "snapshotSha256": "93237cb744457b61185e26242ee155e3d2e253e1edb0f2331f6192bb53ca69f3"
+  },
+  {
+    "oid": "2.16.840.1.113762.1.4.1021.48",
+    "expectedCount": 5,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1021.48",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Active",
+    "sourceSha256": "6612215ad0473017267dbf34d0f3da78ab2a70de1f372a5454da394e99296fc9",
+    "snapshotSha256": "5e3cbaf64f8489cb1092fde78fb30fec5f9b24c245bb587eca26a6dada74e7bc"
+  },
+  {
+    "oid": "2.16.840.1.113762.1.4.1095.65",
+    "expectedCount": 455,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1095.65",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Active",
+    "sourceSha256": "42da85407ac156f0b552e1e149007213352132647284a95c89b88219d1016db6",
+    "snapshotSha256": "5ba2395ab5350b4cd15ad8af227f3f61b79a1986e480d25a0c2293390f29473d"
+  },
+  {
+    "oid": "2.16.840.1.113762.1.4.1099.54",
+    "expectedCount": 1887,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1099.54",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Active",
+    "sourceSha256": "681f942fb5edf42a8e3dda62a1ce192c92c82a7fc2d23cd73148eaa0c561565c",
+    "snapshotSha256": "5137b6a221de27946cad0e20a756ba4af85a8b71a239b73fc8fd0f951959158c"
+  },
+  {
+    "oid": "2.16.840.1.113762.1.4.1166.22",
+    "expectedCount": 4,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1166.22",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Active",
+    "sourceSha256": "4e2d80f28e26df76767f2ee78acf5f2a0107408d42a7ee5c182db4e0b7422df3",
+    "snapshotSha256": "9d6da0100223785c0e814ce41584415409ef701054a66082bf26c963c83b47f8"
+  },
+  {
+    "oid": "2.16.840.1.113762.1.4.1240.1",
+    "expectedCount": 1816,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1240.1",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Active",
+    "sourceSha256": "ddab5e6f7a649178dca0591ec367952c7e82048e66464f90bc89fc19c0e6b3d6",
+    "snapshotSha256": "f90b28f1f05754a1bf5edc0dac932aa9957be078939f7a646c22619d94beb97b"
+  },
+  {
+    "oid": "2.16.840.1.113762.1.4.1267.13",
+    "expectedCount": 16287,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1267.13",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Active",
+    "sourceSha256": "2bd388b56b4f57389ffdd21efea60dcbdbf6c9fc172de9a75516de30c9dab341",
+    "snapshotSha256": "3c79a5ec1cb1505b289bf5856d063849d284200d27ca897912a1654cfb18a521"
+  },
+  {
+    "oid": "2.16.840.1.113762.1.4.1267.25",
+    "expectedCount": 1273,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1267.25",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Active",
+    "sourceSha256": "0b5ac95585274d1a3767c166ec705b73c3100df677707e96a1f29bbdc3f64dd9",
+    "snapshotSha256": "268c89c65f3b3da4e7ad08d111a20ee68bdbd527e3891dc457d9dd975ab343c0"
+  },
+  {
+    "oid": "2.16.840.1.113762.1.4.1267.26",
+    "expectedCount": 352,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1267.26",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Active",
+    "sourceSha256": "0a823eb39fa087548b2fda213cfc713241b3d00a8212153e3b416219a3cad670",
+    "snapshotSha256": "0b2324f5119b046d4399015377df090675c13c1eee7b64ba7f29fce3372e3c7c"
+  },
+  {
+    "oid": "2.16.840.1.113762.1.4.1267.36",
+    "expectedCount": 13712,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1267.36",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Active",
+    "sourceSha256": "2693ec434421a8a964683a15e6683a7be63d458450d2e686f90ccb8d384bacb1",
+    "snapshotSha256": "0436a32d606089f52ac9ce6ebc25a6a27660ff632e9a7b06bd386b905a171ed4"
+  },
+  {
+    "oid": "2.16.840.1.113762.1.4.1267.43",
+    "expectedCount": 53366,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1267.43",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Active",
+    "sourceSha256": "d8c915b1aaa2690b0a926966d4585a12ca425c0e76d65fa3f21e0cc24452dc1f",
+    "snapshotSha256": "be3a951a60fece8a2dc9c4f213eb2a7738bc8eeef8bafea3c4dd89baa8aa33d3"
+  },
+  {
+    "oid": "2.16.840.1.113883.1.11.14914",
+    "expectedCount": 1270,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.113883.1.11.14914",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Active",
+    "sourceSha256": "e4302e6846c86fe9859d12845060c49ec80996d5443bd250dcf42248c8d2dec6",
+    "snapshotSha256": "e8b39a0bbf4949e95798a744d51ae80ff0888638c44897d9c74fe8c96d655702"
+  },
+  {
+    "oid": "2.16.840.1.113883.11.20.9.34",
+    "expectedCount": 1485,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.113883.11.20.9.34",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Active",
+    "sourceSha256": "560f972569881f14d3997d211c2ba7354947d75a55cdeab7415c15be142d3b13",
+    "snapshotSha256": "48603d03d41adb624fbb39b8e160e3e8f3bd417bfae0f3b10e21ed2f895869ca"
+  },
+  {
+    "oid": "2.16.840.1.113883.11.20.9.46",
+    "expectedCount": 16,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.113883.11.20.9.46",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Active",
+    "sourceSha256": "8a1132cf11ac81adce1c589e4a6374dd0d292fcf6a78212eecf4be2b3cec4c2f",
+    "snapshotSha256": "cd22a2f8e8268f7f43d44da9a15987461a1473bed534a9d348fc7021fe73c0cf"
+  },
+  {
+    "oid": "2.16.840.1.113883.3.88.12.3221.8.9",
+    "expectedCount": 45066,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.113883.3.88.12.3221.8.9",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Active",
+    "sourceSha256": "e302660aa2b1a94bfdefdd3e6994b8d2e7cc7028a1f3514d8fbaa7942a7088ef",
+    "snapshotSha256": "15203b640b8a5281f4cd3c55ed7ebe47a5c3f931bd7e2f15f1bf64ac13b10f35"
+  },
+  {
+    "oid": "2.16.840.1.113883.3.88.12.80.28",
+    "expectedCount": 62110,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.113883.3.88.12.80.28",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Active",
+    "sourceSha256": "701460a7d82a745f1bae417b55f20aabb2c9dad796d127288aab3a6c44bc21dd",
+    "snapshotSha256": "88af7308b204e0a7ee557489c74c6bc6b9cf4c1ddd46517e96897105bf212550"
+  },
+  {
+    "oid": "2.16.840.1.114222.4.11.3591",
+    "expectedCount": 125,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.114222.4.11.3591",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Active",
+    "sourceSha256": "335fc64a3fe73219e8c82408dff33d3df8cdb15ec1b725eaf3b48e81fd498811",
+    "snapshotSha256": "3e638c1ee1962cb11a3c6cb4aeb341aac1d6e63de1a5118a5dd4764083fdf8b0"
+  },
+  {
+    "oid": "2.16.840.1.114222.4.11.7900",
+    "expectedCount": 2126,
+    "source": "https://vsac.nlm.nih.gov/valueset/2.16.840.1.114222.4.11.7900",
+    "recordedSourceVersion": "Latest",
+    "recordedStatus": "Active",
+    "sourceSha256": "9e7d42d8215ecf494149bb54cd94d850ec134948031437c554a54154619767a6",
+    "snapshotSha256": "ee04d729c976cf7dec46a5f919e4686572055a5c03cc4eab7da07c9f84778bf9"
+  }
+]
