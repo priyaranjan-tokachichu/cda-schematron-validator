@@ -1,0 +1,120 @@
+{
+  "verifiedAt": "2026-11-28T05:48:05.392073+00:00",
+  "image": "ghcr.io/priyaranjan-tokachichu/cda-schematron-validator:v2.0.0",
+  "imageIndexDigest": "sha256:3a745a29827ca3f188d4ac0989e2e206fa30585deee9a0d26d4d71ed55ca5acb",
+  "scope": "Native-architecture smoke checks of the published image using repository test fixtures. Invalid fixture reports demonstrate engine execution, not document validity or general conformance.",
+  "cases": [
+    {
+      "case": "no-data",
+      "profile": "ccda-2.1",
+      "fixture": "test/VitalSigns.xml",
+      "terminologyReady": false,
+      "missingDatasets": [
+        "Authorized pinned C-CDA 2.1 vocabulary (contains CPT)"
+      ],
+      "report": {
+        "status": "incomplete",
+        "executionComplete": false,
+        "validationComplete": false,
+        "stages": [
+          {
+            "status": "completed",
+            "name": "xml"
+          },
+          {
+            "status": "completed",
+            "name": "xsd"
+          },
+          {
+            "name": "schematron",
+            "reason": "terminology-setup-required",
+            "status": "not-run"
+          }
+        ],
+        "summary": {
+          "errors": 0,
+          "findings": 1,
+          "firedRules": 0,
+          "warnings": 1
+        }
+      }
+    },
+    {
+      "case": "legacy-installed",
+      "profile": "ccda-2.1",
+      "fixture": "test/VitalSigns.xml",
+      "terminologyReady": true,
+      "missingDatasets": [],
+      "report": {
+        "status": "invalid",
+        "executionComplete": true,
+        "validationComplete": true,
+        "stages": [
+          {
+            "name": "xml",
+            "status": "completed"
+          },
+          {
+            "name": "xsd",
+            "status": "completed"
+          },
+          {
+            "status": "completed",
+            "firedRules": 110,
+            "name": "schematron"
+          }
+        ],
+        "summary": {
+          "errors": 1,
+          "findings": 39,
+          "firedRules": 110,
+          "warnings": 38
+        }
+      }
+    },
+    {
+      "case": "local-pack",
+      "profile": "ccda-5.0",
+      "fixture": "service/web/sample.xml",
+      "terminologyReady": false,
+      "missingDatasets": [
+        "http://terminology.hl7.org/ValueSet/v3-USEncounterDischargeDisposition"
+      ],
+      "report": {
+        "status": "invalid",
+        "executionComplete": true,
+        "validationComplete": true,
+        "stages": [
+          {
+            "status": "completed",
+            "name": "xml"
+          },
+          {
+            "status": "completed",
+            "name": "xsd"
+          },
+          {
+            "status": "completed",
+            "name": "schematron",
+            "firedRules": 18
+          }
+        ],
+        "summary": {
+          "warnings": 7,
+          "firedRules": 18,
+          "findings": 21,
+          "errors": 14
+        }
+      }
+    }
+  ],
+  "reproductionChecks": {
+    "publicAndLocationSnapshotsMatched": 5,
+    "grammarDefinitionsMatched": 2,
+    "svsChecklistSnapshotsMatched": 21,
+    "originalSvsCollectionReimported": false,
+    "fullUmlsArchiveReimported": false,
+    "cleanPinnedAssetDownloadVerified": true,
+    "legacyVocabularyInstallVerified": true
+  }
+}

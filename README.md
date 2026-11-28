@@ -97,6 +97,8 @@ Sources are pinned by immutable release URL and SHA-256. The build verifies down
 > [!IMPORTANT]
 > **Coverage is explicit.** The original C-CDA 5.0 generation report is preserved, with reviewed replacement checks reported separately. Completion requires a supported document-level template and every applicable check to be determinate. Missing operator data—including NUBC discharge status—produces coverage findings where needed. The scope is pinned CDA XSD and C-CDA Schematron with supplements, not full FHIR StructureDefinition or clinical certification. [See the checks and evidence](docs/coverage.md).
 
+**Operator** means you or the administrator running the validator. Terminology is installed separately from the public image. To enable C-CDA 2.1 Schematron, follow the [official vocabulary download and installation steps](docs/terminology.md#get-and-install-the-c-cda-21-vocabulary). See [what was verified locally and how to recreate it](docs/terminology.md#what-was-installed-and-validated-locally).
+
 Neither profile certifies clinical accuracy or every terminology requirement. See [standards, provenance, and coverage](docs/architecture.md#standards-and-coverage).
 
 ## Call the API

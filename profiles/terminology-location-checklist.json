@@ -1,0 +1,9 @@
+[
+  {
+    "canonical": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.1.11.20275",
+    "sourceCanonical": "http://terminology.hl7.org/ValueSet/v3-HealthcareServiceLocation",
+    "version": "4.0.0",
+    "expectedCount": 274,
+    "snapshotSha256": "6c512206b8b36c3f8393a1645642f6267a8c31faebfb0d518f4d75300b6a3a72"
+  }
+]
